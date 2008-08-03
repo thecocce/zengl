@@ -1,0 +1,11 @@
+{$MODE DELPHI}
+{$MACRO ON}
+{$DEFINE USE_ASM}
+{$DEFINE USE_3D}
+
+{$IFDEF LINUX}
+  {$DEFINE extdecl := cdecl}
+{$ENDIF}
+{$IFDEF WIN32}
+  {$DEFINE extdecl := stdcall}
+{$ENDIF}
