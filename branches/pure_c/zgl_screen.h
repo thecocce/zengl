@@ -25,6 +25,9 @@
 
 #include "zgl_types.h"
 
+#define REFRESH_DEFAULT 0
+#define REFRESH_MAXIMUM 1
+
 typedef struct {
   int Count;
   int *Width;

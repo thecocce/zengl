@@ -155,26 +155,26 @@ void app_Proc(void)
       case ButtonPress: {
         switch ( event.xbutton.button ) {
           case 1: { /* Left */
-            mDown[ MB_LEFT ] = 1;
-            if ( mCanClick[ MB_LEFT ] ) {
-              mClick   [ MB_LEFT ] = 1;
-              mCanClick[ MB_LEFT ] = 0;
+            mDown[ M_BLEFT ] = 1;
+            if ( mCanClick[ M_BLEFT ] ) {
+              mClick   [ M_BLEFT ] = 1;
+              mCanClick[ M_BLEFT ] = 0;
             }
             break;
           }
           case 2: { /* Midle */
-            mDown[ MB_MIDLE ] = 1;
-            if ( mCanClick[ MB_MIDLE ] ) {
-              mClick   [ MB_MIDLE ] = 1;
-              mCanClick[ MB_MIDLE ] = 0;
+            mDown[ M_BMIDLE ] = 1;
+            if ( mCanClick[ M_BMIDLE ] ) {
+              mClick   [ M_BMIDLE ] = 1;
+              mCanClick[ M_BMIDLE ] = 0;
             }
             break;
           }
           case 3: { /* Right */
-            mDown[ MB_RIGHT ] = 1;
-            if ( mCanClick[ MB_RIGHT ] ) {
-              mClick   [ MB_RIGHT ] = 1;
-              mCanClick[ MB_RIGHT ] = 0;
+            mDown[ M_BRIGHT ] = 1;
+            if ( mCanClick[ M_BRIGHT ] ) {
+              mClick   [ M_BRIGHT ] = 1;
+              mCanClick[ M_BRIGHT ] = 0;
             }
             break;
           }
@@ -184,29 +184,29 @@ void app_Proc(void)
       case ButtonRelease: {
         switch ( event.xbutton.button ) {
           case 1: { /* Left */
-            mDown    [ MB_LEFT ] = 0;
-            mUp      [ MB_LEFT ] = 1;
-            mCanClick[ MB_LEFT ] = 1;
+            mDown    [ M_BLEFT ] = 0;
+            mUp      [ M_BLEFT ] = 1;
+            mCanClick[ M_BLEFT ] = 1;
             break;
           }
           case 2: { /* Midle */
-            mDown    [ MB_MIDLE ] = 0;
-            mUp      [ MB_MIDLE ] = 1;
-            mCanClick[ MB_MIDLE ] = 1;
+            mDown    [ M_BMIDLE ] = 0;
+            mUp      [ M_BMIDLE ] = 1;
+            mCanClick[ M_BMIDLE ] = 1;
             break;
           }
           case 3: { /* Right */
-            mDown    [ MB_RIGHT ] = 0;
-            mUp      [ MB_RIGHT ] = 1;
-            mCanClick[ MB_RIGHT ] = 1;
+            mDown    [ M_BRIGHT ] = 0;
+            mUp      [ M_BRIGHT ] = 1;
+            mCanClick[ M_BRIGHT ] = 1;
             break;
           }
           case 4: { /* Up Wheel */
-            mWheel[ MW_UP ] = 1;
+            mWheel[ M_WUP ] = 1;
             break;
           }
           case 5: { /* Down Wheel */
-            mWheel[ MW_DOWN ] = 1;
+            mWheel[ M_WDOWN ] = 1;
             break;
           }
         }

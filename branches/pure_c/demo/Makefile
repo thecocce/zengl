@@ -1,7 +1,7 @@
 CC     = gcc
 FLAGS  = -Wall -O3 -march=i686 -mtune=i686
 TARGET = demo
-LINK   = -lX11 -lGL -lXxf86vm
+LINK   = -lX11 -lGL -lGLU -lXxf86vm
 SRC    = ../zgl_main.c \
          ../zgl_application.c \
 				 ../zgl_opengl.c \

@@ -41,6 +41,14 @@ Cursor               wnd_Cursor;
 
 bool wnd_Create( int Width, int Height )
 {
+  wnd_Width  = Width;
+  wnd_Height = Height;
+
+  if ( app_Flags && WND_USE_AUTOCENTER ) {
+    wnd_X = ( desktop_Width - wnd_Width ) / 2;
+    wnd_Y = ( desktop_Height - wnd_Height ) / 2;
+  }
+
   wnd_Attr.colormap   = XCreateColormap( scr_Display, wnd_Root, ogl_VisualInfo->visual, AllocNone );
   wnd_Attr.event_mask = ExposureMask |
                         FocusChangeMask |
@@ -77,12 +85,15 @@ bool wnd_Create( int Width, int Height )
   }
 
   XSizeHints sizehints;
-  sizehints.flags      = PMinSize | PMaxSize;
+  sizehints.flags      = PPosition | PSize | PMinSize | PMaxSize;
+  sizehints.x          = wnd_X;
+  sizehints.y          = wnd_Y;
+  sizehints.width      = wnd_Width;
+  sizehints.height     = wnd_Height;
   sizehints.min_width  = wnd_Width;
   sizehints.max_width  = wnd_Width;
   sizehints.min_height = wnd_Height;
   sizehints.max_height = wnd_Height;
-
   XSetWMNormalHints( scr_Display, wnd_Handle, &sizehints );
 
   wnd_Class.res_name  = strdup( "ZenGL" );
@@ -106,11 +117,7 @@ bool wnd_Create( int Width, int Height )
 
   if ( !app_Work && !wnd_Caption ) wnd_Caption = strdup( "ZenGL" );
   wnd_SetCaption( wnd_Caption );
-  wnd_SetSize( wnd_Width, wnd_Height );
   wnd_ShowCursor( app_ShowCursor );
-
-  if ( app_Flags && WND_USE_AUTOCENTER )
-    wnd_SetPos( ( scr_Desktop.hdisplay - wnd_Width ) / 2, ( scr_Desktop.vdisplay - wnd_Height ) / 2 );
 
   return 1;
 }
@@ -126,7 +133,6 @@ void wnd_Update(void)
   wnd_Destroy();
   wnd_Create( wnd_Width, wnd_Height );
   glXMakeCurrent( scr_Display, wnd_Handle, ogl_Context );
-  glXWaitGL();
 
   app_Work = 1;
 }
@@ -134,36 +140,33 @@ void wnd_Update(void)
 void wnd_SetCaption( const char* Caption )
 {
   wnd_Caption = (char*)Caption;
-  glXWaitGL();
   if ( wnd_Handle ) XStoreName( scr_Display, wnd_Handle, wnd_Caption );
 }
 
 void wnd_SetPos( int X, int Y )
 {
-  if ( wnd_Handle ) {
-    if ( !wnd_FullScreen ) {
-      wnd_X = X;
-      wnd_Y = Y;
-      XMoveWindow( scr_Display, wnd_Handle, X, Y );
-    } else {
-        wnd_X = 0;
-        wnd_Y = 0;
-        XMoveWindow( scr_Display, wnd_Handle, 0, 0 );
-      }
-  }
+  if ( !wnd_Handle ) return;
+
+  if ( !wnd_FullScreen ) {
+    wnd_X = X;
+    wnd_Y = Y;
+    XMoveWindow( scr_Display, wnd_Handle, X, Y );
+  } else {
+      wnd_X = 0;
+      wnd_Y = 0;
+      XMoveWindow( scr_Display, wnd_Handle, 0, 0 );
+    }
 }
 
 void wnd_SetSize( int Width, int Height )
 {
+  if ( !wnd_Handle ) return;
+
   wnd_Width  = Width;
   wnd_Height = Height;
 
   XResizeWindow( scr_Display, wnd_Handle, Width, Height );
-  wnd_SetPos( wnd_X, wnd_Y );
-
-  ogl_Width  = Width;
-  ogl_Height = Height;
-  /* SetCurrentMode(); */
+  gl_SetCurrentMode();
 }
 
 void wnd_ShowCursor( bool Show )
@@ -174,21 +177,16 @@ void wnd_ShowCursor( bool Show )
   app_ShowCursor = Show;
   if ( !wnd_Handle ) return;
 
-  switch ( Show ) {
-    case 1: {
-      if ( wnd_Cursor != None ) {
-        XFreeCursor( scr_Display, wnd_Cursor );
-        wnd_Cursor = None;
-        XDefineCursor( scr_Display, wnd_Handle, wnd_Cursor );
-      }
-      break;
+  if ( Show ) {
+    if ( wnd_Cursor != None ) {
+      XFreeCursor( scr_Display, wnd_Cursor );
+      wnd_Cursor = None;
+      XDefineCursor( scr_Display, wnd_Handle, wnd_Cursor );
     }
-    case 0: {
+  } else {
       mask = XCreatePixmap( scr_Display, wnd_Handle, 1, 1, 1 );
       memset( &xcolor, 0, sizeof( xcolor ) );
       wnd_Cursor = XCreatePixmapCursor( scr_Display, mask, mask, &xcolor, &xcolor, 0, 0 );
       XDefineCursor( scr_Display, wnd_Handle, wnd_Cursor );
-      break;
     }
-  }
 }

@@ -10,10 +10,12 @@ bool fs;
 
 void Init()
 {
+  wnd_SetCaption( "ZenGL GCC" );
 }
 
 void Draw()
 {
+  gl_SetCurrentMode();
   if ( key_Down( K_ALT ) && key_Press( K_ENTER ) ) {
     fs = !fs;
     scr_SetOptions( 1024, 768, 32, 0, fs, 0 );

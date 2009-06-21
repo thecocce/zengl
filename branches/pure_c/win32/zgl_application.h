@@ -20,30 +20,18 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
  */
 
-#ifndef ZGL_OPENGL_H
-#define ZGL_OPENGL_H
+#ifndef ZGL_APPLICATION_WIN32_H
+#define ZGL_APPLICATION_WIN32_H
 
-#include <GL/gl.h>
-#include <GL/glu.h>
+#include <windows.h>
+#include <windowsx.h>
 
-#include "zgl_types.h"
+#include "../zgl_application.h"
+#include "zgl_screen.h"
 #include "zgl_window.h"
+#include "../zgl_mouse.h"
+#include "../zgl_keyboard.h"
 
-extern int   ogl_zDepth;
-extern int   ogl_Stencil;
-extern bool  ogl_FSAA;
-extern float ogl_zNear;
-extern float ogl_zFar;
-
-extern int ogl_Mode;
-
-extern bool ogl_CanVSync;
-
-extern bool gl_Create(void);
-extern void gl_Destroy(void);
-extern void gl_Initialize(void);
-extern void gl_Set2DMode(void);
-extern void gl_Set3DMode( float FOVY );
-extern void gl_SetCurrentMode(void);
+extern LRESULT CALLBACK app_WndProc( HWND hWnd, uint Msg, WPARAM wParam, LPARAM lParam );
 
 #endif

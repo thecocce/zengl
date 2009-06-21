@@ -55,8 +55,8 @@ void scr_GetResList()
     tmp_Settings = *scr_ModeList[ i ];
     if ( !scr_ResIsInList( tmp_Settings.hdisplay, tmp_Settings.vdisplay ) ) {
       scr_ResList.Count++;
-      scr_ResList.Width  = (int*)malloc( (size_t)scr_ResList.Count * sizeof( zglResolutionList ) );
-      scr_ResList.Height = (int*)malloc( (size_t)scr_ResList.Count * sizeof( zglResolutionList ) );
+      scr_ResList.Width  = (int*)realloc( scr_ResList.Width, (size_t)scr_ResList.Count * sizeof( zglResolutionList ) );
+      scr_ResList.Height = (int*)realloc( scr_ResList.Height, (size_t)scr_ResList.Count * sizeof( zglResolutionList ) );
       scr_ResList.Width[ scr_ResList.Count - 1 ]  = tmp_Settings.hdisplay;
       scr_ResList.Height[ scr_ResList.Count - 1 ] = tmp_Settings.vdisplay;
     }
@@ -165,8 +165,6 @@ void scr_SetOptions( int Width, int Height, int BPP, int Refresh, bool FullScree
 {
   int modeToSet;
 
-  ogl_Width      = Width;
-  ogl_Height     = Height;
   wnd_Width      = Width;
   wnd_Height     = Height;
   scr_Width      = Width;
@@ -234,9 +232,17 @@ void scr_SetVSync( bool VSync )
 
 void scr_Clear(void)
 {
+  glClearColor( 1, 1, 1, 1 );
   glClear( GL_COLOR_BUFFER_BIT   * ( app_Flags & COLOR_BUFFER_CLEAR ) |
            GL_DEPTH_BUFFER_BIT   * ( app_Flags & DEPTH_BUFFER_CLEAR ) |
            GL_STENCIL_BUFFER_BIT * ( app_Flags & STENCIL_BUFFER_CLEAR ) );
+  glColor3f( 0, 0, 0 );
+  glBegin(GL_QUADS);
+    glVertex2f( 100, 100 );
+    glVertex2f( 612, 100 );
+    glVertex2f( 612, 612 );
+    glVertex2f( 100, 612 );
+  glEnd();
 }
 
 void scr_Flush(void)

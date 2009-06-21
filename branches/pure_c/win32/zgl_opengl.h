@@ -20,30 +20,25 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
  */
 
-#ifndef ZGL_OPENGL_H
-#define ZGL_OPENGL_H
+#ifndef ZGL_OPENGL_WIN32_H
+#define ZGL_OPENGL_WIN32_H
 
+#include <windows.h>
 #include <GL/gl.h>
-#include <GL/glu.h>
 
-#include "zgl_types.h"
-#include "zgl_window.h"
+#include "../zgl_types.h"
+#include "zgl_screen.h"
+#include "../zgl_opengl.h"
 
-extern int   ogl_zDepth;
-extern int   ogl_Stencil;
-extern bool  ogl_FSAA;
-extern float ogl_zNear;
-extern float ogl_zFar;
+extern HGLRC ogl_Context;
+extern float ogl_fAttr[2];
+extern int   ogl_iAttr[32];
+extern int   ogl_Format;
+extern uint  ogl_Formats;
 
-extern int ogl_Mode;
+#define wglGetAddress( a, b ) a = (void*)wglGetProcAddress( (GLubyte*)b )
 
-extern bool ogl_CanVSync;
-
-extern bool gl_Create(void);
-extern void gl_Destroy(void);
-extern void gl_Initialize(void);
-extern void gl_Set2DMode(void);
-extern void gl_Set3DMode( float FOVY );
-extern void gl_SetCurrentMode(void);
+extern bool (*wglSwapIntervalEXT)(GLint);
+extern GLint (*wglGetSwapIntervalEXT)(void);
 
 #endif

@@ -30,7 +30,7 @@ void (*app_cbExit)(void);
 /* states */
 bool app_Initialized;
 bool app_Work;
-uint app_Flags = WND_USE_AUTOCENTER;
+uint app_Flags = WND_USE_AUTOCENTER | APP_USE_LOG | COLOR_BUFFER_CLEAR | DEPTH_BUFFER | DEPTH_BUFFER_CLEAR | CROP_INVISIBLE;
 bool app_Pause;
 bool app_AutoPause = 1;
 bool app_Focus;

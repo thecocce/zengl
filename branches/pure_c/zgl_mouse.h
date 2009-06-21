@@ -26,11 +26,11 @@
 #include "zgl_types.h"
 #include "zgl_window.h"
 
-#define MB_LEFT  0
-#define MB_MIDLE 1
-#define MB_RIGHT 2
-#define MW_UP    0
-#define MW_DOWN  1
+#define M_BLEFT  0
+#define M_BMIDLE 1
+#define M_BRIGHT 2
+#define M_WUP    0
+#define M_WDOWN  1
 
 extern int  mX;
 extern int  mY;

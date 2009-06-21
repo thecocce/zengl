@@ -20,30 +20,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
  */
 
-#ifndef ZGL_OPENGL_H
-#define ZGL_OPENGL_H
+#ifndef ZGL_UTILS_WIN32_H
+#define ZGL_UTILS_WIN32_H
 
-#include <GL/gl.h>
-#include <GL/glu.h>
+#include <windows.h>
 
-#include "zgl_types.h"
-#include "zgl_window.h"
-
-extern int   ogl_zDepth;
-extern int   ogl_Stencil;
-extern bool  ogl_FSAA;
-extern float ogl_zNear;
-extern float ogl_zFar;
-
-extern int ogl_Mode;
-
-extern bool ogl_CanVSync;
-
-extern bool gl_Create(void);
-extern void gl_Destroy(void);
-extern void gl_Initialize(void);
-extern void gl_Set2DMode(void);
-extern void gl_Set3DMode( float FOVY );
-extern void gl_SetCurrentMode(void);
+#include "../zgl_utils.h"
 
 #endif

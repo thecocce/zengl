@@ -20,30 +20,29 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
  */
 
-#ifndef ZGL_OPENGL_H
-#define ZGL_OPENGL_H
+#include "zgl_utils.h"
 
-#include <GL/gl.h>
-#include <GL/glu.h>
+void u_Error( const char* Error )
+{
+  MessageBox( 0, Error, "ERROR!", MB_OK | MB_ICONERROR );
+  char* tmp = (char*)malloc( 7 + strlen( Error ) );
+  strcpy( tmp, "ERROR: " );
+  strcat( tmp, Error );
+  log_Add( tmp, 1 );
+  free( tmp );
+}
 
-#include "zgl_types.h"
-#include "zgl_window.h"
+void u_Warning( const char* Warning )
+{
+  MessageBox( 0, Warning, "WARNING!", MB_OK | MB_ICONWARNING );
+  char* tmp = (char*)malloc( 9 + strlen( Warning ) );
+  strcpy( tmp, "WARNING: " );
+  strcat( tmp, Warning );
+  log_Add( tmp, 1 );
+  free( tmp );
+}
 
-extern int   ogl_zDepth;
-extern int   ogl_Stencil;
-extern bool  ogl_FSAA;
-extern float ogl_zNear;
-extern float ogl_zFar;
-
-extern int ogl_Mode;
-
-extern bool ogl_CanVSync;
-
-extern bool gl_Create(void);
-extern void gl_Destroy(void);
-extern void gl_Initialize(void);
-extern void gl_Set2DMode(void);
-extern void gl_Set3DMode( float FOVY );
-extern void gl_SetCurrentMode(void);
-
-#endif
+void u_Sleep( int msec )
+{
+  Sleep( msec );
+}
