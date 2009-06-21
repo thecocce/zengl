@@ -20,32 +20,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
  */
 
-#ifndef ZGL_SCREEN_H
-#define ZGL_SCREEN_H
+#ifndef ZGL_UTILS_H
+#define ZGL_UTILS_H
 
-#include "zgl_types.h"
+#include "zgl_log.h"
 
-typedef struct {
-  int Count;
-  int *Width;
-  int *Height;
-} zglResolutionList;
-
-extern int               scr_Width;
-extern int               scr_Height;
-extern int               scr_BPP;
-extern int               scr_Refresh;
-extern bool              scr_VSync;
-extern int               desktop_Width;
-extern int               desktop_Height;
-extern zglResolutionList scr_ResList;
-
-extern bool scr_Create(void);
-extern void scr_SetOptions( int Width, int Height, int BPP, int Refresh, bool FullScreen, bool VSync );
-extern void scr_Reset(void);
-extern void scr_SetVSync( bool VSync );
-
-extern void scr_Clear(void);
-extern void scr_Flush(void);
+extern void u_Error( const char* Error );
+extern void u_Warning( const char* Warning );
+extern void u_Sleep( int msec );
 
 #endif

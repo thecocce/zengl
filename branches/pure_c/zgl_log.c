@@ -31,9 +31,9 @@ void log_Init(void)
   app_Log = 1;
 
   log_file = fopen( "log.txt", "w+" );
-  log_Add( "################", 0 );
-  log_Add( "# ZenGL 0.1.28 #", 0 );
-  log_Add( "################", 0 );
+  log_Add( "###############", 0 );
+  log_Add( "# ZenGL 0.0.1 #", 0 );
+  log_Add( "###############", 0 );
   log_Add( "Begin", 1 );
 }
 
@@ -57,6 +57,9 @@ void log_Add( const char* Message, bool Timings )
     }
 
   fputs( tmp, log_file );
+#ifdef __LINUX__
+  printf( "%s\n", Message );
+#endif
   log_Flush();
   free( tmp );
 }

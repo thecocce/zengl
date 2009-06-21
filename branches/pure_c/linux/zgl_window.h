@@ -27,6 +27,7 @@
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
+#include <X11/cursorfont.h>
 
 #include <GL/glx.h>
 
@@ -39,9 +40,9 @@ extern Window               wnd_Handle;
 extern Window               wnd_Root;
 extern XClassHint           wnd_Class;
 extern XSetWindowAttributes wnd_Attr;
-extern XTextProperty        wnd_Title;
 extern uint                 wnd_ValueMask;
 extern Atom                 wnd_DestroyAtom;
 extern Atom                 wnd_Protocols;
+extern Cursor               wnd_Cursor;
 
 #endif

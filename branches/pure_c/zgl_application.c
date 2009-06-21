@@ -28,6 +28,7 @@ void (*app_cbDraw)(void);
 void (*app_cbExit)(void);
 
 /* states */
+bool app_Initialized;
 bool app_Work;
 uint app_Flags = WND_USE_AUTOCENTER;
 bool app_Pause;
@@ -35,10 +36,13 @@ bool app_AutoPause = 1;
 bool app_Focus;
 bool app_Log;
 int  app_FPS;
+bool app_ShowCursor;
 
 void app_Draw(void)
 {
+  scr_Clear();
   if ( app_cbDraw ) app_cbDraw();
+  scr_Flush();
 }
 
 void app_MainLoop(void)
@@ -46,9 +50,14 @@ void app_MainLoop(void)
   if ( app_cbInit ) app_cbInit();
 
   while ( app_Work ) {
-    if ( app_Pause ) usleep( 1000 );
-    app_ProcessMessages();
+    app_Proc();
 
+    if ( !app_Pause ) {
+    } else {
+        u_Sleep( 10 );
+      }
+
+    if ( app_Pause ) continue;
     app_Draw();
   }
   scr_Reset();

@@ -23,10 +23,9 @@
 #ifndef ZGL_APPLICATION_H
 #define ZGL_APPLICATION_H
 
-#include <unistd.h>
-
 #include "zgl_types.h"
 #include "zgl_main.h"
+#include "zgl_utils.h"
 
 /* callback functions */
 extern void (*app_cbInit)(void);
@@ -34,6 +33,7 @@ extern void (*app_cbDraw)(void);
 extern void (*app_cbExit)(void);
 
 /* states */
+extern bool app_Initialized;
 extern bool app_Work;
 extern uint app_Flags;
 extern bool app_Pause;
@@ -41,9 +41,10 @@ extern bool app_AutoPause;
 extern bool app_Focus;
 extern bool app_Log;
 extern int  app_FPS;
+extern bool app_ShowCursor;
 
 extern void app_MainLoop(void);
 extern void app_Draw(void);
-extern void app_ProcessMessages(void);
+extern void app_Proc(void);
 
 #endif

@@ -20,32 +20,17 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
  */
 
-#ifndef ZGL_SCREEN_H
-#define ZGL_SCREEN_H
+#include "zgl_opengl.h"
 
-#include "zgl_types.h"
+int  ogl_zDepth;
+int  ogl_Stencil;
+bool ogl_FSAA;
 
-typedef struct {
-  int Count;
-  int *Width;
-  int *Height;
-} zglResolutionList;
+int ogl_Width;
+int ogl_Height;
 
-extern int               scr_Width;
-extern int               scr_Height;
-extern int               scr_BPP;
-extern int               scr_Refresh;
-extern bool              scr_VSync;
-extern int               desktop_Width;
-extern int               desktop_Height;
-extern zglResolutionList scr_ResList;
+bool ogl_CanVSync;
 
-extern bool scr_Create(void);
-extern void scr_SetOptions( int Width, int Height, int BPP, int Refresh, bool FullScreen, bool VSync );
-extern void scr_Reset(void);
-extern void scr_SetVSync( bool VSync );
-
-extern void scr_Clear(void);
-extern void scr_Flush(void);
-
-#endif
+void gl_LoadExtensions(void)
+{
+}

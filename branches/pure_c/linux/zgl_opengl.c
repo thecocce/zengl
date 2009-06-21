@@ -22,16 +22,12 @@
 
 #include "zgl_opengl.h"
 
-int  ogl_zDepth;
-int  ogl_Stencil;
-bool ogl_FSAA;
-
-int ogl_Width;
-int ogl_Height;
-
 GLXContext  ogl_Context;
 XVisualInfo *ogl_VisualInfo;
 int         ogl_Attr[32];
+
+int (*glXGetVideoSyncSGI)(unsigned int *);
+int (*glXWaitVideoSyncSGI)(int, int, unsigned int *);
 
 bool gl_Create(void)
 {
@@ -39,15 +35,33 @@ bool gl_Create(void)
   if ( !ogl_Context ) {
     ogl_Context = glXCreateContext( scr_Display, ogl_VisualInfo, 0, 0 );
     if ( !ogl_Context ) {
-      /* u_Error( "Cannot create OpenGL context" ); */
+      u_Error( "Cannot create OpenGL context" );
       return 0;
     }
   }
 
   if ( !glXMakeCurrent( scr_Display, wnd_Handle, ogl_Context ) ) {
-    /* u_Error( "Cannot set current OpenGL context" ); */
+    u_Error( "Cannot set current OpenGL context" );
     return 0;
   }
 
+  glXGetAddress( glXGetVideoSyncSGI, "glXGetVideoSyncSGI" );
+  if ( glXGetVideoSyncSGI ) {
+    ogl_CanVSync        = 1;
+    glXGetAddress( glXWaitVideoSyncSGI, "glXWaitVideoSyncSGI" );
+    log_Add( "Support WaitVSync: yes", 1 );
+  } else {
+    ogl_CanVSync = 0;
+    log_Add( "Support WaitVSync: no", 1 );
+  }
+
   return 1;
+}
+
+void gl_Destroy(void)
+{
+  if ( !glXMakeCurrent( scr_Display, None, NULL ) ) u_Error( "Cannot release current OpenGL context" );
+
+  glXDestroyContext( scr_Display, ogl_Context );
+  glXWaitGL();
 }

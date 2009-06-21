@@ -109,7 +109,7 @@ int xkey_to_scancode( int XKey, int KeyCode )
   }
 }
 
-void app_ProcessMessages(void)
+void app_Proc(void)
 {
   XEvent event;
   uint   key;
@@ -130,7 +130,10 @@ void app_ProcessMessages(void)
       case FocusIn: {
         app_Focus = 1;
         app_Pause = 0;
+        memset( mDown, 0, 3 );
         mouse_ClearState();
+        memset( kDown, 0, 256 );
+        key_ClearState();
         break;
       }
       case FocusOut: {

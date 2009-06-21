@@ -28,9 +28,16 @@
 #include "../zgl_types.h"
 #include "zgl_screen.h"
 #include "../zgl_opengl.h"
+#include "../zgl_utils.h"
+
+#define glXGetAddress( a, b ) a = (typeof(a))glXGetProcAddress( (GLubyte*)b )
 
 extern GLXContext  ogl_Context;
 extern XVisualInfo *ogl_VisualInfo;
 extern int         ogl_Attr[32];
+
+/* GLX */
+extern int (*glXGetVideoSyncSGI)(unsigned int *);
+extern int (*glXWaitVideoSyncSGI)(int, int, unsigned int *);
 
 #endif

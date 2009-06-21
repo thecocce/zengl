@@ -52,9 +52,9 @@ int  key_Last( int KeyAction )
 
 void key_ClearState(void)
 {
-  memset( kUp, 0, 255 );
-  memset( kPress, 0, 255 );
-  memset( kCanPress, 1, 255 );
+  memset( kUp, 0, 256 );
+  memset( kPress, 0, 256 );
+  memset( kCanPress, 1, 256 );
   memset( kLast, 0, 2 );
 }
 

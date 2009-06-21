@@ -34,10 +34,10 @@ Window               wnd_Handle;
 Window               wnd_Root;
 XClassHint           wnd_Class;
 XSetWindowAttributes wnd_Attr;
-XTextProperty        wnd_Title;
 uint                 wnd_ValueMask;
 Atom                 wnd_DestroyAtom;
 Atom                 wnd_Protocols;
+Cursor               wnd_Cursor;
 
 bool wnd_Create( int Width, int Height )
 {
@@ -72,7 +72,7 @@ bool wnd_Create( int Width, int Height )
                               &wnd_Attr );
 
   if ( !wnd_Handle ) {
-    /* u_Error( 'Cannot create window' ); */
+    u_Error( "Cannot create window" );
     return 0;
   }
 
@@ -107,6 +107,7 @@ bool wnd_Create( int Width, int Height )
   if ( !app_Work && !wnd_Caption ) wnd_Caption = strdup( "ZenGL" );
   wnd_SetCaption( wnd_Caption );
   wnd_SetSize( wnd_Width, wnd_Height );
+  wnd_ShowCursor( app_ShowCursor );
 
   if ( app_Flags && WND_USE_AUTOCENTER )
     wnd_SetPos( ( scr_Desktop.hdisplay - wnd_Width ) / 2, ( scr_Desktop.vdisplay - wnd_Height ) / 2 );
@@ -126,7 +127,6 @@ void wnd_Update(void)
   wnd_Create( wnd_Width, wnd_Height );
   glXMakeCurrent( scr_Display, wnd_Handle, ogl_Context );
   glXWaitGL();
-  /* wnd_ShowCursor( app_ShowCursor ); */
 
   app_Work = 1;
 }
@@ -135,11 +135,7 @@ void wnd_SetCaption( const char* Caption )
 {
   wnd_Caption = (char*)Caption;
   glXWaitGL();
-  if ( wnd_Title.value ) free( wnd_Title.value );
-  if ( wnd_Handle ) {
-    XStringListToTextProperty( &wnd_Caption, 1, &wnd_Title );
-    XSetWMName( scr_Display, wnd_Handle, &wnd_Title );
-  }
+  if ( wnd_Handle ) XStoreName( scr_Display, wnd_Handle, wnd_Caption );
 }
 
 void wnd_SetPos( int X, int Y )
@@ -168,4 +164,31 @@ void wnd_SetSize( int Width, int Height )
   ogl_Width  = Width;
   ogl_Height = Height;
   /* SetCurrentMode(); */
+}
+
+void wnd_ShowCursor( bool Show )
+{
+  Pixmap mask;
+  XColor xcolor;
+
+  app_ShowCursor = Show;
+  if ( !wnd_Handle ) return;
+
+  switch ( Show ) {
+    case 1: {
+      if ( wnd_Cursor != None ) {
+        XFreeCursor( scr_Display, wnd_Cursor );
+        wnd_Cursor = None;
+        XDefineCursor( scr_Display, wnd_Handle, wnd_Cursor );
+      }
+      break;
+    }
+    case 0: {
+      mask = XCreatePixmap( scr_Display, wnd_Handle, 1, 1, 1 );
+      memset( &xcolor, 0, sizeof( xcolor ) );
+      wnd_Cursor = XCreatePixmapCursor( scr_Display, mask, mask, &xcolor, &xcolor, 0, 0 );
+      XDefineCursor( scr_Display, wnd_Handle, wnd_Cursor );
+      break;
+    }
+  }
 }

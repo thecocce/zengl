@@ -28,6 +28,8 @@ int               scr_BPP;
 int               scr_Refresh;
 bool              scr_VSync;
 zglResolutionList scr_ResList;
+int               desktop_Width;
+int               desktop_Height;
 
 Display             *scr_Display;
 int                 scr_Default;
@@ -69,11 +71,11 @@ bool scr_Create(void)
 
   scr_Display = XOpenDisplay( NULL );
   if ( !scr_Display ) {
-    /* u_Error( "Cannot connect to X server" ); */
+    u_Error( "Cannot connect to X server" );
     return 0;
   }
   if ( !glXQueryExtension( scr_Display, &i, &j ) ) {
-    /* u_Error( "GLX Extension not found" ); */
+    u_Error( "GLX Extension not found" );
     return 0;
   } else log_Add( "GLX Extension - ok", 1 );
 
@@ -92,29 +94,30 @@ bool scr_Create(void)
   scr_Default = DefaultScreen( scr_Display );
 
   if ( !XF86VidModeQueryExtension( scr_Display, &i, &j ) ) {
-    /* u_Error( "XF86VidMode Extension not found" ); */
+    u_Error( "XF86VidMode Extension not found" );
     return 0;
   } else log_Add( "XF86VidMode Extension - ok", 1 );
 
   XF86VidModeGetAllModeLines( scr_Display, scr_Default, (int*)&scr_ModeCount, &scr_ModeList );
   XF86VidModeGetModeLine( scr_Display, scr_Default, (int*)&scr_Desktop.dotclock, (XF86VidModeModeLine*)( (char*)&scr_Desktop + sizeof( scr_Desktop.dotclock ) ) );
+  desktop_Width  = scr_Desktop.hdisplay;
+  desktop_Height = scr_Desktop.vdisplay;
 
   ogl_zDepth = 24;
-  do
-  {
-    ogl_Attr[ 0 ]  = GLX_RGBA;
-    ogl_Attr[ 1 ]  = GLX_RED_SIZE;
-    ogl_Attr[ 2 ]  = 1;
-    ogl_Attr[ 3 ]  = GLX_GREEN_SIZE;
-    ogl_Attr[ 4 ]  = 1;
-    ogl_Attr[ 5 ]  = GLX_BLUE_SIZE;
-    ogl_Attr[ 6 ]  = 1;
-    ogl_Attr[ 7 ]  = GLX_ALPHA_SIZE;
-    ogl_Attr[ 8 ]  = 1;
-    ogl_Attr[ 9 ]  = GLX_DOUBLEBUFFER;
-    ogl_Attr[ 10 ] = GLX_DEPTH_SIZE;
-    ogl_Attr[ 11 ] = ogl_zDepth;
-    i = 12;
+  do {
+    i = 0;
+    ogl_Attr[ i++ ] = GLX_RGBA;
+    ogl_Attr[ i++ ] = GLX_RED_SIZE;
+    ogl_Attr[ i++ ] = 1;
+    ogl_Attr[ i++ ] = GLX_GREEN_SIZE;
+    ogl_Attr[ i++ ] = 1;
+    ogl_Attr[ i++ ] = GLX_BLUE_SIZE;
+    ogl_Attr[ i++ ] = 1;
+    ogl_Attr[ i++ ] = GLX_ALPHA_SIZE;
+    ogl_Attr[ i++ ] = 1;
+    ogl_Attr[ i++ ] = GLX_DOUBLEBUFFER;
+    ogl_Attr[ i++ ] = GLX_DEPTH_SIZE;
+    ogl_Attr[ i++ ] = ogl_zDepth;
     if ( ogl_Stencil > 0 ) {
       ogl_Attr[ i++ ] = GLX_STENCIL_SIZE;
       ogl_Attr[ i++ ] = ogl_Stencil;
@@ -125,6 +128,9 @@ bool scr_Create(void)
     }
     ogl_Attr[ i ] = None;
 
+    char tmp[256];
+    sprintf( tmp, "glXChooseVisual: zDepth = %i; stencil = %i; fsaa = %i", ogl_zDepth, ogl_Stencil, ogl_FSAA );
+    log_Add( tmp, 1 );
     ogl_VisualInfo = glXChooseVisual( scr_Display, scr_Default, &ogl_Attr[ 0 ] );
     if ( ( !ogl_VisualInfo ) && ( ogl_zDepth == 1 ) ) {
       if ( ogl_FSAA == 0 ) {
@@ -139,7 +145,7 @@ bool scr_Create(void)
   while ( !ogl_VisualInfo );
 
   if ( !ogl_VisualInfo ) {
-    /* u_Error( "Cannot choose pixel format" ); */
+    u_Error( "Cannot choose pixel format" );
     return 0;
   }
 
@@ -148,7 +154,7 @@ bool scr_Create(void)
   wnd_Root = RootWindow( scr_Display, ogl_VisualInfo->screen );
 
   char tmp[256];
-  sprintf( tmp, "Current mode: %i x %i", 1280, 1024 );
+  sprintf( tmp, "Current mode: %i x %i", desktop_Width, desktop_Height );
   log_Add( tmp, 1 );
   scr_GetResList();
 
@@ -168,18 +174,17 @@ void scr_SetOptions( int Width, int Height, int BPP, int Refresh, bool FullScree
   scr_BPP        = BPP;
   wnd_FullScreen = FullScreen;
   scr_VSync      = VSync;
-  if ( !app_Work ) return;
-  /* scr_SetVSync( scr_VSync ); */
+  if ( !app_Initialized ) return;
+  scr_SetVSync( scr_VSync );
 
-  /* if ( Width >= zgl_Get( DESKTOP_WIDTH ) ) and ( Height >= zgl_Get( DESKTOP_HEIGHT ) ) Then
-    wnd_FullScreen := TRUE; */
+  if ( ( Width >= desktop_Width ) && ( Height >= desktop_Height ) ) wnd_FullScreen = 1;
   if ( wnd_FullScreen ) {
     scr_Width  = Width;
     scr_Height = Height;
     scr_BPP    = BPP;
   } else {
-      scr_Width  = 1280; /* zgl_Get( DESKTOP_WIDTH ); */
-      scr_Height = 1024; /* zgl_Get( DESKTOP_HEIGHT ); */
+      scr_Width  = desktop_Width;
+      scr_Height = desktop_Height;
       scr_BPP    = BPP;
     }
 
@@ -197,7 +202,6 @@ void scr_SetOptions( int Width, int Height, int BPP, int Refresh, bool FullScree
        ( scr_Settings.vdisplay != scr_Desktop.vdisplay ) ) {
     XF86VidModeSwitchToMode( scr_Display, scr_Default, &scr_Settings );
     XF86VidModeSetViewPort( scr_Display, scr_Default, 0, 0 );
-    /* XSetInputFocus( scr_Display, wnd_Handle, RevertToPointerRoot, CurrentTime ); */
   } else {
       scr_Reset();
       XMapWindow( scr_Display, wnd_Handle );
@@ -211,7 +215,7 @@ void scr_SetOptions( int Width, int Height, int BPP, int Refresh, bool FullScree
     strcat( tmp, "bpp windowed" );
   log_Add( tmp, 1 );
 
-  wnd_Update();
+  if ( app_Work ) wnd_Update();
 }
 
 void scr_Reset(void)
@@ -221,4 +225,28 @@ void scr_Reset(void)
   XUngrabKeyboard( scr_Display, CurrentTime );
   XUngrabPointer( scr_Display, CurrentTime );
   glXWaitX();
+}
+
+void scr_SetVSync( bool VSync )
+{
+  scr_VSync = VSync;
+}
+
+void scr_Clear(void)
+{
+  glClear( GL_COLOR_BUFFER_BIT   * ( app_Flags & COLOR_BUFFER_CLEAR ) |
+           GL_DEPTH_BUFFER_BIT   * ( app_Flags & DEPTH_BUFFER_CLEAR ) |
+           GL_STENCIL_BUFFER_BIT * ( app_Flags & STENCIL_BUFFER_CLEAR ) );
+}
+
+void scr_Flush(void)
+{
+  if ( scr_VSync && ogl_CanVSync ) {
+    uint sync;
+    glXGetVideoSyncSGI( &sync );
+    glXWaitVideoSyncSGI( 2, ( sync + 1 ) % 2, &sync );
+    glFinish();
+  };
+
+  glXSwapBuffers( scr_Display, wnd_Handle );
 }

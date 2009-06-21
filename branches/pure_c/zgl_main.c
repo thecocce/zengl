@@ -24,6 +24,9 @@
 
 void zgl_Init( int FSAA, int StencilBits )
 {
+  ogl_FSAA    = FSAA;
+  ogl_Stencil = StencilBits;
+  app_Initialized = 1;
   log_Init();
 
   if ( !scr_Create() ) return;

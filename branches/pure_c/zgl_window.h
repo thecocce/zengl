@@ -40,5 +40,6 @@ extern void wnd_Update(void);
 extern void wnd_SetCaption( const char* Caption );
 extern void wnd_SetPos( int X, int Y );
 extern void wnd_SetSize( int Width, int Height );
+extern void wnd_ShowCursor( bool Show );
 
 #endif

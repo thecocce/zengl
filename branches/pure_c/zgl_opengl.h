@@ -32,6 +32,10 @@ extern bool ogl_FSAA;
 extern int ogl_Width;
 extern int ogl_Height;
 
+extern bool ogl_CanVSync;
+
 extern bool gl_Create(void);
+extern void gl_Destroy(void);
+extern void gl_LoadExtensions(void);
 
 #endif
