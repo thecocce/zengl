@@ -155,7 +155,7 @@ function  key_Down( const KeyCode : Byte ) : Boolean;
 function  key_Up( const KeyCode : Byte ) : Boolean;
 function  key_Press( const KeyCode : Byte ) : Boolean;
 function  key_Last( const KeyAction : Byte ) : Byte;
-procedure key_BeginReadText( const Text : String; const MaxSymbols : WORD );
+procedure key_BeginReadText( const Text : String; const MaxSymbols : Integer );
 procedure key_EndReadText( var Result : String );
 procedure key_ClearState;
 
@@ -171,7 +171,7 @@ var
   keysPress    : array[ 0..255 ] of Boolean;
   keysCanPress : array[ 0..255 ] of Boolean;
   keysText     : String = '';
-  keysMax      : WORD;
+  keysMax      : Integer;
   keysLast     : array[ 0..1 ] of Byte;
 
 implementation
@@ -229,7 +229,7 @@ procedure key_InputText;
   var
     c : Char;
 begin
-  if u_Length( keysText ) < keysMax Then
+  if ( keysMax = -1 ) or ( u_Length( keysText ) < keysMax ) Then
     begin
       if ( app_Flags and APP_USE_ENGLISH_INPUT > 0 ) and
          ( Text[ 1 ] <> ' ' )  Then
