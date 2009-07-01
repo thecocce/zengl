@@ -230,7 +230,7 @@ begin
         FillChar( mouseDown[ 0 ], 3, 0 );
         mouse_ClearState;
         if wnd_FullScreen Then
-          scr_SetOptions( scr_Width, scr_Height, scr_BPP, scr_Refresh, wnd_FullScreen, scr_VSync );        
+          scr_SetOptions( scr_Width, scr_Height, scr_BPP, scr_Refresh, wnd_FullScreen, scr_VSync );
       end;
     WM_NCHITTEST:
       begin
@@ -343,10 +343,13 @@ begin
           K_BACKSPACE: u_Backspace( keysText );
           K_TAB:       key_InputText( '  ' );
         else
-          if app_Flags and APP_USE_UTF8 > 0 Then
-            key_InputText( AnsiToUtf8( Char( wParam ) ) )
-          else
-            key_InputText( Char( wParam ) );
+          if wParam > 32 Then
+            begin
+              if app_Flags and APP_USE_UTF8 > 0 Then
+                key_InputText( AnsiToUtf8( Char( wParam ) ) )
+              else
+                key_InputText( Char( wParam ) );
+            end;
         end;
       end;
   else

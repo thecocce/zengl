@@ -198,6 +198,10 @@ begin
         scr_Refresh := GetDisplayRefresh;
       end;
 
+  d3d8_BeginScene;
+  d3d8_Device.Clear( 0, nil, D3DCLEAR_TARGET, D3DCOLOR_XRGB( 0, 0, 0 ), 1, 0 );
+  d3d8_EndScene;
+
   if wnd_FullScreen Then
     log_Add( 'Set screen options: ' + u_IntToStr( scr_Width ) + ' x ' + u_IntToStr( scr_Height ) + ' x ' + u_IntToStr( scr_BPP ) + 'bpp fullscreen' )
   else
