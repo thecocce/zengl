@@ -37,8 +37,8 @@ end;
 
 procedure cam2d_Set( const Camera : zglPCamera2D );
 
-procedure cam2d_Vertex2f( X, Y : Single ); stdcall;
-procedure cam2d_Vertex2fv( v : Pointer ); stdcall;
+procedure cam2d_Vertex2f( X, Y : Single );
+procedure cam2d_Vertex2fv( v : Pointer );
 
 var
   cam2dGlobal   : zglPCamera2D = nil;
