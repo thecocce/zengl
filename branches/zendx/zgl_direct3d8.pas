@@ -306,11 +306,6 @@ end;
 
 procedure d3d8_ResetState;
 begin
-  Set2DMode;
-  d3d8_BeginScene;
-  d3d8_Device.Clear( 0, nil, D3DCLEAR_TARGET, D3DCOLOR_XRGB( 0, 0, 0 ), 1, 0 );
-  d3d8_EndScene;
-
   glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
   glAlphaFunc( GL_GREATER, 0 );
 

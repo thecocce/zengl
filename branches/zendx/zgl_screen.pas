@@ -205,6 +205,8 @@ begin
         scr_Refresh := GetDisplayRefresh;
       end;
 
+  glClear( GL_COLOR_BUFFER_BIT );
+
   if wnd_FullScreen Then
     log_Add( 'Set screen options: ' + u_IntToStr( scr_Width ) + ' x ' + u_IntToStr( scr_Height ) + ' x ' + u_IntToStr( scr_BPP ) + 'bpp fullscreen' )
   else

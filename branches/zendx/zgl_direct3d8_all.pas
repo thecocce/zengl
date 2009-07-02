@@ -1,4 +1,4 @@
-{
+﻿{
  * Copyright © Kemka Andrey aka Andru
  * mail: dr.andru@gmail.com
  * site: http://andru-kun.ru
@@ -277,12 +277,14 @@ var
 
 procedure glClear;
 begin
+  glViewPort( 0, 0, wnd_Width, wnd_Height );
   if mask and GL_DEPTH_BUFFER_BIT > 0 Then
     d3d8_Device.Clear( 0, nil, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB( 0, 0, 0 ), 1, 0 );
   if mask and GL_STENCIL_BUFFER_BIT > 0 Then
     d3d8_Device.Clear( 0, nil, D3DCLEAR_STENCIL, D3DCOLOR_XRGB( 0, 0, 0 ), 1, 0 );
   if mask and GL_COLOR_BUFFER_BIT > 0 Then
     d3d8_Device.Clear( 0, nil, D3DCLEAR_TARGET, D3DCOLOR_XRGB( 0, 0, 0 ), 1, 0 );
+  SetCurrentMode;
 end;
 
 procedure glBegin;
