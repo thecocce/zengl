@@ -1,4 +1,4 @@
-﻿{
+{
  * Copyright © Kemka Andrey aka Andru
  * mail: dr.andru@gmail.com
  * site: http://andru-kun.ru
@@ -25,7 +25,7 @@ unit zgl_direct3d8_all;
 
 interface
 uses
-  Direct3D8;
+  DirectXGraphics;
 
 const
   GL_FALSE                          = 0;
@@ -251,7 +251,7 @@ uses
   math;
 
 var
-  RenderMode     : _D3DPRIMITIVETYPE;
+  RenderMode     : TD3DPrimitiveType;
   RenderQuad     : Boolean;
   RenderTextured : Boolean;
   RenderTexID    : Integer;
@@ -277,14 +277,12 @@ var
 
 procedure glClear;
 begin
-  glViewPort( 0, 0, wnd_Width, wnd_Height );
   if mask and GL_DEPTH_BUFFER_BIT > 0 Then
     d3d8_Device.Clear( 0, nil, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB( 0, 0, 0 ), 1, 0 );
   if mask and GL_STENCIL_BUFFER_BIT > 0 Then
     d3d8_Device.Clear( 0, nil, D3DCLEAR_STENCIL, D3DCOLOR_XRGB( 0, 0, 0 ), 1, 0 );
   if mask and GL_COLOR_BUFFER_BIT > 0 Then
     d3d8_Device.Clear( 0, nil, D3DCLEAR_TARGET, D3DCOLOR_XRGB( 0, 0, 0 ), 1, 0 );
-  SetCurrentMode;
 end;
 
 procedure glBegin;
@@ -340,11 +338,11 @@ begin
   if RenderTextured Then
     begin
       d3d8_Device.SetVertexShader( D3DFVF_XYZCT );
-      d3d8_Device.DrawPrimitiveUP( RenderMode, Count, bTVertices[ 0 ], s_D3DFVF_XYZCT );
+      d3d8_Device.DrawPrimitiveUP( RenderMode, Count, @bTVertices[ 0 ], s_D3DFVF_XYZCT );
     end else
       begin
         d3d8_Device.SetVertexShader( D3DFVF_XYZC );
-        d3d8_Device.DrawPrimitiveUP( RenderMode, Count, bPVertices[ 0 ], s_D3DFVF_XYZC );
+        d3d8_Device.DrawPrimitiveUP( RenderMode, Count, @bPVertices[ 0 ], s_D3DFVF_XYZC );
       end;
 
 _end:
@@ -887,7 +885,7 @@ end;
 
 procedure glTexImage2D;
   var
-    fmt  : D3DFORMAT;
+    fmt  : TD3DFormat;
     size : Integer;
     r    : TD3DLockedRect;
 begin
@@ -924,7 +922,7 @@ end;
 procedure glGetTexImage;
   var
     r : TD3DLockedRect;
-    d : D3DSURFACE_DESC;
+    d : TD3DSurface_Desc;
 begin
   if ( RenderTexID > d3d8_texCount ) or
      ( not Assigned( d3d8_texArray[ RenderTexID ].Texture ) ) Then exit;
@@ -957,7 +955,7 @@ end;
 
 function gluBuild2DMipmaps;
   var
-    fmt  : D3DFORMAT;
+    fmt  : TD3DFormat;
     size : Integer;
     r    : TD3DLockedRect;
 begin

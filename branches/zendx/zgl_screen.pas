@@ -26,7 +26,6 @@ unit zgl_screen;
 interface
 uses
   Windows,
-  Direct3D8,
   zgl_direct3d8,
   zgl_direct3d8_all;
 

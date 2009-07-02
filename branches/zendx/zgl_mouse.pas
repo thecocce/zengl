@@ -68,7 +68,7 @@ begin
     Result := cursorpos.X
   else
     Result := cursorpos.X - wnd_X - wnd_BrdSizeX;
-  Result := Round( Result / scr_ResCX );
+  Result := Round( ( Result - scr_AddCX ) / scr_ResCX );
 end;
 
 function mouse_Y;
@@ -78,7 +78,7 @@ begin
     Result := cursorpos.Y
   else
     Result := cursorpos.Y - wnd_Y - wnd_BrdSizeY - wnd_CpnSize;
-  Result := Round( Result / scr_ResCY );
+  Result := Round( ( Result - scr_AddCY ) / scr_ResCY );
 end;
 
 function mouse_DX;

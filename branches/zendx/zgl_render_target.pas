@@ -26,7 +26,7 @@ unit zgl_render_target;
 interface
 uses
   Windows,
-  Direct3D8,
+  DirectXGraphics,
   zgl_direct3d8,
   zgl_direct3d8_all,
   zgl_textures;
@@ -35,7 +35,6 @@ const
   RT_TYPE_SIMPLE  = 0;
   RT_TYPE_FBO     = 1;
   RT_TYPE_PBUFFER = 2;
-  RT_TYPE_TEST    = 3;
   RT_FULL_SCREEN  = $01;
   RT_CLEAR_SCREEN = $02;
 
@@ -43,7 +42,7 @@ type
   zglPRenderTarget = ^zglTRenderTarget;
   zglTRenderTarget = record
     rtType     : Byte;
-    Handle     : IDirect3DSurface8; //Pointer;
+    Handle     : DWORD;
     Surface    : zglPTexture;
     Flags      : Byte;
 
@@ -63,7 +62,7 @@ procedure rtarget_Set( const Target : zglPRenderTarget );
 
 var
   managerRTarget : zglTRenderTargetManager;
-  rt_ScaleW : Single;           
+  rt_ScaleW : Single;
   rt_ScaleH : Single;
   arr : array[ 0..512*512*4 ] of Byte;
 
@@ -92,15 +91,10 @@ begin
   case rtType of
     RT_TYPE_SIMPLE, RT_TYPE_FBO, RT_TYPE_PBUFFER:
       begin
-        glDeleteTextures( 1, @Surface.ID );
-        glGenTextures( 1, @Surface.ID );
-        d3d8_Device.CreateTexture( Surface.Width, Surface.Height, 1 * Byte( Surface.Flags and TEX_MIPMAP = 0 ),
+        glGenTextures( 1, @Result.Next.Handle );
+        d3d8_Device.CreateTexture( Surface.Width, Surface.Height, 1,
                                    D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT,
-                                   d3d8_texArray[ Surface.ID ].Texture );
-      end;
-    RT_TYPE_TEST:
-      begin
-        d3d8_Device.CreateRenderTarget( Surface.Width, Surface.Height, D3DFMT_A8R8G8B8, D3DMULTISAMPLE_NONE, TRUE, Result.Next.Handle );
+                                   d3d8_texArray[ Result.Next.Handle ].Texture );
       end;
   end;
   Result.Next.rtType  := rtType;
@@ -120,19 +114,13 @@ procedure rtarget_Del;
 begin
   if not Assigned( Target ) Then exit;
 
-  case Target.rtType of
-    RT_TYPE_SIMPLE, RT_TYPE_FBO, RT_TYPE_PBUFFER:
-      begin
-        glDeleteTextures( 1, @Target.Surface.ID );
-      end;
-  end;
+  glDeleteTextures( 1, @Target.Handle );
 
   if Assigned( Target.Prev ) Then
     Target.Prev.Next := Target.Next;
   if Assigned( Target.Next ) Then
     Target.Next.Prev := Target.Prev;
 
-  Target.Handle := nil;
   FreeMemory( Target );
   DEC( managerRTarget.Count );
 
@@ -141,8 +129,7 @@ end;
 
 procedure rtarget_Set;
   var
-    i : Integer;
-    lrs, lrt : TD3DLockedRect;
+    src, dst : IDirect3DSurface8;
 begin
   if Assigned( Target ) Then
     begin
@@ -157,14 +144,7 @@ begin
           begin
             d3d8_Device.GetRenderTarget( d3d8_Surface );
             d3d8_Device.GetDepthStencilSurface( d3d8_Stencil );
-            d3d8_texArray[ Target.Surface.ID ].Texture.GetSurfaceLevel( 0, lSurface );
-            d3d8_Device.SetRenderTarget( lSurface, nil );
-          end;
-        RT_TYPE_TEST:
-          begin
-            d3d8_Device.GetRenderTarget( d3d8_Surface );
-            d3d8_Device.GetDepthStencilSurface( d3d8_Stencil );
-            lSurface := Target.Handle;
+            d3d8_texArray[ Target.Handle ].Texture.GetSurfaceLevel( 0, lSurface );
             lTexture := Target.Surface;
             d3d8_Device.SetRenderTarget( lSurface, nil );
           end;
@@ -196,19 +176,13 @@ begin
               lSurface := nil;
               d3d8_Surface := nil;
               d3d8_Stencil := nil;
-            end;
-          RT_TYPE_TEST:
-            begin
-              lSurface.LockRect( lrs, nil, D3DLOCK_READONLY );
-              d3d8_texArray[ lTexture.ID ].Texture.LockRect( 0, lrt, nil, D3DLOCK_DISCARD );
-              Move( lrs.pBits^, lrt.pBits^, lTexture.Width * lTexture.Height * 4 );
-              d3d8_texArray[ lTexture.ID ].Texture.UnlockRect( 0 );
-              lSurface.UnlockRect;
 
-              d3d8_Device.SetRenderTarget( d3d8_Surface, d3d8_Stencil );
-              lSurface := nil;
-              d3d8_Surface := nil;
-              d3d8_Stencil := nil;
+              d3d8_texArray[ lRTarget.Handle ].Texture.GetSurfaceLevel( 0, src );
+              d3d8_texArray[ lTexture.ID ].Texture.GetSurfaceLevel( 0, dst );
+              d3d8_Device.CopyRects( src, nil, 0, dst, nil );
+
+              src := nil;
+              dst := nil;
             end;
         end;
 

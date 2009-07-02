@@ -26,7 +26,7 @@ unit zgl_direct3d8;
 interface
 uses
   Windows,
-  Direct3D8;
+  DirectXGraphics;
 
 function  d3d8_Create : Boolean;
 procedure d3d8_Destroy;
@@ -250,10 +250,7 @@ begin
   r := managerRTarget.First.Next;
   while Assigned( r ) do
     begin
-      if r.rtType <> RT_TYPE_TEST Then
-        glDeleteTextures( 1, @r.Surface.ID )
-      else
-        r.Handle := nil;
+      glDeleteTextures( 1, @r.Handle );
       r := r.Next;
     end;
 
@@ -289,13 +286,10 @@ begin
   r := managerRTarget.First.Next;
   while Assigned( r ) do
     begin
-      if r.rtType <> RT_TYPE_TEST Then
-        begin
-          glGenTextures( 1, @r.Surface.ID );
-          d3d8_Device.CreateTexture( r.Surface.Width, r.Surface.Height, 1 * ( 1 - r.Surface.Flags and TEX_MIPMAP ),
-                                     D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT,
-                                     d3d8_texArray[ r.Surface.ID ].Texture );
-        end else d3d8_Device.CreateRenderTarget( r.Surface.Width, r.Surface.Height, D3DFMT_A8R8G8B8, D3DMULTISAMPLE_NONE, TRUE, r.Handle );
+      glGenTextures( 1, @r.Handle );
+      d3d8_Device.CreateTexture( r.Surface.Width, r.Surface.Height, 1 * ( 1 - r.Surface.Flags and TEX_MIPMAP ),
+                                 D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT,
+                                 d3d8_texArray[ r.Handle ].Texture );
       r := r.Next;
     end;
 
