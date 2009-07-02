@@ -1,4 +1,4 @@
-{
+﻿{
  * Copyright © Kemka Andrey aka Andru
  * mail: dr.andru@gmail.com
  * site: http://andru-kun.ru
@@ -34,6 +34,7 @@ const
   REFRESH_MAXIMUM = 0;
   REFRESH_DEFAULT = 1;
 
+procedure scr_Init;
 function  scr_Create : Boolean;
 procedure scr_GetResList;
 procedure scr_Destroy;
@@ -62,6 +63,7 @@ var
   scr_Refresh : Integer;
   scr_VSync   : Boolean;
   scr_ResList : zglTResolutionList;
+  scr_Initialized : Boolean;
 
   // Resolution Correct
   scr_ResW  : Integer;
@@ -103,9 +105,8 @@ begin
   ReleaseDC( 0, tHDC );
 end;
 
-function scr_Create;
+procedure scr_Init;
 begin
-  Result := FALSE;
   with scr_Desktop do
     begin
       dmSize             := SizeOf( DEVMODE );
@@ -115,6 +116,12 @@ begin
       dmDisplayFrequency := GetDisplayRefresh;
       dmFields           := DM_PELSWIDTH or DM_PELSHEIGHT or DM_BITSPERPEL or DM_DISPLAYFREQUENCY;
     end;
+end;
+
+function scr_Create;
+begin
+  Result := FALSE;
+  scr_Init;
   log_Add( 'Current mode: ' + u_IntToStr( zgl_Get( DESKTOP_WIDTH ) ) + ' x ' + u_IntToStr( zgl_Get( DESKTOP_HEIGHT ) ) );
   scr_GetResList;
   Result := TRUE;
@@ -197,10 +204,6 @@ begin
         scr_BPP     := GetDisplayColors;
         scr_Refresh := GetDisplayRefresh;
       end;
-
-  d3d8_BeginScene;
-  d3d8_Device.Clear( 0, nil, D3DCLEAR_TARGET, D3DCOLOR_XRGB( 0, 0, 0 ), 1, 0 );
-  d3d8_EndScene;
 
   if wnd_FullScreen Then
     log_Add( 'Set screen options: ' + u_IntToStr( scr_Width ) + ' x ' + u_IntToStr( scr_Height ) + ' x ' + u_IntToStr( scr_BPP ) + 'bpp fullscreen' )

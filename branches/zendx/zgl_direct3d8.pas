@@ -95,6 +95,7 @@ uses
   zgl_application,
   zgl_screen,
   zgl_window,
+  zgl_camera_2d,
   zgl_textures,
   zgl_render_target,
   zgl_log,
@@ -305,6 +306,11 @@ end;
 
 procedure d3d8_ResetState;
 begin
+  Set2DMode;
+  d3d8_BeginScene;
+  d3d8_Device.Clear( 0, nil, D3DCLEAR_TARGET, D3DCOLOR_XRGB( 0, 0, 0 ), 1, 0 );
+  d3d8_EndScene;
+
   glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
   glAlphaFunc( GL_GREATER, 0 );
 
@@ -441,6 +447,13 @@ procedure scissor_Begin;
 begin
   if ( Width < 0 ) or ( Height < 0 ) Then
     exit;
+  if cam2DGlobal <> @constCamera2D Then
+    begin
+      X      := Trunc( ( X - cam2dGlobal.X ) * cam2dGlobal.Zoom.X + ( ( ogl_Width  / 2 ) - ( ogl_Width  / 2 ) * cam2dGlobal.Zoom.X ) );
+      Y      := Trunc( ( Y - cam2dGlobal.Y ) * cam2dGlobal.Zoom.Y + ( ( ogl_Height / 2 ) - ( ogl_Height / 2 ) * cam2dGlobal.Zoom.Y ) );
+      Width  := Trunc( Width  * cam2DGlobal.Zoom.X );
+      Height := Trunc( Height * cam2DGlobal.Zoom.Y );
+    end;
   if app_Flags and CORRECT_RESOLUTION > 0 Then
     begin
       X      := Trunc( X * scr_ResCX + scr_AddCX );

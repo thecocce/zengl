@@ -155,7 +155,7 @@ function  key_Down( const KeyCode : Byte ) : Boolean;
 function  key_Up( const KeyCode : Byte ) : Boolean;
 function  key_Press( const KeyCode : Byte ) : Boolean;
 function  key_Last( const KeyAction : Byte ) : Byte;
-procedure key_BeginReadText( const Text : String; const MaxSymbols : Integer );
+procedure key_BeginReadText( const Text : String; const MaxSymbols : Integer = -1 );
 procedure key_EndReadText( var Result : String );
 procedure key_ClearState;
 
