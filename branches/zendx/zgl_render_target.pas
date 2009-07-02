@@ -42,7 +42,7 @@ type
   zglPRenderTarget = ^zglTRenderTarget;
   zglTRenderTarget = record
     rtType     : Byte;
-    Handle     : DWORD;
+    Handle     : zglPTexture;
     Surface    : zglPTexture;
     Flags      : Byte;
 
@@ -91,10 +91,13 @@ begin
   case rtType of
     RT_TYPE_SIMPLE, RT_TYPE_FBO, RT_TYPE_PBUFFER:
       begin
-        glGenTextures( 1, @Result.Next.Handle );
+        Result.Next.Handle := tex_Add;
+        Result.Next.Handle^ := Surface^;
+        glGenTextures( 1, @Result.Next.Handle.ID );
+        tex_Filter( Result.Next.Handle, Surface.Flags );
         d3d8_Device.CreateTexture( Surface.Width, Surface.Height, 1,
                                    D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT,
-                                   d3d8_texArray[ Result.Next.Handle ].Texture );
+                                   d3d8_texArray[ Result.Next.Handle.ID ].Texture );
       end;
   end;
   Result.Next.rtType  := rtType;
@@ -114,7 +117,7 @@ procedure rtarget_Del;
 begin
   if not Assigned( Target ) Then exit;
 
-  glDeleteTextures( 1, @Target.Handle );
+  tex_Del( Target.Handle );
 
   if Assigned( Target.Prev ) Then
     Target.Prev.Next := Target.Next;
@@ -142,9 +145,10 @@ begin
       case Target.rtType of
         RT_TYPE_SIMPLE, RT_TYPE_FBO, RT_TYPE_PBUFFER:
           begin
+            //tex_Filter( Target.Handle, Target.Handle.Flags );
             d3d8_Device.GetRenderTarget( d3d8_Surface );
             d3d8_Device.GetDepthStencilSurface( d3d8_Stencil );
-            d3d8_texArray[ Target.Handle ].Texture.GetSurfaceLevel( 0, lSurface );
+            d3d8_texArray[ Target.Handle.ID ].Texture.GetSurfaceLevel( 0, lSurface );
             lTexture := Target.Surface;
             d3d8_Device.SetRenderTarget( lSurface, nil );
           end;
@@ -177,7 +181,7 @@ begin
               d3d8_Surface := nil;
               d3d8_Stencil := nil;
 
-              d3d8_texArray[ lRTarget.Handle ].Texture.GetSurfaceLevel( 0, src );
+              d3d8_texArray[ lRTarget.Handle.ID ].Texture.GetSurfaceLevel( 0, src );
               d3d8_texArray[ lTexture.ID ].Texture.GetSurfaceLevel( 0, dst );
               d3d8_Device.CopyRects( src, nil, 0, dst, nil );
 

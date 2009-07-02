@@ -250,7 +250,7 @@ begin
   r := managerRTarget.First.Next;
   while Assigned( r ) do
     begin
-      glDeleteTextures( 1, @r.Handle );
+      glDeleteTextures( 1, @r.Handle.ID );
       r := r.Next;
     end;
 
@@ -286,10 +286,11 @@ begin
   r := managerRTarget.First.Next;
   while Assigned( r ) do
     begin
-      glGenTextures( 1, @r.Handle );
+      glGenTextures( 1, @r.Handle.ID );
+      tex_Filter( r.Handle, r.Surface.Flags );
       d3d8_Device.CreateTexture( r.Surface.Width, r.Surface.Height, 1 * ( 1 - r.Surface.Flags and TEX_MIPMAP ),
                                  D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT,
-                                 d3d8_texArray[ r.Handle ].Texture );
+                                 d3d8_texArray[ r.Handle.ID ].Texture );
       r := r.Next;
     end;
 
