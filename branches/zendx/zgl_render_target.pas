@@ -38,6 +38,8 @@ const
   RT_FULL_SCREEN  = $01;
   RT_CLEAR_SCREEN = $02;
 
+  TEX_RESTORE     = $200000;
+
 type
   zglPRenderTarget = ^zglTRenderTarget;
   zglTRenderTarget = record
@@ -94,7 +96,6 @@ begin
         Result.Next.Handle := tex_Add;
         Result.Next.Handle^ := Surface^;
         glGenTextures( 1, @Result.Next.Handle.ID );
-        tex_Filter( Result.Next.Handle, Surface.Flags );
         d3d8_Device.CreateTexture( Surface.Width, Surface.Height, 1,
                                    D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT,
                                    d3d8_texArray[ Result.Next.Handle.ID ].Texture );
@@ -145,7 +146,17 @@ begin
       case Target.rtType of
         RT_TYPE_SIMPLE, RT_TYPE_FBO, RT_TYPE_PBUFFER:
           begin
-            //tex_Filter( Target.Handle, Target.Handle.Flags );
+            if Target.Handle.Flags and TEX_RESTORE > 0 Then
+              begin
+                Target.Handle.Flags := Target.Handle.Flags xor TEX_RESTORE;
+                d3d8_texArray[ Target.Handle.ID ].Texture.GetSurfaceLevel( 0, src );
+                d3d8_texArray[ Target.Surface.ID ].Texture.GetSurfaceLevel( 0, dst );
+                d3d8_Device.CopyRects( dst, nil, 0, src, nil );
+
+                src := nil;
+                dst := nil;
+              end;
+
             d3d8_Device.GetRenderTarget( d3d8_Surface );
             d3d8_Device.GetDepthStencilSurface( d3d8_Stencil );
             d3d8_texArray[ Target.Handle.ID ].Texture.GetSurfaceLevel( 0, lSurface );
