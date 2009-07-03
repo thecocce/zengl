@@ -89,7 +89,6 @@ begin
     Result := Result.Next;
 
   zgl_GetMem( Pointer( Result.Next ), SizeOf( zglTRenderTarget ) );
-  FillChar( Result.Next^, SizeOf( zglTRenderTarget ), 0 );
 
   case rtType of
     RT_TYPE_SIMPLE, RT_TYPE_FBO, RT_TYPE_PBUFFER:
@@ -100,7 +99,13 @@ begin
           fmt := D3DFMT_A8R8G8B8;
 
         Result.Next.Handle := tex_Add;
-        Result.Next.Handle^ := Surface^;
+        Result.Next.Handle.Width   := Surface.Width;
+        Result.Next.Handle.Height  := Surface.Height;
+        Result.Next.Handle.U       := Surface.U;
+        Result.Next.Handle.V       := Surface.V;
+        Result.Next.Handle.FramesX := Surface.FramesX;
+        Result.Next.Handle.FramesY := Surface.FramesY;
+        Result.Next.Handle.Flags   := Surface.Flags;
         glGenTextures( 1, @Result.Next.Handle.ID );
         d3d8_Device.CreateTexture( Surface.Width, Surface.Height, 1,
                                    D3DUSAGE_RENDERTARGET, fmt, D3DPOOL_DEFAULT,

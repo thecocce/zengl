@@ -287,7 +287,7 @@ begin
         fmt := D3DFMT_A8R8G8B8;
       glGenTextures( 1, @r.Handle.ID );
       r.Handle.Flags := r.Handle.Flags or TEX_RESTORE;
-      d3d8_Device.CreateTexture( r.Surface.Width, r.Surface.Height, 1 * ( 1 - r.Surface.Flags and TEX_MIPMAP ),
+      d3d8_Device.CreateTexture( r.Surface.Width, r.Surface.Height, 1,
                                  D3DUSAGE_RENDERTARGET, fmt, D3DPOOL_DEFAULT,
                                  d3d8_texArray[ r.Handle.ID ].Texture );
       r := r.Next;
