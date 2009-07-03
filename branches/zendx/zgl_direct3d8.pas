@@ -147,11 +147,8 @@ begin
         SwapEffect := D3DSWAPEFFECT_COPY_VSYNC
       else
         SwapEffect := D3DSWAPEFFECT_COPY;
-      if ogl_Stencil > 0 Then
-        begin
-          EnableAutoDepthStencil := TRUE;
-          AutoDepthStencilFormat := D3DFMT_D16;
-        end;
+      EnableAutoDepthStencil := TRUE;
+      AutoDepthStencilFormat := D3DFMT_D16;
     end;
 
   // FullScreen
@@ -188,11 +185,8 @@ begin
         FullScreen_PresentationInterval := D3DPRESENT_INTERVAL_ONE
       else
         FullScreen_PresentationInterval := D3DPRESENT_INTERVAL_IMMEDIATE;
-      if ogl_Stencil > 0 Then
-        begin
-          EnableAutoDepthStencil := TRUE;
-          AutoDepthStencilFormat := D3DFMT_D16;
-        end;
+      EnableAutoDepthStencil := TRUE;
+      AutoDepthStencilFormat := D3DFMT_D16;
     end;
 
   if wnd_FullScreen Then
@@ -246,6 +240,7 @@ end;
 function d3d8_Restore;
   var
     r : zglPRenderTarget;
+    fmt : TD3DFormat;
 begin
   r := managerRTarget.First.Next;
   while Assigned( r ) do
@@ -286,10 +281,14 @@ begin
   r := managerRTarget.First.Next;
   while Assigned( r ) do
     begin
+      if r.Surface.Flags and TEX_RGB > 0 Then
+        fmt := D3DFMT_X8R8G8B8
+      else
+        fmt := D3DFMT_A8R8G8B8;
       glGenTextures( 1, @r.Handle.ID );
       r.Handle.Flags := r.Handle.Flags or TEX_RESTORE;
       d3d8_Device.CreateTexture( r.Surface.Width, r.Surface.Height, 1 * ( 1 - r.Surface.Flags and TEX_MIPMAP ),
-                                 D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT,
+                                 D3DUSAGE_RENDERTARGET, fmt, D3DPOOL_DEFAULT,
                                  d3d8_texArray[ r.Handle.ID ].Texture );
       r := r.Next;
     end;
@@ -385,7 +384,7 @@ begin
   if ogl_Mode = 1 Then
     begin
       glScalef( rt_ScaleW, -rt_ScaleH, 1 );
-      glTranslatef( 0, ogl_Height, 0 );
+      glTranslatef( 0, scr_ResH, 0 );
     end;
 
   scr_SetViewPort;
@@ -408,7 +407,7 @@ begin
   if ogl_Mode = 1 Then
     begin
       glScalef( rt_ScaleW, -rt_ScaleH, 1 );
-      glTranslatef( 0, ogl_Height, 0 );
+      glTranslatef( 0, scr_ResH, 0 );
     end;
 
   scr_SetViewPort;

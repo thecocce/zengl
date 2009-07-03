@@ -66,14 +66,13 @@ var
   managerRTarget : zglTRenderTargetManager;
   rt_ScaleW : Single;
   rt_ScaleH : Single;
-  arr : array[ 0..512*512*4 ] of Byte;
 
 implementation
 uses
+  zgl_const,
   zgl_main,
-  zgl_window,
-  zgl_screen,
-  zgl_log;
+  zgl_application,
+  zgl_screen;
 
 var
   lRTarget : zglPRenderTarget;
@@ -82,6 +81,8 @@ var
   lTexture : zglPTexture;
 
 function rtarget_Add;
+  var
+    fmt : TD3DFormat;
 begin
   Result := @managerRTarget.First;
   while Assigned( Result.Next ) do
@@ -93,11 +94,16 @@ begin
   case rtType of
     RT_TYPE_SIMPLE, RT_TYPE_FBO, RT_TYPE_PBUFFER:
       begin
+        if Surface.Flags and TEX_RGB > 0 Then
+          fmt := D3DFMT_X8R8G8B8
+        else
+          fmt := D3DFMT_A8R8G8B8;
+
         Result.Next.Handle := tex_Add;
         Result.Next.Handle^ := Surface^;
         glGenTextures( 1, @Result.Next.Handle.ID );
         d3d8_Device.CreateTexture( Surface.Width, Surface.Height, 1,
-                                   D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT,
+                                   D3DUSAGE_RENDERTARGET, fmt, D3DPOOL_DEFAULT,
                                    d3d8_texArray[ Result.Next.Handle.ID ].Texture );
       end;
   end;
@@ -165,10 +171,15 @@ begin
           end;
       end;
 
+      if app_Flags and CORRECT_RESOLUTION = 0 Then
+        begin
+          scr_ResW := ogl_Width;
+          scr_ResH := ogl_Height;
+        end;
       if Target.Flags and RT_FULL_SCREEN = 0 Then
         begin
-          rt_ScaleW := ogl_Width / Target.Surface.Width;
-          rt_ScaleH := ogl_Height / Target.Surface.Height;
+          rt_ScaleW := scr_ResW / Target.Surface.Width;
+          rt_ScaleH := scr_ResH / Target.Surface.Height;
         end else
           begin
             rt_ScaleW := 1;

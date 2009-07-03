@@ -1,4 +1,4 @@
-{
+﻿{
  * Copyright © Kemka Andrey aka Andru
  * mail: dr.andru@gmail.com
  * site: http://andru-kun.ru
@@ -358,10 +358,10 @@ procedure zgl_Enable;
 begin
   app_Flags := app_Flags or What;
 
-  {if What and DEPTH_BUFFER > 0 Then
+  if What and DEPTH_BUFFER > 0 Then
     glEnable( GL_DEPTH_TEST );
 
-  if What and DEPTH_MASK > 0 Then
+  {if What and DEPTH_MASK > 0 Then
     glDepthMask( GL_TRUE );}
 
   if What and APP_USE_AUTOPAUSE > 0 Then
@@ -388,11 +388,21 @@ begin
   if app_Flags and What > 0 Then
     app_Flags := app_Flags xor What;
 
-  {if What and DEPTH_BUFFER > 0 Then
+  if What and DEPTH_BUFFER > 0 Then
     glDisable( GL_DEPTH_TEST );
 
-  if What and DEPTH_MASK > 0 Then
+  {if What and DEPTH_MASK > 0 Then
     glDepthMask( GL_FALSE );}
+
+  if What and CORRECT_RESOLUTION > 0 Then
+    begin
+      scr_ResCX := 1;
+      scr_ResCY := 1;
+      scr_AddCX := 0;
+      scr_AddCY := 0;
+      scr_SubCX := 0;
+      scr_SubCY := 0;
+    end;
 
   if What and APP_USE_AUTOPAUSE > 0 Then
     app_AutoPause := FALSE;

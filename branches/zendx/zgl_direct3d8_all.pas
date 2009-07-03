@@ -1,4 +1,4 @@
-{
+﻿{
  * Copyright © Kemka Andrey aka Andru
  * mail: dr.andru@gmail.com
  * site: http://andru-kun.ru
@@ -435,21 +435,24 @@ procedure glScissor;
 begin
   ScissorX := x;
   ScissorY := -( y + height - wnd_Height );
-  if ScissorX < 0 Then
+  if ScissorX < scr_AddCX Then
     begin
-      ScissorW := ScissorX + width;
-      ScissorX := 0;
+      ScissorW := ScissorX + width - scr_AddCX;
+      ScissorX := scr_AddCX;
     end else ScissorW := width;
-  if ScissorY < 0 Then
+  if ScissorY < scr_AddCY Then
     begin
-      ScissorH := ScissorY + height;
-      ScissorY := 0;
+      ScissorH := ScissorY + height - scr_AddCY;
+      ScissorY := scr_AddCY;
     end else ScissorH := height;
 
-  if ScissorX + ScissorW > wnd_Width Then
-    ScissorW := wnd_Width - ScissorX;
-  if ScissorY + ScissorH > wnd_Height Then
-    ScissorH := wnd_Height - ScissorY;
+  if ScissorX + ScissorW > wnd_Width - scr_AddCX Then
+    ScissorW := wnd_Width - ScissorX - scr_AddCX;
+  if ScissorY + ScissorH > wnd_Height - scr_AddCY Then
+    ScissorH := wnd_Height - ScissorY - scr_AddCY; 
+
+  if ScissorX >= ScissorW Then exit;
+  if ScissorY >= ScissorH Then exit;
 
   glViewPort( 0, 0, 0, 0 );
 end;
@@ -894,7 +897,7 @@ begin
   case format of
     GL_RGB:
       begin
-        fmt  := D3DFMT_A8R8G8B8;
+        fmt  := D3DFMT_X8R8G8B8;
         size := 3;
       end;
     GL_RGBA:
@@ -964,7 +967,7 @@ begin
   case format of
     GL_RGB:
       begin
-        fmt  := D3DFMT_A8R8G8B8;
+        fmt  := D3DFMT_X8R8G8B8;
         size := 3;
       end;
     GL_RGBA:
