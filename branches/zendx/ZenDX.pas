@@ -283,5 +283,6 @@ exports
   ;
 
 begin
+Copy(
   wnd_INST := hInstance;
 end.
