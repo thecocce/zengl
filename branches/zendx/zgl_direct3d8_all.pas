@@ -1,7 +1,7 @@
 ﻿{
  * Copyright © Kemka Andrey aka Andru
  * mail: dr.andru@gmail.com
- * site: http://andru-kun.ru
+ * site: http://andru-kun.inf.ua
  *
  * This file is part of ZenGL
  *
@@ -432,6 +432,8 @@ begin
 end;
 
 procedure glScissor;
+  var
+    t : Integer;
 begin
   ScissorX := x;
   ScissorY := -( y + height - wnd_Height );
@@ -449,10 +451,10 @@ begin
   if ScissorX + ScissorW > wnd_Width - scr_AddCX Then
     ScissorW := wnd_Width - ScissorX - scr_AddCX;
   if ScissorY + ScissorH > wnd_Height - scr_AddCY Then
-    ScissorH := wnd_Height - ScissorY - scr_AddCY; 
+    ScissorH := wnd_Height - ScissorY - scr_AddCY;
 
-  if ScissorX >= ScissorW Then exit;
-  if ScissorY >= ScissorH Then exit;
+  if ScissorX >= ScissorX + ScissorW Then exit;
+  if ScissorY >= ScissorY + ScissorH Then exit;
 
   glViewPort( 0, 0, 0, 0 );
 end;
@@ -620,10 +622,10 @@ procedure glTranslatef;
 begin
   with d3d8_Matrices[ d3d8_MatrixMode ] do
     begin
-      _41 := x;
-      _42 := y;
-      _43 := z;
-      _44 := 1;
+      _41 := _41 + x;
+      _42 := _42 + y;
+      _43 := _43 + z;
+      _44 := _44;
     end;
   d3d8_Device.SetTransform( d3d8_MatrixMode, d3d8_Matrices[ d3d8_MatrixMode ] );
 end;
@@ -828,7 +830,7 @@ begin
     GL_NEAREST: value := D3DTEXF_POINT;
     GL_LINEAR: value := D3DTEXF_LINEAR;
     GL_LINEAR_MIPMAP_NEAREST: value := D3DTEXF_FLATCUBIC;
-    GL_LINEAR_MIPMAP_LINEAR: value := D3DTEXF_GAUSSIANCUBIC;
+    GL_LINEAR_MIPMAP_LINEAR:  value := D3DTEXF_GAUSSIANCUBIC;
   end;
 
   case pname of

@@ -1,7 +1,7 @@
 {
  * Copyright © Kemka Andrey aka Andru
  * mail: dr.andru@gmail.com
- * site: http://andru-kun.ru
+ * site: http://andru-kun.inf.ua
  *
  * This file is part of ZenGL
  *
@@ -632,7 +632,7 @@ end;
 
 procedure tex_GetData;
 begin
-  pSize := 3 + Byte( Texture.Flags and TEX_RGB = 0 );
+  pSize := 4;
   zgl_GetMem( pData, Round( Texture.Width / Texture.U ) * Round( Texture.Height / Texture.V ) * pSize );
 
   glEnable( GL_TEXTURE_2D );

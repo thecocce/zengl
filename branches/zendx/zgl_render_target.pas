@@ -1,7 +1,7 @@
 ﻿{
  * Copyright © Kemka Andrey aka Andru
  * mail: dr.andru@gmail.com
- * site: http://andru-kun.ru
+ * site: http://andru-kun.inf.ua
  *
  * This file is part of ZenGL
  *
@@ -107,6 +107,10 @@ begin
         Result.Next.Handle.FramesY := Surface.FramesY;
         Result.Next.Handle.Flags   := Surface.Flags;
         glGenTextures( 1, @Result.Next.Handle.ID );
+        d3d8_texArray[ Result.Next.Handle.ID ].MagFilter := d3d8_texArray[ Surface.ID ].MagFilter;
+        d3d8_texArray[ Result.Next.Handle.ID ].MinFilter := d3d8_texArray[ Surface.ID ].MinFilter;
+        d3d8_texArray[ Result.Next.Handle.ID ].MipFilter := d3d8_texArray[ Surface.ID ].MipFilter;
+        d3d8_texArray[ Result.Next.Handle.ID ].Wrap      := d3d8_texArray[ Surface.ID ].Wrap;
         d3d8_Device.CreateTexture( Surface.Width, Surface.Height, 1,
                                    D3DUSAGE_RENDERTARGET, fmt, D3DPOOL_DEFAULT,
                                    d3d8_texArray[ Result.Next.Handle.ID ].Texture );
