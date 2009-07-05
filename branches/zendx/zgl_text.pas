@@ -227,7 +227,7 @@ begin
         LineFeed := TRUE;
       if ( ( X >= Rect.X + Rect.W ) and ( i - l > 0 ) ) or LineFeed Then
         begin
-          X := Round( Rect.X ) - WordsArray[ i ].ShiftX - SpaceShift * Byte( not LineFeed );
+          X := Round( Rect.X ) - WordsArray[ i ].ShiftX - SpaceShift * Byte( not LineFeed ) - SpaceShift * Byte( Flags and TEXT_HALIGN_CENTER > 0 );
           Y := Y + Round( Font.MaxHeight * textScale );
           WordsArray[ i ].X := X;
           WordsArray[ i ].Y := Y;
