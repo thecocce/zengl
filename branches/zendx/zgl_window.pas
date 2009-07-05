@@ -230,7 +230,6 @@ end;
 
 procedure wnd_Select;
 begin
-  ShowWindow( wnd_Handle, SW_NORMAL );
   BringWindowToTop( wnd_Handle );
 end;
 
