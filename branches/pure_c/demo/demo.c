@@ -7,6 +7,8 @@
 #include "../zgl_keyboard.h"
 
 bool fs;
+int  w = 1024;
+int  h = 768;
 
 void Init()
 {
@@ -15,10 +17,26 @@ void Init()
 
 void Draw()
 {
-  gl_SetCurrentMode();
+  gl_Set2DMode();
+
+  glColor3f( 0.8, 0.8, 0.8 );
+  glBegin(GL_QUADS);
+    glVertex2f( 0, 0 );
+    glVertex2f( w, 0 );
+    glVertex2f( w, h );
+    glVertex2f( 0, h );
+  glEnd();
+  glColor3f( 1, 1, 1 );
+  glBegin(GL_QUADS);
+    glVertex2f( 10,     10 );
+    glVertex2f( w - 10, 10 );
+    glVertex2f( w - 10, h - 10 );
+    glVertex2f( 10,     h - 10 );
+  glEnd();
+
   if ( key_Down( K_ALT ) && key_Press( K_ENTER ) ) {
     fs = !fs;
-    scr_SetOptions( 1024, 768, 32, 0, fs, 0 );
+    scr_SetOptions( w, h, 32, 0, fs, 1 );
   }
   if ( key_Press( K_ESCAPE ) ) zgl_Exit();
   mouse_ClearState();
@@ -30,9 +48,7 @@ int main(void)
   zgl_Reg( SYS_INIT, (void*)Init );
   zgl_Reg( SYS_DRAW, (void*)Draw );
 
-  scr_SetOptions( 800, 600, 32, 0, 0, 1 );
-
-  wnd_SetCaption( "ZenGL GCC" );
+  wnd_SetCaption( "ZenGL Pure C" );
 
   scr_SetOptions( 1024, 768, 32, 0, 0, 1 );
 

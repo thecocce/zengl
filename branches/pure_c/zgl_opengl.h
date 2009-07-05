@@ -1,7 +1,7 @@
 /*
  * Copyright © Kemka Andrey aka Andru
  * mail: dr.andru@gmail.com
- * site: http://andru-kun.ru
+ * site: http://andru-kun.inf.ua
  *
  * This file is part of ZenGL
  *
@@ -37,6 +37,7 @@ extern float ogl_zFar;
 
 extern int ogl_Mode;
 
+extern bool ogl_3DAccelerator;
 extern bool ogl_CanVSync;
 
 extern bool gl_Create(void);

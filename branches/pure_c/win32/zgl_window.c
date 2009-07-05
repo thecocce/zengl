@@ -1,7 +1,7 @@
 /*
  * Copyright © Kemka Andrey aka Andru
  * mail: dr.andru@gmail.com
- * site: http://andru-kun.ru
+ * site: http://andru-kun.inf.ua
  *
  * This file is part of ZenGL
  *
@@ -173,11 +173,11 @@ void wnd_SetPos( int X, int Y )
   if ( ( !wnd_FullScreen ) || ( !app_Focus ) ) {
     wnd_X = X;
     wnd_Y = Y;
-    SetWindowPos( wnd_Handle, 0, wnd_X, wnd_Y - ( wnd_BrdSizeY * 2 + wnd_CpnSize ), wnd_Width + ( wnd_BrdSizeX * 2 ), wnd_Height + ( wnd_BrdSizeY * 2 + wnd_CpnSize ), SWP_NOACTIVATE );
+    SetWindowPos( wnd_Handle, HWND_TOPMOST, wnd_X, wnd_Y - ( wnd_BrdSizeY * 2 + wnd_CpnSize ), wnd_Width + ( wnd_BrdSizeX * 2 ), wnd_Height + ( wnd_BrdSizeY * 2 + wnd_CpnSize ), SWP_NOACTIVATE );
   } else {
       wnd_X = 0;
       wnd_Y = 0;
-      SetWindowPos( wnd_Handle, 0, 0, 0, wnd_Width, wnd_Height, SWP_NOACTIVATE );
+      SetWindowPos( wnd_Handle, HWND_TOPMOST, 0, 0, wnd_Width, wnd_Height, SWP_NOACTIVATE );
     }
 }
 

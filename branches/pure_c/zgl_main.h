@@ -1,7 +1,7 @@
 /*
  * Copyright © Kemka Andrey aka Andru
  * mail: dr.andru@gmail.com
- * site: http://andru-kun.ru
+ * site: http://andru-kun.inf.ua
  *
  * This file is part of ZenGL
  *
@@ -65,10 +65,11 @@
 #define APP_USE_AUTOPAUSE     0x000040
 #define APP_USE_LOG           0x000080
 #define APP_USE_ENGLISH_INPUT 0x000100
-#define WND_USE_AUTOCENTER    0x000200
-#define SND_CAN_PLAY          0x000400
-#define SND_CAN_PLAY_FILE     0x000800
-#define CROP_INVISIBLE        0x001000
+#define APP_USE_UTF8          0x000200
+#define WND_USE_AUTOCENTER    0x000400
+#define SND_CAN_PLAY          0x000800
+#define SND_CAN_PLAY_FILE     0x001000
+#define CROP_INVISIBLE        0x002000
 
 extern void zgl_Init( int FSAA, int StencilBits );
 extern void zgl_Exit(void);

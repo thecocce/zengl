@@ -1,7 +1,7 @@
 /*
  * Copyright © Kemka Andrey aka Andru
  * mail: dr.andru@gmail.com
- * site: http://andru-kun.ru
+ * site: http://andru-kun.inf.ua
  *
  * This file is part of ZenGL
  *
@@ -177,17 +177,9 @@ void scr_SetVSync( bool VSync )
 
 void scr_Clear(void)
 {
-  glClearColor( 1, 1, 1, 1 );
   glClear( GL_COLOR_BUFFER_BIT   * ( app_Flags & COLOR_BUFFER_CLEAR ) |
            GL_DEPTH_BUFFER_BIT   * ( app_Flags & DEPTH_BUFFER_CLEAR ) |
            GL_STENCIL_BUFFER_BIT * ( app_Flags & STENCIL_BUFFER_CLEAR ) );
-  glColor3f( 0, 0, 0 );
-  glBegin(GL_QUADS);
-    glVertex2f( 100, 100 );
-    glVertex2f( 612, 100 );
-    glVertex2f( 612, 612 );
-    glVertex2f( 100, 612 );
-  glEnd();
 }
 
 void scr_Flush(void)

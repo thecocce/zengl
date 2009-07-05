@@ -1,7 +1,7 @@
 /*
  * Copyright © Kemka Andrey aka Andru
  * mail: dr.andru@gmail.com
- * site: http://andru-kun.ru
+ * site: http://andru-kun.inf.ua
  *
  * This file is part of ZenGL
  *
@@ -66,6 +66,7 @@ void scr_GetResList()
 bool scr_Create(void)
 {
   int i, j;
+  char tmp[256];
 
   if ( scr_Display ) XCloseDisplay( scr_Display );
 
@@ -78,6 +79,8 @@ bool scr_Create(void)
     u_Error( "GLX Extension not found" );
     return 0;
   } else log_Add( "GLX Extension - ok", 1 );
+  sprintf( tmp, "GLX Version: %s", glXGetClientString( scr_Display, GLX_VERSION ) );
+  log_Add( tmp, 1 );
 
   app_XIM = XOpenIM( scr_Display, NULL, NULL, NULL );
   if ( !app_XIM )
@@ -153,7 +156,6 @@ bool scr_Create(void)
 
   wnd_Root = RootWindow( scr_Display, ogl_VisualInfo->screen );
 
-  char tmp[256];
   sprintf( tmp, "Current mode: %i x %i", desktop_Width, desktop_Height );
   log_Add( tmp, 1 );
   scr_GetResList();
@@ -232,17 +234,9 @@ void scr_SetVSync( bool VSync )
 
 void scr_Clear(void)
 {
-  glClearColor( 1, 1, 1, 1 );
   glClear( GL_COLOR_BUFFER_BIT   * ( app_Flags & COLOR_BUFFER_CLEAR ) |
            GL_DEPTH_BUFFER_BIT   * ( app_Flags & DEPTH_BUFFER_CLEAR ) |
            GL_STENCIL_BUFFER_BIT * ( app_Flags & STENCIL_BUFFER_CLEAR ) );
-  glColor3f( 0, 0, 0 );
-  glBegin(GL_QUADS);
-    glVertex2f( 100, 100 );
-    glVertex2f( 612, 100 );
-    glVertex2f( 612, 612 );
-    glVertex2f( 100, 612 );
-  glEnd();
 }
 
 void scr_Flush(void)
