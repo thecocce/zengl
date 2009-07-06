@@ -188,7 +188,11 @@ begin
   X := X + 1;
   Y := Y + 1;
 
-  WordsCount := u_Words( Text );
+  WordsCount := 0;
+  for i := 1 to length( Text ) do
+    if Text[ i ] = #10 Then
+      INC( WordsCount );
+  WordsCount := WordsCount + u_Words( Text );
   SetLength( WordsArray, WordsCount + 1 );
   WordsArray[ WordsCount ].str := ' ';
   WordsArray[ WordsCount ].W   := Round( Rect.W + 1 );
@@ -197,7 +201,7 @@ begin
   l := length( Text );
   b := 1;
   W := 0;
-  H := 2;
+  H := 1;
   for i := 0 to WordsCount - 1 do
     for j := b to l do
       begin
@@ -207,7 +211,7 @@ begin
             if ( j < l ) and ( Text[ j + 1 ] = #10 ) Then
               begin
                 INC( W );
-                INC( H );
+                font_GetCID( WordsArray[ i ].str, H, @H );
                 continue;
               end;
             if ( j > 1 ) and ( Text[ j - 1 ] = ' ' ) Then
@@ -219,6 +223,7 @@ begin
               WordsArray[ i ].str := Copy( Text, b, j - b )
             else
               WordsArray[ i ].str := Copy( Text, b - 1, j - b + 1 + 1 * Byte( not LineFeed ) - W );
+            font_GetCID( WordsArray[ i ].str, H, @H );
             WordsArray[ i ].LF      := LineFeed;
             WordsArray[ i ].LFShift := W + 1;
             WordsArray[ i ].W       := Round( text_GetWidth( Font, WordsArray[ i ].str, textStep ) * textScale );
@@ -230,7 +235,7 @@ begin
               b := j + 1;
             LineFeed := FALSE;
             W := 0;
-            H := 2;
+            H := 1;
             break;
           end;
       end;
