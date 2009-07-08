@@ -25,6 +25,12 @@ unit zgl_sound_ogg;
 
 {$IFDEF FPC}
   {$IFDEF USE_OGG_STATIC}
+    {$IFDEF LINUX}
+      {$LINKLIB libogg.a}
+      {$LINKLIB libvorbis.a}
+      {$LINKLIB libvorbisfile.a}
+    {$ENDIF LINUX}
+    {$IFDEF WIN32}
       {$L libogg_win32/bitwise}
       {$L libogg_win32/framing}
       {$L libogg_win32/analysis}
@@ -50,6 +56,19 @@ unit zgl_sound_ogg;
       {$L libogg_win32/window}
       {$LINKLIB libogg_win32/libgcc.a}
       {$LINKLIB libogg_win32/libmsvcrt.a}
+    {$ENDIF}
+    {$IFDEF DARWIN}
+      {$IFDEF cpui386}
+        {$L libogg_macos_i386/libogg-i386-master}
+        {$L libogg_macos_i386/libvorbis-i386-master}
+        {$L libogg_macos_i386/libvorbisfile-i386-master}
+      {$ELSE}
+        {$L libogg_macos_ppc/libogg-ppc-master}
+        {$L libogg_macos_ppc/libvorbis-ppc-master}
+        {$L libogg_macos_ppc/libvorbisfile-ppc-master}
+      {$ENDIF}
+      {$LINKLIB libgcc.a}
+    {$ENDIF}
   {$ENDIF}
 {$ENDIF}
 
@@ -65,9 +84,21 @@ uses
   zgl_sound;
 
 const
+{$IFDEF LINUX}
+  libogg        = 'libogg.so';
+  libvorbis     = 'libvorbis.so';
+  libvorbisfile = 'libvorbisfile.so';
+{$ENDIF}
+{$IFDEF WIN32}
   libogg        = 'ogg.dll';
   libvorbis     = 'vorbis.dll';
   libvorbisfile = 'vorbisfile.dll';
+{$ENDIF}
+{$IFDEF DARWIN}
+  libogg        = 'libogg.0.5.3.dylib';
+  libvorbis     = 'libvorbis.0.3.1.dylib';
+  libvorbisfile = 'libvorbisfile.3.1.1.dylib';
+{$ENDIF}
 
 {***********************************************************************}
 {                       POSIX TYPE DEFINITIONS                          }
@@ -293,9 +324,9 @@ var
   vf : OggVorbis_File;
   vc : ov_callbacks;
 
-  ogg_Library        : HMODULE;
-  vorbis_Library     : HMODULE;
-  vorbisfile_Library : HMODULE;
+  ogg_Library        : {$IFDEF LINUX_OR_DARWIN} Pointer {$ENDIF} {$IFDEF WIN32} HMODULE {$ENDIF};
+  vorbis_Library     : {$IFDEF LINUX_OR_DARWIN} Pointer {$ENDIF} {$IFDEF WIN32} HMODULE {$ENDIF};
+  vorbisfile_Library : {$IFDEF LINUX_OR_DARWIN} Pointer {$ENDIF} {$IFDEF WIN32} HMODULE {$ENDIF};
 
 {$IFNDEF USE_OGG_STATIC}
   ov_clear          : function(var vf: OggVorbis_File): cint; cdecl;
@@ -345,9 +376,29 @@ begin
 {$IFDEF USE_OGG_STATIC}
   oggInit := TRUE;
 {$ELSE}
-  ogg_Library        := dlopen( libogg );
-  vorbis_Library     := dlopen( libvorbis );
-  vorbisfile_Library := dlopen( libvorbisfile );
+  ogg_Library        := dlopen( libogg {$IFDEF LINUX_OR_DARWIN}, $001 {$ENDIF} );
+  vorbis_Library     := dlopen( libvorbis {$IFDEF LINUX_OR_DARWIN}, $001 {$ENDIF} );
+  vorbisfile_Library := dlopen( libvorbisfile {$IFDEF LINUX_OR_DARWIN}, $001 {$ENDIF} );
+  {$IFDEF LINUX}
+  if ( ogg_Library        = LIB_ERROR ) and
+     ( vorbis_Library     = LIB_ERROR ) and
+     ( vorbisfile_Library = LIB_ERROR ) Then
+    begin
+      ogg_Library        := dlopen( PChar( libogg + '.0' ), $001 );
+      vorbis_Library     := dlopen( PChar( libvorbis + '.0' ), $001 );
+      vorbisfile_Library := dlopen( PChar( libvorbisfile + '.3' ), $001 );
+    end;
+  {$ENDIF}
+  {$IFDEF DARWIN}
+  if ( ogg_Library        = LIB_ERROR ) and
+     ( vorbis_Library     = LIB_ERROR ) and
+     ( vorbisfile_Library = LIB_ERROR ) Then
+    begin
+      ogg_Library        := dlopen( PChar( app_WorkDir + 'Contents/MacOS/' + libogg ), $001 );
+      vorbis_Library     := dlopen( PChar( app_WorkDir + 'Contents/MacOS/' + libvorbis ), $001 );
+      vorbisfile_Library := dlopen( PChar( app_WorkDir + 'Contents/MacOS/' + libvorbisfile ), $001 );
+    end;
+  {$ENDIF}
 
   if ( ogg_Library        <> LIB_ERROR ) and
      ( vorbis_Library     <> LIB_ERROR ) and
@@ -435,14 +486,34 @@ procedure ogg_Load;
     Buffer    : Pointer;
     _End      : Boolean;
     first     : Boolean;
+
+    _vi : pvorbis_info;
+    _vf : OggVorbis_File;
+    _vc : ov_callbacks;
+
+  function CodecRead( const Buffer : Pointer; const Count : DWORD; var _End : Boolean ) : DWORD;
+    var
+      BytesRead : Integer;
+  begin
+    BytesRead := 0;
+    repeat
+      Result := ov_read( _vf, Pointer( Ptr( Buffer ) + BytesRead ), Count - BytesRead, FALSE, 2, TRUE, nil );
+
+      if Result = -3  Then break;
+      BytesRead := BytesRead + Result;
+    until ( Result = 0 ) or ( BytesRead = Count );
+
+    _End   := Result = 0;
+    Result := BytesRead;
+  end;
 begin
   if not oggLoad Then ogg_Init;
   if not oggInit Then exit;
 
-  if ov_open_callbacks( nil, vf, oggMemory.Memory, oggMemory.Size, vc ) >= 0 Then
+  if ov_open_callbacks( nil, _vf, oggMemory.Memory, oggMemory.Size, _vc ) >= 0 Then
     begin
-      vi        := ov_info( vf, -1 );
-      Frequency := vi.rate;
+      _vi       := ov_info( _vf, -1 );
+      Frequency := _vi.rate;
       {$IFDEF USE_OPENAL}
       case vi.channels of
         1: format := AL_FORMAT_MONO16;
@@ -452,8 +523,8 @@ begin
       with oggBufferDesc do
         begin
           FormatCode     := $0001;
-          ChannelNumber  := vi.channels;
-          SampleRate     := vi.rate;
+          ChannelNumber  := _vi.channels;
+          SampleRate     := _vi.rate;
           BitsPerSample  := 16;
           BytesPerSample := ( BitsPerSample div 8 ) * ChannelNumber;
           BytesPerSecond := SampleRate * BytesPerSample;
@@ -462,32 +533,32 @@ begin
       format := Ptr( @oggBufferDesc.Formatcode );
       {$ENDIF}
 
-      ov_time_seek( vf, 0 );
+      ov_time_seek( _vf, 0 );
 
       size := 0;
       zgl_GetMem( Buffer, 64 * 1024 );
       // Т.к. ov_pcm_total почему-то возвращает бред, приходится извращаться :)
       repeat
-        BytesRead := ogg_CodecRead( Buffer, 64 * 1024, _End );
+        BytesRead := CodecRead( Buffer, 64 * 1024, _End );
         INC( size, BytesRead );
       until _End;
-      vi := nil;
-      ov_clear( vf );
+      _vi := nil;
+      ov_clear( _vf );
 
       zgl_GetMem( Data, size );
-      ov_open_callbacks( nil, vf, oggMemory.Memory, oggMemory.Size, vc );
-      ov_time_seek( vf, 0 );
+      ov_open_callbacks( nil, _vf, oggMemory.Memory, oggMemory.Size, _vc );
+      ov_time_seek( _vf, 0 );
       size := 0;
       repeat
-        BytesRead := ogg_CodecRead( Buffer, 64 * 1024, _End );
+        BytesRead := CodecRead( Buffer, 64 * 1024, _End );
         INC( size, BytesRead );
         if BytesRead > 0 Then
           Move( Buffer^, Pointer( Ptr( Data ) + size - BytesRead )^, BytesRead );
       until _End;
       Freemem( Buffer );
 
-      vi := nil;
-      ov_clear( vf );
+      _vi := nil;
+      ov_clear( _vf );
     end;
   mem_Free( oggMemory );
 end;
