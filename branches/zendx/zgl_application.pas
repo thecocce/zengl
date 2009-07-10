@@ -174,9 +174,6 @@ begin
         timer_Del( aTimersToKill[ i ] );
       TimersToKill  := 0;
 
-      app_PUpdate( timer_GetTicks - odt );
-      odt := timer_GetTicks;
-
       if app_Pause Then continue;
       dt := timer_GetTicks - t;
       if dt >= 1 Then
@@ -185,6 +182,8 @@ begin
             begin
               t := t + 1;
 
+              app_PUpdate( timer_GetTicks - odt );
+              odt := timer_GetTicks;
               app_Draw;
             end else
               t := t + dt;
