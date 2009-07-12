@@ -77,7 +77,7 @@ begin
 
   glColor4ub( textRGBA[ 0 ], textRGBA[ 1 ], textRGBA[ 2 ], textRGBA[ 3 ] );
 
-  Y := Y - Font.MaxShiftY;
+  Y := Y - Font.MaxShiftY * textScale;
   if Flags and TEXT_HALIGN_CENTER > 0 Then
     X := X - Round( text_GetWidth( Font, Text, textStep ) / 2 ) * textScale
   else
@@ -147,9 +147,9 @@ end;
 
 procedure text_DrawEx;
 begin
-  textRGBA[ 0 ] :=   Color and $FF;
+  textRGBA[ 0 ] :=   Color             shr 16;
   textRGBA[ 1 ] := ( Color and $FF00 ) shr 8;
-  textRGBA[ 2 ] :=   Color             shr 16;
+  textRGBA[ 2 ] :=   Color and $FF;
   textRGBA[ 3 ] := Alpha;
   textScale     := Scale;
   textStep      := Step;
@@ -314,9 +314,9 @@ end;
 
 procedure text_DrawInRectEx;
 begin
-  textRGBA[ 0 ] :=   Color and $FF;
+  textRGBA[ 0 ] :=   Color             shr 16;
   textRGBA[ 1 ] := ( Color and $FF00 ) shr 8;
-  textRGBA[ 2 ] :=   Color             shr 16;
+  textRGBA[ 2 ] :=   Color and $FF;
   textRGBA[ 3 ] := Alpha;
   textScale     := Scale;
   textStep      := Step;

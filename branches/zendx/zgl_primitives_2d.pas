@@ -46,7 +46,7 @@ uses
 
 procedure pr2d_Pixel;
 begin
-  glColor4ub( Color and $FF, ( Color and $FF00 ) shr 8, ( Color and $FF0000 ) shr 16, Alpha );
+  glColor4ub( ( Color and $FF0000 ) shr 16, ( Color and $FF00 ) shr 8, Color and $FF, Alpha );
 
   glEnable( GL_BLEND );
 
@@ -90,7 +90,7 @@ begin
             _y1 := Y1 + 0.5;
             _y2 := Y2 + 0.5;
           end;
-  glColor4ub( Color and $FF, ( Color and $FF00 ) shr 8, ( Color and $FF0000 ) shr 16, Alpha );
+  glColor4ub( ( Color and $FF0000 ) shr 16, ( Color and $FF00 ) shr 8, Color and $FF, Alpha );
 
   if FX and PR2D_SMOOTH > 0 Then
     begin
@@ -116,7 +116,7 @@ end;
 
 procedure pr2d_Rect;
 begin
-  glColor4ub( Color and $FF, ( Color and $FF00 ) shr 8, ( Color and $FF0000 ) shr 16, Alpha );
+  glColor4ub( ( Color and $FF0000 ) shr 16, ( Color and $FF00 ) shr 8, Color and $FF, Alpha );
 
   glEnable( GL_BLEND );
 
@@ -162,7 +162,7 @@ procedure pr2d_Circle;
     i : Integer;
     k : Single;
 begin
-  glColor4ub( Color and $FF, ( Color and $FF00 ) shr 8, ( Color and $FF0000 ) shr 16, Alpha );
+  glColor4ub( ( Color and $FF0000 ) shr 16, ( Color and $FF00 ) shr 8, Color and $FF, Alpha );
 
   if FX and PR2D_SMOOTH > 0 Then
     begin
@@ -209,7 +209,7 @@ procedure pr2d_Ellipse;
     i : Integer;
     k : Single;
 begin
-  glColor4ub( Color and $FF, ( Color and $FF00 ) shr 8, ( Color and $FF0000 ) shr 16, Alpha );
+  glColor4ub( ( Color and $FF0000 ) shr 16, ( Color and $FF00 ) shr 8, Color and $FF, Alpha );
 
   if FX and PR2D_SMOOTH > 0 Then
     begin

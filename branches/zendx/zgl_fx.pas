@@ -95,24 +95,24 @@ end;
 
 procedure fx2d_SetVCA;
 begin
-  FX2D_VR1 :=   C1 and $FF;
+  FX2D_VR1 :=   C1             shr 16;
   FX2D_VG1 := ( C1 and $FF00 ) shr 8;
-  FX2D_VB1 :=   C1             shr 16;
+  FX2D_VB1 :=   C1 and $FF;
   FX2D_VA1 := A1;
 
-  FX2D_VR2 :=   C2 and $FF;
+  FX2D_VR2 :=   C2             shr 16;
   FX2D_VG2 := ( C2 and $FF00 ) shr 8;
-  FX2D_VB2 :=   C2             shr 16;
+  FX2D_VB2 :=   C2 and $FF;
   FX2D_VA2 := A2;
 
-  FX2D_VR3 :=   C3 and $FF;
+  FX2D_VR3 :=   C3             shr 16;
   FX2D_VG3 := ( C3 and $FF00 ) shr 8;
-  FX2D_VB3 :=   C3             shr 16;
+  FX2D_VB3 :=   C3 and $FF;
   FX2D_VA3 := A3;
 
-  FX2D_VR4 :=   C4 and $FF;
+  FX2D_VR4 :=   C4             shr 16;
   FX2D_VG4 := ( C4 and $FF00 ) shr 8;
-  FX2D_VB4 :=   C4             shr 16;
+  FX2D_VB4 :=   C4 and $FF;
   FX2D_VA4 := A4;
 end;
 
