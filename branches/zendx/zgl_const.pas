@@ -29,7 +29,7 @@ const
   LIB_ERROR  = 0;
   FILE_ERROR = 0;
 
-  cs_ZenGL = 'ZenDX 0.1.32';
+  cs_ZenGL = 'ZenDX 0.1.33';
 
   defWidth  = 800;
   defHeight = 600;

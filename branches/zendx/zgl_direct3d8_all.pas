@@ -120,6 +120,29 @@ const
   GL_TEXTURE_WRAP_S                 = $2802;
   GL_TEXTURE_WRAP_T                 = $2803;
 
+  GL_COMBINE_ARB                    = $8570;
+  GL_COMBINE_RGB_ARB                = $8571;
+  GL_COMBINE_ALPHA_ARB              = $8572;
+  GL_SOURCE0_RGB_ARB                = $8580;
+  GL_SOURCE1_RGB_ARB                = $8581;
+  GL_SOURCE2_RGB_ARB                = $8582;
+  GL_SOURCE0_ALPHA_ARB              = $8588;
+  GL_SOURCE1_ALPHA_ARB              = $8589;
+  GL_SOURCE2_ALPHA_ARB              = $858A;
+  GL_OPERAND0_RGB_ARB               = $8590;
+  GL_OPERAND1_RGB_ARB               = $8591;
+  GL_OPERAND2_RGB_ARB               = $8592;
+  GL_OPERAND0_ALPHA_ARB             = $8598;
+  GL_OPERAND1_ALPHA_ARB             = $8599;
+  GL_OPERAND2_ALPHA_ARB             = $859A;
+  GL_RGB_SCALE_ARB                  = $8573;
+  GL_ADD_SIGNED_ARB                 = $8574;
+  GL_INTERPOLATE_ARB                = $8575;
+  GL_SUBTRACT_ARB                   = $84E7;
+  GL_CONSTANT_ARB                   = $8576;
+  GL_PRIMARY_COLOR_ARB              = $8577;
+  GL_PREVIOUS_ARB                   = $8578;
+
   // d3d8_Matrices
   GL_MODELVIEW_MATRIX               = $0BA6;
   GL_PROJECTION_MATRIX              = $0BA7;
@@ -134,6 +157,12 @@ const
   GL_STENCIL_TEST                   = $0B90;
   GL_ALPHA_TEST                     = $0BC0;
   GL_SCISSOR_TEST                   = $0C11;
+
+  // StencilOp
+  GL_KEEP                           = $1E00;
+  GL_REPLACE                        = $1E01;
+  GL_INCR                           = $1E02;
+  GL_DECR                           = $1E03;
 
 type
   GLenum     = Cardinal;      PGLenum     = ^GLenum;
@@ -945,10 +974,13 @@ begin
 end;
 
 procedure glTexEnvi;
+  var
+    _type : TD3DTextureStageStateType;
+    value : LongWord;
 begin
-  if ( target = GL_TEXTURE_ENV ) and
-     ( pname = GL_TEXTURE_ENV_MODE ) and
-     ( param = GL_MODULATE ) Then
+  if target <> GL_TEXTURE_ENV Then exit;
+
+  if ( pname = GL_TEXTURE_ENV_MODE ) and ( param = GL_MODULATE ) Then
     begin
       d3d8_Device.SetTextureStageState( 0, D3DTSS_COLOROP, D3DTOP_MODULATE );
       d3d8_Device.SetTextureStageState( 0, D3DTSS_COLORARG1, D3DTA_TEXTURE );
@@ -957,7 +989,30 @@ begin
       d3d8_Device.SetTextureStageState( 0, D3DTSS_ALPHAOP, D3DTOP_MODULATE );
       d3d8_Device.SetTextureStageState( 0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE );
       d3d8_Device.SetTextureStageState( 0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE );
+
+      exit;
     end;
+  if ( pname = GL_TEXTURE_ENV_MODE ) and ( param = GL_COMBINE_ARB ) Then exit;
+
+  case pname of
+    GL_COMBINE_RGB_ARB:   _type := D3DTSS_COLOROP;
+    GL_SOURCE0_RGB_ARB:   _type := D3DTSS_COLORARG0;
+    GL_SOURCE1_RGB_ARB:   _type := D3DTSS_COLORARG1;
+    GL_SOURCE2_RGB_ARB:   _type := D3DTSS_COLORARG2;
+    GL_COMBINE_ALPHA_ARB: _type := D3DTSS_ALPHAOP;
+    GL_SOURCE0_ALPHA_ARB: _type := D3DTSS_ALPHAARG0;
+    GL_SOURCE1_ALPHA_ARB: _type := D3DTSS_ALPHAARG1;
+    GL_SOURCE2_ALPHA_ARB: _type := D3DTSS_ALPHAARG2;
+  end;
+
+  case param of
+    GL_REPLACE:           value := 25; // Хммм...
+    GL_MODULATE:          value := D3DTOP_MODULATE;
+    GL_TEXTURE:           value := D3DTA_TEXTURE;
+    GL_PRIMARY_COLOR_ARB: value := D3DTA_DIFFUSE;
+  end;
+
+  d3d8_Device.SetTextureStageState( 0, _type, value );
 end;
 
 function gluBuild2DMipmaps;

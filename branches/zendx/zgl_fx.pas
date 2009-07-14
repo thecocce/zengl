@@ -38,11 +38,12 @@ const
   FX2D_FLIPX    = $000001;
   FX2D_FLIPY    = $000002;
   FX2D_COLORMIX = $000004;
-  FX2D_VCA      = $000008;
-  FX2D_VCHANGE  = $000010;
-  FX2D_SCALE    = $000020;
+  FX2D_COLORSET = $000008;
+  FX2D_VCA      = $000010;
+  FX2D_VCHANGE  = $000020;
+  FX2D_SCALE    = $000040;
 
-  FX_BLEND      = $000040;
+  FX_BLEND      = $100000;
 
 procedure fx_SetBlendMode( const Mode : Byte );
 
@@ -72,10 +73,17 @@ var
 
 implementation
 uses
-  zgl_direct3d8_all;
+  zgl_direct3d8_all,
+  zgl_render_2d;
 
 procedure fx_SetBlendMode;
 begin
+  if b2d_Started and ( Mode <> b2dcur_Blend ) Then
+    begin
+      batch2d_Flush;
+      b2d_New := TRUE;
+    end;
+  b2dcur_Blend := Mode;
   case Mode of
     FX_BLEND_NORMAL : glBlendFunc( GL_SRC_ALPHA,           GL_ONE_MINUS_SRC_ALPHA );
     FX_BLEND_ADD    : glBlendFunc( GL_SRC_ALPHA,           GL_ONE                 );
@@ -88,9 +96,15 @@ end;
 
 procedure fx2d_SetColorMix;
 begin
-  FX2D_R :=   Color and $FF;
+  if b2d_Started and ( Color <> b2dcur_Color ) Then
+    begin
+      batch2d_Flush;
+      b2d_New := TRUE;
+    end;
+  b2dcur_Color := Color;
+  FX2D_R :=   Color             shr 16;
   FX2D_G := ( Color and $FF00 ) shr 8;
-  FX2D_B :=   Color             shr 16;
+  FX2D_B :=   Color and $FF;
 end;
 
 procedure fx2d_SetVCA;

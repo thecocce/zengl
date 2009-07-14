@@ -42,6 +42,7 @@ uses
   zgl_screen,
   zgl_direct3d8,
   zgl_direct3d8_all,
+  zgl_render_2d,
   zgl_camera_2d;
 
 function sprite2d_InScreen( const X, Y, W, H, Angle : Single ) : Boolean;
@@ -153,55 +154,73 @@ begin
             Quad[ 3 ].Y := Y + H + FX2D_VY4;
           end;
 
-  if FX and FX2D_COLORMIX > 0 Then
+  if ( not b2d_Started ) or batch2d_Check( GL_QUADS, FX, Texture ) Then
+    begin
+      if FX and FX_BLEND > 0 Then
+        glEnable( GL_BLEND )
+      else
+        glEnable( GL_ALPHA_TEST );
+      glEnable( GL_TEXTURE_2D );
+      glBindTexture( GL_TEXTURE_2D, Texture.ID );
+
+      if FX and FX2D_COLORSET > 0 Then
+        begin
+          glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_ARB );
+          glTexEnvi( GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB,  GL_REPLACE );
+          glTexEnvi( GL_TEXTURE_ENV, GL_SOURCE0_RGB_ARB,  GL_PRIMARY_COLOR_ARB );
+        end else
+          begin
+            glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
+          end;
+
+      glBegin( GL_QUADS );
+    end;
+
+  if ( FX and FX2D_COLORMIX > 0 ) or ( FX and FX2D_COLORSET > 0 ) Then
     glColor4ub( FX2D_R, FX2D_G, FX2D_B, Alpha )
   else
     glColor4ub( 255, 255, 255, Alpha );
 
-  if FX and FX_BLEND > 0 Then
-    glEnable( GL_BLEND )
-  else
-    glEnable( GL_ALPHA_TEST );
-  glEnable( GL_TEXTURE_2D );
-  glBindTexture( GL_TEXTURE_2D, Texture.ID );
+  if FX and FX2D_VCA > 0 Then
+    begin
+      glColor4ub  ( FX2D_VR1, FX2D_VG1, FX2D_VB1, FX2D_VA1 );
+      glTexCoord2f( FU, Texture^.V - FV );
+      gl_Vertex2fv( @Quad[ 0 ] );
 
-   glBegin( GL_QUADS );
-    if FX and FX2D_VCA > 0 Then
+      glColor4ub  ( FX2D_VR2, FX2D_VG2, FX2D_VB2, FX2D_VA2 );
+      glTexCoord2f( Texture^.U - FU, Texture^.V - FV );
+      gl_Vertex2fv( @Quad[ 1 ] );
+
+      glColor4ub  ( FX2D_VR3, FX2D_VG3, FX2D_VB3, FX2D_VA3 );
+      glTexCoord2f( Texture^.U - FU, FV );
+      gl_Vertex2fv( @Quad[ 2 ] );
+
+      glColor4ub  ( FX2D_VR4, FX2D_VG4, FX2D_VB4, FX2D_VA4 );
+      glTexCoord2f( FU, FV );
+      gl_Vertex2fv( @Quad[ 3 ] );
+    end else
       begin
-        glColor4ub  ( FX2D_VR1, FX2D_VG1, FX2D_VB1, FX2D_VA1 );
         glTexCoord2f( FU, Texture^.V - FV );
         gl_Vertex2fv( @Quad[ 0 ] );
 
-        glColor4ub  ( FX2D_VR2, FX2D_VG2, FX2D_VB2, FX2D_VA2 );
         glTexCoord2f( Texture^.U - FU, Texture^.V - FV );
         gl_Vertex2fv( @Quad[ 1 ] );
 
-        glColor4ub  ( FX2D_VR3, FX2D_VG3, FX2D_VB3, FX2D_VA3 );
         glTexCoord2f( Texture^.U - FU, FV );
         gl_Vertex2fv( @Quad[ 2 ] );
 
-        glColor4ub  ( FX2D_VR4, FX2D_VG4, FX2D_VB4, FX2D_VA4 );
         glTexCoord2f( FU, FV );
         gl_Vertex2fv( @Quad[ 3 ] );
-      end else
-        begin
-          glTexCoord2f( FU, Texture^.V - FV );
-          gl_Vertex2fv( @Quad[ 0 ] );
+      end;
 
-          glTexCoord2f( Texture^.U - FU, Texture^.V - FV );
-          gl_Vertex2fv( @Quad[ 1 ] );
+  if not b2d_Started Then
+    begin
+      glEnd;
 
-          glTexCoord2f( Texture^.U - FU, FV );
-          gl_Vertex2fv( @Quad[ 2 ] );
-
-          glTexCoord2f( FU, FV );
-          gl_Vertex2fv( @Quad[ 3 ] );
-        end;
-  glEnd;
-
-  glDisable( GL_TEXTURE_2D );
-  glDisable( GL_BLEND );
-  glDisable( GL_ALPHA_TEST );
+      glDisable( GL_TEXTURE_2D );
+      glDisable( GL_BLEND );
+      glDisable( GL_ALPHA_TEST );
+    end;
 end;
 
 procedure asprite2d_Draw;
@@ -301,19 +320,31 @@ begin
             Quad[ 3 ].Y := Y + H + FX2D_VY4;
           end;
 
-  if FX and FX2D_COLORMIX > 0 Then
+  if ( not b2d_Started ) or batch2d_Check( GL_QUADS, FX, Texture ) Then
+    begin
+      if FX and FX_BLEND > 0 Then
+        glEnable( GL_BLEND )
+      else
+        glEnable( GL_ALPHA_TEST );
+      glEnable( GL_TEXTURE_2D );
+      glBindTexture( GL_TEXTURE_2D, Texture^.ID );
+
+      if FX and FX2D_COLORSET > 0 Then
+        begin
+          glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_ARB );
+          glTexEnvi( GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB,  GL_REPLACE );
+          glTexEnvi( GL_TEXTURE_ENV, GL_SOURCE0_RGB_ARB,  GL_PRIMARY_COLOR_ARB );
+        end else
+          glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
+
+      glBegin( GL_QUADS );
+    end;
+
+  if ( FX and FX2D_COLORMIX > 0 ) or ( FX and FX2D_COLORSET > 0 ) Then
     glColor4ub( FX2D_R, FX2D_G, FX2D_B, Alpha )
   else
     glColor4ub( 255, 255, 255, Alpha );
 
-  if FX and FX_BLEND > 0 Then
-    glEnable( GL_BLEND )
-  else
-    glEnable( GL_ALPHA_TEST );
-  glEnable( GL_TEXTURE_2D );
-  glBindTexture( GL_TEXTURE_2D, Texture^.ID );
-
-  glBegin( GL_QUADS );
   if FX and FX2D_VCA > 0 Then
     begin
       glColor4ub  ( FX2D_VR1, FX2D_VG1, FX2D_VB1, FX2D_VA1 );
@@ -345,11 +376,15 @@ begin
         glTexCoord2f( tX - SU + tU, tY - SV + tV );
         gl_Vertex2fv( @Quad[ 3 ] );
       end;
-  glEnd;
 
-  glDisable( GL_TEXTURE_2D );
-  glDisable( GL_BLEND );
-  glDisable( GL_ALPHA_TEST );
+  if not b2d_Started Then
+    begin
+      glEnd;
+
+      glDisable( GL_TEXTURE_2D );
+      glDisable( GL_BLEND );
+      glDisable( GL_ALPHA_TEST );
+    end;
 end;
 
 procedure csprite2d_Draw;
@@ -379,10 +414,10 @@ begin
   // бред, ога :)
   tU := 1 / ( Texture.Width  / Texture.U / Texture.U );
   tV := 1 / ( Texture.Height / Texture.V / Texture.V );
-  tX := tU * CutRect.X;
-  tY := tV * ( Texture.Height / Texture.V - CutRect.Y );
-  tW := tX + tU * CutRect.W;
-  tH := tY + tV * ( - CutRect.H );
+  tX := tU * ( CutRect.X / Texture.U );
+  tY := tV * ( Texture.Height / Texture.V - CutRect.Y / Texture.V );
+  tW := tX + tU * ( CutRect.W / Texture.U );
+  tH := tY + tV * ( - CutRect.H / Texture.V );
 
   if FX and FX2D_FLIPX > 0 Then tU := tW - tX else tU := 0;
   if FX and FX2D_FLIPY > 0 Then tV := tH - tY else tV := 0;
@@ -444,19 +479,31 @@ begin
             Quad[ 3 ].Y := Y + H + FX2D_VY4;
           end;
 
-  if FX and FX2D_COLORMIX > 0 Then
+  if ( not b2d_Started ) or batch2d_Check( GL_QUADS, FX, Texture ) Then
+    begin
+      if FX and FX_BLEND > 0 Then
+        glEnable( GL_BLEND )
+      else
+        glEnable( GL_ALPHA_TEST );
+      glEnable( GL_TEXTURE_2D );
+      glBindTexture( GL_TEXTURE_2D, Texture^.ID );
+
+      if FX and FX2D_COLORSET > 0 Then
+        begin
+          glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_ARB );
+          glTexEnvi( GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB,  GL_REPLACE );
+          glTexEnvi( GL_TEXTURE_ENV, GL_SOURCE0_RGB_ARB,  GL_PRIMARY_COLOR_ARB );
+        end else
+          glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
+
+      glBegin( GL_QUADS );
+    end;
+
+  if ( FX and FX2D_COLORMIX > 0 ) or ( FX and FX2D_COLORSET > 0 ) Then
     glColor4ub( FX2D_R, FX2D_G, FX2D_B, Alpha )
   else
     glColor4ub( 255, 255, 255, Alpha );
 
-  if FX and FX_BLEND > 0 Then
-    glEnable( GL_BLEND )
-  else
-    glEnable( GL_ALPHA_TEST );
-  glEnable( GL_TEXTURE_2D );
-  glBindTexture( GL_TEXTURE_2D, Texture^.ID );
-
-  glBegin( GL_QUADS );
   if FX and FX2D_VCA > 0 Then
     begin
       glColor4ub  ( FX2D_VR1, FX2D_VG1, FX2D_VB1, FX2D_VA1 );
@@ -488,11 +535,15 @@ begin
         glTexCoord2f( tX + tU, tH - tV );
         gl_Vertex2fv( @Quad[ 3 ] );
       end;
-  glEnd;
 
-  glDisable( GL_TEXTURE_2D );
-  glDisable( GL_BLEND );
-  glDisable( GL_ALPHA_TEST );
+  if not b2d_Started Then
+    begin
+      glEnd;
+
+      glDisable( GL_TEXTURE_2D );
+      glDisable( GL_BLEND );
+      glDisable( GL_ALPHA_TEST );
+    end;
 end;
 
 end.
