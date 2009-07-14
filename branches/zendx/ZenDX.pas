@@ -52,6 +52,7 @@ uses
 
   zgl_fx,
   zgl_camera_2d,
+  zgl_render_2d,
 
   zgl_font,
   zgl_text,
