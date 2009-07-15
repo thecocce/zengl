@@ -30,8 +30,7 @@ uses
   zgl_const,
   zgl_types,
   zgl_direct3d8,
-  zgl_direct3d8_all
-  ;
+  zgl_direct3d8_all;
 
 procedure zero;
 procedure zerou( dt : Double );

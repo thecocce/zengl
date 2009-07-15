@@ -27,8 +27,7 @@ interface
 uses
   Windows,
   zgl_types,
-  zgl_log
-  ;
+  zgl_log;
 
 function u_IntToStr( const Value : Integer ) : String;
 function u_StrToInt( const Value : String ) : Integer;
