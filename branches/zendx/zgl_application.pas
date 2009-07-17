@@ -109,7 +109,7 @@ end;
 procedure app_MainLoop;
   var
     i, z : Integer;
-    j, t, dt, odt : Double;
+    j, dt, odt : Double;
     currTimer : zglPTimer;
     SysInfo : _SYSTEM_INFO;
 begin
@@ -122,7 +122,6 @@ begin
   app_PLoad;
   scr_Flush;
 
-  t   := timer_GetTicks;
   odt := timer_GetTicks;
   timer_Reset;
   timer_Add( @app_CalcFPS, 1000 );
@@ -148,9 +147,9 @@ begin
                   begin
                     if j > currTimer^.LastTick + currTimer^.Interval Then
                       begin
-                        currTimer^.LastTick := currTimer^.LastTick + currTimer^.Interval;
                         currTimer^.OnTimer;
                         j := timer_GetTicks;
+                        currTimer^.LastTick := j;
                       end;
                   end else currTimer^.LastTick := timer_GetTicks;
 
@@ -174,19 +173,9 @@ begin
       TimersToKill  := 0;
 
       if app_Pause Then continue;
-      dt := timer_GetTicks - t;
-      if dt >= 1 Then
-        begin
-          if dt < 2 Then
-            begin
-              t := t + 1;
-
-              app_PUpdate( timer_GetTicks - odt );
-              odt := timer_GetTicks;
-              app_Draw;
-            end else
-              t := t + dt;
-        end;
+      app_PUpdate( timer_GetTicks - odt );
+      odt := timer_GetTicks;
+      app_Draw;
     end;
 end;
 
