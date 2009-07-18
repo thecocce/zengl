@@ -49,6 +49,7 @@ bool wnd_Create( int Width, int Height )
     wnd_Y = ( desktop_Height - wnd_Height ) / 2;
   }
 
+  memset( &wnd_Attr, 0, sizeof( wnd_Attr ) );
   wnd_Attr.colormap   = XCreateColormap( scr_Display, wnd_Root, ogl_VisualInfo->visual, AllocNone );
   wnd_Attr.event_mask = ExposureMask |
                         FocusChangeMask |
@@ -62,11 +63,8 @@ bool wnd_Create( int Width, int Height )
     wnd_X = 0;
     wnd_Y = 0;
     wnd_Attr.override_redirect = 1;
-    wnd_ValueMask = CWColormap | CWEventMask | CWOverrideRedirect | CWX | CWY | CWCursor;
-  } else {
-      wnd_Attr.override_redirect = 0;
-      wnd_ValueMask = CWColormap | CWEventMask | CWX | CWY | CWCursor | CWBorderPixel;
-    }
+  } else wnd_Attr.override_redirect = 0;
+  wnd_ValueMask = CWColormap | CWEventMask | CWOverrideRedirect | CWBorderPixel | CWBackPixel;
 
   wnd_Handle = XCreateWindow( scr_Display,
                               wnd_Root,

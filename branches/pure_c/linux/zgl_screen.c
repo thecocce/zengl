@@ -111,13 +111,13 @@ bool scr_Create(void)
     i = 0;
     ogl_Attr[ i++ ] = GLX_RGBA;
     ogl_Attr[ i++ ] = GLX_RED_SIZE;
-    ogl_Attr[ i++ ] = 1;
+    ogl_Attr[ i++ ] = 8;
     ogl_Attr[ i++ ] = GLX_GREEN_SIZE;
-    ogl_Attr[ i++ ] = 1;
+    ogl_Attr[ i++ ] = 8;
     ogl_Attr[ i++ ] = GLX_BLUE_SIZE;
-    ogl_Attr[ i++ ] = 1;
+    ogl_Attr[ i++ ] = 8;
     ogl_Attr[ i++ ] = GLX_ALPHA_SIZE;
-    ogl_Attr[ i++ ] = 1;
+    ogl_Attr[ i++ ] = 8;
     ogl_Attr[ i++ ] = GLX_DOUBLEBUFFER;
     ogl_Attr[ i++ ] = GLX_DEPTH_SIZE;
     ogl_Attr[ i++ ] = ogl_zDepth;

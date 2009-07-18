@@ -12,7 +12,6 @@ int  h = 768;
 
 void Init()
 {
-  wnd_SetCaption( "ZenGL GCC" );
 }
 
 void Draw()
