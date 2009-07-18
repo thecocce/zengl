@@ -42,7 +42,7 @@ const
   K_BACKSPACE  = $0E;
   K_SPACE      = $39;
   K_TAB        = $0F;
-  K_TILDA      = $29;
+  K_TILDE      = $29;
 
   K_INSERT     = $D2;
   K_DELETE     = $D3;
@@ -248,7 +248,7 @@ begin
   Result := 0;
 
   case ScanCode of
-    K_TILDA:  Result := 96;
+    K_TILDE:  Result := 96;
     K_MINUS,
     K_KP_SUB: Result := 45;
     K_EQUALS: Result := 61;
