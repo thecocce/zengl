@@ -58,7 +58,7 @@ var
   app_PExit   : procedure = zero;
   app_PUpdate : procedure( dt : Double ) = zerou;
 
-  app_ShowCursor : Boolean = TRUE;
+  app_ShowCursor : Boolean;
 
   app_FPS      : DWORD;
   app_FPSCount : DWORD;
