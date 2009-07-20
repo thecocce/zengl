@@ -72,7 +72,8 @@ uses
   zgl_const,
   zgl_main,
   zgl_application,
-  zgl_screen;
+  zgl_screen,
+  zgl_render_2d;
 
 var
   lRTarget : zglPRenderTarget;
@@ -150,6 +151,8 @@ procedure rtarget_Set;
   var
     src, dst : IDirect3DSurface8;
 begin
+  batch2d_Flush;
+
   if Assigned( Target ) Then
     begin
       if not d3d8_CanDraw Then
