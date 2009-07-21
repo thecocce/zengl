@@ -25,8 +25,7 @@ unit zgl_sound_dsound;
 
 interface
 uses
-  Windows,
-  math;
+  Windows;
 
 const
   DS_OK                       = $00000000;
