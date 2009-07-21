@@ -77,7 +77,7 @@ unit DirectXGraphics;
 interface
 
 uses
-  Windows,sysutils;
+  Windows;
 
 {$IFNDEF STATIC_LINKING}
 var

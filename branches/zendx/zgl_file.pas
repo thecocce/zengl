@@ -45,9 +45,9 @@ const
   FSM_CUR    = $02;
   FSM_END    = $03;
 
-procedure file_Open( var FileHandle : zglTFile; const FileName : String; const Mode : Byte );
-function  file_MakeDir( const Directory : String ) : Boolean;
-function  file_Exists( const FileName : String ) : Boolean;
+procedure file_Open( var FileHandle : zglTFile; const FileName : AnsiString; const Mode : Byte );
+function  file_MakeDir( const Directory : AnsiString ) : Boolean;
+function  file_Exists( const FileName : AnsiString ) : Boolean;
 function  file_Seek( const FileHandle : zglTFile; const Offset, Mode : DWORD ) : DWORD;
 function  file_GetPos( const FileHandle : zglTFile ) : DWORD;
 function  file_Read( const FileHandle : zglTFile; var buffer; const count : DWORD ) : DWORD;
@@ -56,28 +56,28 @@ procedure file_Trunc( const FileHandle : zglTFile; const count : DWORD );
 function  file_GetSize( const FileHandle : zglTFile ) : DWORD;
 procedure file_Flush( const FileHandle : zglTFile );
 procedure file_Close( const FileHandle : zglTFile );
-procedure file_Find( const Directory : String; var List : zglTFileList; const FindDir : Boolean );
-procedure file_GetName( const FileName : String; var Result : String );
-procedure file_GetExtension( const FileName : String; var Result : String );
-procedure file_SetPath( const Path : String );
+procedure file_Find( const Directory : AnsiString; var List : zglTFileList; const FindDir : Boolean );
+procedure file_GetName( const FileName : AnsiString; var Result : AnsiString );
+procedure file_GetExtension( const FileName : AnsiString; var Result : AnsiString );
+procedure file_SetPath( const Path : AnsiString );
 
 var
-  filePath : String;
+  filePath : AnsiString;
 
 implementation
 
 procedure file_Open;
 begin
   case Mode of
-    FOM_CREATE: FileHandle := CreateFile( PChar( filePath + FileName ), GENERIC_ALL, 0, nil, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0 );
-    FOM_OPENR:  FileHandle := CreateFile( PChar( filePath + FileName ), GENERIC_READ, FILE_SHARE_READ, nil, OPEN_EXISTING, 0, 0 );
-    FOM_OPENRW: FileHandle := CreateFile( PChar( filePath + FileName ), GENERIC_READ or GENERIC_WRITE, FILE_SHARE_READ or FILE_SHARE_WRITE, nil, OPEN_EXISTING, 0, 0 );
+    FOM_CREATE: FileHandle := CreateFileA( PAnsiChar( filePath + FileName ), GENERIC_ALL, 0, nil, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0 );
+    FOM_OPENR:  FileHandle := CreateFileA( PAnsiChar( filePath + FileName ), GENERIC_READ, FILE_SHARE_READ, nil, OPEN_EXISTING, 0, 0 );
+    FOM_OPENRW: FileHandle := CreateFileA( PAnsiChar( filePath + FileName ), GENERIC_READ or GENERIC_WRITE, FILE_SHARE_READ or FILE_SHARE_WRITE, nil, OPEN_EXISTING, 0, 0 );
   end;
 end;
 
 function file_MakeDir;
 begin
-  Result := CreateDirectory( PChar( Directory ), nil );
+  Result := CreateDirectoryA( PAnsiChar( Directory ), nil );
 end;
 
 function file_Exists;
@@ -136,9 +136,9 @@ end;
 procedure file_Find;
   var
     First : THandle;
-    FList : WIN32_FIND_DATA;
+    FList : {$IFDEF FPC} WIN32FINDDATAA {$ELSE} WIN32_FIND_DATAA {$ENDIF};
 begin
-  First := FindFirstFile( PChar( Directory ), FList );
+  First := FindFirstFileA( PAnsiChar( Directory ), FList );
   repeat
     if FindDir Then
       begin
@@ -148,10 +148,10 @@ begin
     SetLength( List.Items, List.Count + 1 );
     List.Items[ List.Count ] := FList.cFileName;
     INC( List.Count );
-  until not FindNextFile( First, FList );
+  until not FindNextFileA( First, FList );
 end;
 
-procedure GetStr( const Str : String; var Result : String; const d : Char );
+procedure GetStr( const Str : AnsiString; var Result : AnsiString; const d : AnsiChar );
   var
     i, pos, l : Integer;
 begin
@@ -168,7 +168,7 @@ end;
 
 procedure file_GetName;
   var
-    tmp : String;
+    tmp : AnsiString;
 begin
   GetStr( FileName, Result, '/' );
   if Result = '' Then
@@ -178,8 +178,6 @@ begin
 end;
 
 procedure file_GetExtension;
-  var
-    i, pos : Integer;
 begin
   GetStr( FileName, Result, '.' );
 end;

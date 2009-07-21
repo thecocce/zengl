@@ -1,4 +1,4 @@
-﻿{
+{
  * Copyright © Kemka Andrey aka Andru
  * mail: dr.andru@gmail.com
  * site: http://andru-kun.inf.ua
@@ -334,7 +334,7 @@ end;
 procedure glEnd;
   label _end;
   var
-    i, Count : Integer;
+    Count : Integer;
 begin
   if RenderQuad Then
     begin
@@ -461,8 +461,6 @@ begin
 end;
 
 procedure glScissor;
-  var
-    t : Integer;
 begin
   ScissorX := x;
   ScissorY := -( y + height - wnd_Height );

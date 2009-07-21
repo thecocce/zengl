@@ -1,4 +1,4 @@
-﻿{
+{
  * Copyright © Kemka Andrey aka Andru
  * mail: dr.andru@gmail.com
  * site: http://andru-kun.inf.ua
@@ -95,22 +95,22 @@ uses
 
 procedure zgl_GetSysDir;
 var
-  FL, FP : PChar;
-  S      : String;
-  t      : array[ 0..MAX_PATH - 1 ] of Char;
+  FL, FP : PAnsiChar;
+  S      : AnsiString;
+  t      : array[ 0..MAX_PATH - 1 ] of AnsiChar;
 begin
   app_GetSysDirs := TRUE;
   wnd_INST := GetModuleHandle( nil );
   GetMem( FL, 65535 );
   GetMem( FP, 65535 );
-  GetModuleFileName( wnd_INST, FL, 65535 );
-  GetFullPathName( FL, 65535, FP, FL );
-  S := copy( String( FP ), 1, length( FP ) - length( FL ) );
-  app_WorkDir := PChar( S );
+  GetModuleFileNameA( wnd_INST, FL, 65535 );
+  GetFullPathNameA( FL, 65535, FP, FL );
+  S := copy( AnsiString( FP ), 1, length( FP ) - length( FL ) );
+  app_WorkDir := PAnsiChar( S );
   FL := nil;
   FP := nil;
 
-  GetEnvironmentVariable( 'APPDATA', t, MAX_PATH );
+  GetEnvironmentVariableA( 'APPDATA', t, MAX_PATH );
   app_UsrHomeDir := t;
   app_UsrHomeDir := app_UsrHomeDir + '\';
 end;
@@ -255,7 +255,7 @@ begin
     TEX_FORMAT_EXTENSION:
       begin
         SetLength( managerTexture.Formats, managerTexture.Count.Formats + 1 );
-        managerTexture.Formats[ managerTexture.Count.Formats ].Extension := u_StrUp( String( PChar( UserData ) ) );
+        managerTexture.Formats[ managerTexture.Count.Formats ].Extension := u_StrUp( AnsiString( PAnsiChar( UserData ) ) );
       end;
     TEX_FORMAT_FILE_LOADER:
       begin
@@ -270,7 +270,7 @@ begin
     SND_FORMAT_EXTENSION:
       begin
         SetLength( managerSound.Formats, managerSound.Count.Formats + 1 );
-        managerSound.Formats[ managerSound.Count.Formats ].Extension := u_StrUp( String( PChar( UserData ) ) );
+        managerSound.Formats[ managerSound.Count.Formats ].Extension := u_StrUp( AnsiString( PAnsiChar( UserData ) ) );
         managerSound.Formats[ managerSound.Count.Formats ].Stream    := nil;
       end;
     SND_FORMAT_FILE_LOADER:
@@ -326,8 +326,8 @@ begin
   case What of
     SYS_FPS: Result := app_FPS;
     APP_PAUSED: Result := Byte( app_Pause );
-    APP_DIRECTORY: Result := Ptr( PChar( app_WorkDir ) );
-    USR_HOMEDIR: Result := Ptr( PChar( app_UsrHomeDir ) );
+    APP_DIRECTORY: Result := Ptr( PAnsiChar( app_WorkDir ) );
+    USR_HOMEDIR: Result := Ptr( PAnsiChar( app_UsrHomeDir ) );
     LOG_FILENAME: Result := Ptr( @logfile );
     //ZGL_VERSION: Result := cv_version;
     SCR_ADD_X: Result := scr_AddCX;

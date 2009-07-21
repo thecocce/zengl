@@ -289,13 +289,13 @@ type
   end;
 
 procedure ogg_Init;
-function  ogg_CodecOpen( const FileName : String; var Stream : zglPSoundStream ) : Boolean;
+function  ogg_CodecOpen( const FileName : AnsiString; var Stream : zglPSoundStream ) : Boolean;
 function  ogg_CodecRead( const Buffer : Pointer; const Count : DWORD; var _End : Boolean ) : DWORD;
 procedure ogg_CodecLoop;
 procedure ogg_CodecClose( var Stream : zglPSoundStream );
 
 procedure ogg_Load( var Data : Pointer; var Size, Format, Frequency : DWORD );
-procedure ogg_LoadFromFile( const FileName : String; var Data : Pointer; var Size, Format, Frequency : DWORD );
+procedure ogg_LoadFromFile( const FileName : AnsiString; var Data : Pointer; var Size, Format, Frequency : DWORD );
 procedure ogg_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var Size, Format, Frequency : DWORD );
 
 function ogg_Read( ptr : pointer; size, nmemb : csize_t; datasource : pointer) : csize_t; cdecl;
@@ -384,9 +384,9 @@ begin
      ( vorbis_Library     = LIB_ERROR ) and
      ( vorbisfile_Library = LIB_ERROR ) Then
     begin
-      ogg_Library        := dlopen( PChar( libogg + '.0' ), $001 );
-      vorbis_Library     := dlopen( PChar( libvorbis + '.0' ), $001 );
-      vorbisfile_Library := dlopen( PChar( libvorbisfile + '.3' ), $001 );
+      ogg_Library        := dlopen( PAnsiChar( libogg + '.0' ), $001 );
+      vorbis_Library     := dlopen( PAnsiChar( libvorbis + '.0' ), $001 );
+      vorbisfile_Library := dlopen( PAnsiChar( libvorbisfile + '.3' ), $001 );
     end;
   {$ENDIF}
   {$IFDEF DARWIN}
@@ -394,9 +394,9 @@ begin
      ( vorbis_Library     = LIB_ERROR ) and
      ( vorbisfile_Library = LIB_ERROR ) Then
     begin
-      ogg_Library        := dlopen( PChar( app_WorkDir + 'Contents/MacOS/' + libogg ), $001 );
-      vorbis_Library     := dlopen( PChar( app_WorkDir + 'Contents/MacOS/' + libvorbis ), $001 );
-      vorbisfile_Library := dlopen( PChar( app_WorkDir + 'Contents/MacOS/' + libvorbisfile ), $001 );
+      ogg_Library        := dlopen( PAnsiChar( app_WorkDir + 'Contents/MacOS/' + libogg ), $001 );
+      vorbis_Library     := dlopen( PAnsiChar( app_WorkDir + 'Contents/MacOS/' + libvorbis ), $001 );
+      vorbisfile_Library := dlopen( PAnsiChar( app_WorkDir + 'Contents/MacOS/' + libvorbisfile ), $001 );
     end;
   {$ENDIF}
 
@@ -581,7 +581,7 @@ initialization
   oggStream.CodecRead  := ogg_CodecRead;
   oggStream.CodecLoop  := ogg_CodecLoop;
   oggStream.CodecClose := ogg_CodecClose;
-  zgl_Reg( SND_FORMAT_EXTENSION, PChar( 'OGG' ) );
+  zgl_Reg( SND_FORMAT_EXTENSION, PAnsiChar( 'OGG' ) );
   zgl_Reg( SND_FORMAT_FILE_LOADER, @ogg_LoadFromFile );
   zgl_Reg( SND_FORMAT_MEM_LOADER,  @ogg_LoadFromMemory );
   zgl_Reg( SND_FORMAT_STREAM, @oggStream );
