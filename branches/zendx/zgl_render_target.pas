@@ -151,12 +151,11 @@ procedure rtarget_Set;
   var
     src, dst : IDirect3DSurface8;
 begin
-  batch2d_Flush;
-
   if Assigned( Target ) Then
     begin
       if not d3d8_CanDraw Then
         d3d8_Device.BeginScene;
+      batch2d_Flush;
       lRTarget := Target;
       lMode := ogl_Mode;
       ogl_Mode := 1;
@@ -224,6 +223,7 @@ begin
             end;
         end;
 
+        batch2d_Flush;
         ogl_Mode := lMode;
         SetCurrentMode;
         scr_SetViewPort;
