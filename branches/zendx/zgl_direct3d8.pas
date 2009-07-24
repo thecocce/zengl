@@ -152,9 +152,6 @@ begin
       exit;
     end;
 
-  while d3d8.CheckDeviceMultiSampleType( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, d3d8_Format, not wnd_FullScreen, TD3DMultiSampleType( ogl_FSAA ) ) <> D3D_OK do
-    DEC( ogl_FSAA );
-
   FillChar( d3d8_ParamsW, SizeOf( TD3DPresentParameters ), 0 );
   with d3d8_ParamsW do
     begin
@@ -255,9 +252,6 @@ begin
 
   Result := FALSE;
   if not Assigned( d3d8_Device ) Then exit;
-
-  while d3d8.CheckDeviceMultiSampleType( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, d3d8_Format, not wnd_FullScreen, TD3DMultiSampleType( ogl_FSAA ) ) <> D3D_OK do
-    DEC( ogl_FSAA );
 
   d3d8_ParamsW.BackBufferWidth  := wnd_Width;
   d3d8_ParamsW.BackBufferHeight := wnd_Height;

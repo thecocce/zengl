@@ -84,6 +84,7 @@ var
 function rtarget_Add;
   var
     fmt : TD3DFormat;
+    src, dst : IDirect3DSurface8;
 begin
   Result := @managerRTarget.First;
   while Assigned( Result.Next ) do
@@ -126,8 +127,9 @@ begin
   Result := Result.Next;
   INC( managerRTarget.Count );
 
-  rtarget_Set( Result );
-  rtarget_Set( nil );
+  d3d8_texArray[ Result.Surface.ID ].Texture.GetSurfaceLevel( 0, src );
+  d3d8_texArray[ Result.Handle.ID ].Texture.GetSurfaceLevel( 0, dst );
+  d3d8_Device.CopyRects( src, nil, 0, dst, nil );
 end;
 
 procedure rtarget_Del;
