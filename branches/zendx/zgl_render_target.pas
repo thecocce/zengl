@@ -64,6 +64,7 @@ procedure rtarget_Set( const Target : zglPRenderTarget );
 
 var
   managerRTarget : zglTRenderTargetManager;
+  lRTarget : zglPRenderTarget;
   rt_ScaleW : Single;
   rt_ScaleH : Single;
 
@@ -76,7 +77,6 @@ uses
   zgl_render_2d;
 
 var
-  lRTarget : zglPRenderTarget;
   lMode : Integer;
   lSurface : IDirect3DSurface8;
   lTexture : zglPTexture;
@@ -225,6 +225,8 @@ begin
 
         batch2d_Flush;
         ogl_Mode := lMode;
+        lRTarget := nil;
+        lTexture := nil;
         SetCurrentMode;
         scr_SetViewPort;
         if not d3d8_CanDraw Then

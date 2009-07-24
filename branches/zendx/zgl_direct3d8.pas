@@ -83,7 +83,6 @@ var
   ogl_CropW  : Integer;
   ogl_CropH  : Integer;
 
-  ogl_CanVSync      : Boolean;
   ogl_CanCompress   : Boolean;
   ogl_MaxTexSize    : Integer;
   ogl_MaxAnisotropy : Integer;
@@ -120,6 +119,7 @@ begin
     end else log_Add( 'Direct3DCreate8' );
 
   d3d8.GetAdapterIdentifier( D3DADAPTER_DEFAULT, D3DENUM_NO_WHQL_LEVEL, d3d8_Adapter );
+  log_Add( 'D3D8_RENDERER: ' + d3d8_Adapter.Description );
 
   d3d8.GetDeviceCaps( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, d3d8_Caps );
   ogl_MaxTexSize    := d3d8_Caps.MaxTextureWidth;
@@ -132,24 +132,6 @@ begin
     begin
       u_Warning( 'GetAdapterDisplayMode = D3DFMT_UNKNOWN' );
       if not wnd_FullScreen Then exit;
-    end;
-
-  FillChar( d3d8_ParamsW, SizeOf( TD3DPresentParameters ), 0 );
-  with d3d8_ParamsW do
-    begin
-      BackBufferWidth  := wnd_Width;
-      BackBufferHeight := wnd_Height;
-      BackBufferFormat := d3d8_Mode.Format;
-      BackBufferCount  := 1;
-      MultiSampleType  := D3DMULTISAMPLE_NONE;
-      hDeviceWindow    := wnd_Handle;
-      Windowed         := TRUE;
-      if scr_VSync Then
-        SwapEffect := D3DSWAPEFFECT_COPY_VSYNC
-      else
-        SwapEffect := D3DSWAPEFFECT_COPY;
-      EnableAutoDepthStencil := TRUE;
-      AutoDepthStencilFormat := D3DFMT_D16;
     end;
 
   // FullScreen
@@ -170,6 +152,27 @@ begin
       exit;
     end;
 
+  while d3d8.CheckDeviceMultiSampleType( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, d3d8_Format, not wnd_FullScreen, TD3DMultiSampleType( ogl_FSAA ) ) <> D3D_OK do
+    DEC( ogl_FSAA );
+
+  FillChar( d3d8_ParamsW, SizeOf( TD3DPresentParameters ), 0 );
+  with d3d8_ParamsW do
+    begin
+      BackBufferWidth  := wnd_Width;
+      BackBufferHeight := wnd_Height;
+      BackBufferFormat := d3d8_Mode.Format;
+      BackBufferCount  := 1;
+      MultiSampleType  := TD3DMultiSampleType( ogl_FSAA );
+      hDeviceWindow    := wnd_Handle;
+      Windowed         := TRUE;
+      if scr_VSync Then
+        SwapEffect := D3DSWAPEFFECT_COPY_VSYNC
+      else
+        SwapEffect := D3DSWAPEFFECT_COPY;
+      EnableAutoDepthStencil := TRUE;
+      AutoDepthStencilFormat := D3DFMT_D16;
+    end;
+
   FillChar( d3d8_ParamsF, SizeOf( TD3DPresentParameters ), 0 );
   with d3d8_ParamsF do
     begin
@@ -177,7 +180,7 @@ begin
       BackBufferHeight := scr_Height;
       BackBufferFormat := d3d8_Format;
       BackBufferCount  := 1;
-      MultiSampleType  := D3DMULTISAMPLE_NONE;
+      MultiSampleType  := TD3DMultiSampleType( ogl_FSAA );
       hDeviceWindow    := wnd_Handle;
       Windowed         := FALSE;
       SwapEffect       := D3DSWAPEFFECT_FLIP;
@@ -253,10 +256,15 @@ begin
   Result := FALSE;
   if not Assigned( d3d8_Device ) Then exit;
 
+  while d3d8.CheckDeviceMultiSampleType( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, d3d8_Format, not wnd_FullScreen, TD3DMultiSampleType( ogl_FSAA ) ) <> D3D_OK do
+    DEC( ogl_FSAA );
+
   d3d8_ParamsW.BackBufferWidth  := wnd_Width;
   d3d8_ParamsW.BackBufferHeight := wnd_Height;
   d3d8_ParamsF.BackBufferWidth  := scr_Width;
   d3d8_ParamsF.BackBufferHeight := scr_Height;
+  d3d8_ParamsW.MultiSampleType  := TD3DMultiSampleType( ogl_FSAA );
+  d3d8_ParamsF.MultiSampleType  := TD3DMultiSampleType( ogl_FSAA );
   if scr_VSync Then
     begin
       d3d8_ParamsW.SwapEffect := D3DSWAPEFFECT_COPY_VSYNC;

@@ -265,17 +265,20 @@ end;
 procedure scr_SetVSync;
 begin
   scr_VSync := VSync;
+  wnd_Update;
 end;
 
 procedure scr_SetFSAA;
 begin
-{  if ogl_FSAA = FSAA Then exit;
+  if ogl_FSAA = FSAA Then exit;
   ogl_FSAA := FSAA;
 
   if ogl_FSAA <> 0 Then
     log_Add( 'Set FSAA: ' + u_IntToStr( ogl_FSAA ) + 'x' )
   else
-    log_Add( 'Set FSAA: off' );}
+    log_Add( 'Set FSAA: off' );
+
+  wnd_Update;
 end;
 
 initialization

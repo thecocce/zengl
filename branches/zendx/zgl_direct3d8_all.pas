@@ -273,6 +273,7 @@ uses
   zgl_application,
   zgl_screen,
   zgl_window,
+  zgl_render_target,
   zgl_textures,
   zgl_log,
   zgl_math_2d,
@@ -775,14 +776,21 @@ begin
       exit;
     end;
 
-  if d3d8_texArray[ texture ].MagFilter > 0 Then
-    d3d8_Device.SetTextureStageState( 0, D3DTSS_MAGFILTER, d3d8_texArray[ texture ].MagFilter );
-  if d3d8_texArray[ texture ].MinFilter > 0 Then
-    d3d8_Device.SetTextureStageState( 0, D3DTSS_MINFILTER, d3d8_texArray[ texture ].MinFilter );
-  if d3d8_texArray[ texture ].MipFilter > 0 Then
-    d3d8_Device.SetTextureStageState( 0, D3DTSS_MIPFILTER, d3d8_texArray[ texture ].MipFilter );
-  if ogl_Anisotropy > 0 Then
-    d3d8_Device.SetTextureStageState( 0, D3DTSS_MAXANISOTROPY, ogl_Anisotropy );
+  if Assigned( lRTarget ) and ( texture = lRTarget.Surface.ID ) Then
+    begin
+      d3d8_Device.SetTextureStageState( 0, D3DTSS_MAGFILTER, D3DTEXF_POINT );
+      d3d8_Device.SetTextureStageState( 0, D3DTSS_MINFILTER, D3DTEXF_POINT );
+    end else
+      begin
+        if d3d8_texArray[ texture ].MagFilter > 0 Then
+          d3d8_Device.SetTextureStageState( 0, D3DTSS_MAGFILTER, d3d8_texArray[ texture ].MagFilter );
+        if d3d8_texArray[ texture ].MinFilter > 0 Then
+          d3d8_Device.SetTextureStageState( 0, D3DTSS_MINFILTER, d3d8_texArray[ texture ].MinFilter );
+        if d3d8_texArray[ texture ].MipFilter > 0 Then
+          d3d8_Device.SetTextureStageState( 0, D3DTSS_MIPFILTER, d3d8_texArray[ texture ].MipFilter );
+        if ogl_Anisotropy > 0 Then
+          d3d8_Device.SetTextureStageState( 0, D3DTSS_MAXANISOTROPY, ogl_Anisotropy );
+      end;
   case  d3d8_texArray[ texture ].Wrap of
     GL_CLAMP_TO_EDGE:
       begin
