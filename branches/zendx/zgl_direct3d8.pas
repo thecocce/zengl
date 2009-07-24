@@ -33,6 +33,7 @@ procedure d3d8_Destroy;
 function  d3d8_Restore : Boolean;
 procedure d3d8_ResetState;
 function  d3d8_GetFormatID( Format : DWORD ) : DWORD;
+function  d3d8_CheckFSAA : TD3DMultiSampleType;
 
 function  d3d8_BeginScene : Boolean;
 procedure d3d8_EndScene;
@@ -159,7 +160,7 @@ begin
       BackBufferHeight := wnd_Height;
       BackBufferFormat := d3d8_Mode.Format;
       BackBufferCount  := 1;
-      MultiSampleType  := TD3DMultiSampleType( ogl_FSAA );
+      MultiSampleType  := D3DMULTISAMPLE_NONE;
       hDeviceWindow    := wnd_Handle;
       Windowed         := TRUE;
       if scr_VSync Then
@@ -177,10 +178,10 @@ begin
       BackBufferHeight := scr_Height;
       BackBufferFormat := d3d8_Format;
       BackBufferCount  := 1;
-      MultiSampleType  := TD3DMultiSampleType( ogl_FSAA );
+      MultiSampleType  := d3d8_CheckFSAA;
       hDeviceWindow    := wnd_Handle;
       Windowed         := FALSE;
-      SwapEffect       := D3DSWAPEFFECT_FLIP;
+      SwapEffect       := D3DSWAPEFFECT_DISCARD;
       FullScreen_RefreshRateInHz := D3DPRESENT_RATE_DEFAULT;
       if scr_VSync Then
         FullScreen_PresentationInterval := D3DPRESENT_INTERVAL_ONE
@@ -243,6 +244,9 @@ function d3d8_Restore;
     r : zglPRenderTarget;
     fmt : TD3DFormat;
 begin
+  Result := FALSE;
+  if not Assigned( d3d8_Device ) Then exit;
+
   r := managerRTarget.First.Next;
   while Assigned( r ) do
     begin
@@ -250,15 +254,12 @@ begin
       r := r.Next;
     end;
 
-  Result := FALSE;
-  if not Assigned( d3d8_Device ) Then exit;
-
   d3d8_ParamsW.BackBufferWidth  := wnd_Width;
   d3d8_ParamsW.BackBufferHeight := wnd_Height;
   d3d8_ParamsF.BackBufferWidth  := scr_Width;
   d3d8_ParamsF.BackBufferHeight := scr_Height;
-  d3d8_ParamsW.MultiSampleType  := TD3DMultiSampleType( ogl_FSAA );
-  d3d8_ParamsF.MultiSampleType  := TD3DMultiSampleType( ogl_FSAA );
+  d3d8_ParamsW.MultiSampleType  := D3DMULTISAMPLE_NONE;
+  d3d8_ParamsF.MultiSampleType  := d3d8_CheckFSAA;
   if scr_VSync Then
     begin
       d3d8_ParamsW.SwapEffect := D3DSWAPEFFECT_COPY_VSYNC;
@@ -328,6 +329,25 @@ begin
   else
     Result := 0;
   end;
+end;
+
+function d3d8_CheckFSAA;
+  var
+    fsaa : Integer;
+begin
+  fsaa := ogl_FSAA;
+  if wnd_FullScreen Then
+    begin
+      while d3d8.CheckDeviceMultiSampleType( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, d3d8_Format, FALSE, TD3DMultiSampleType( fsaa ) ) <> D3D_OK do
+        if fsaa > 0 Then
+ 	        DEC( fsaa );
+    end else
+      begin
+        while d3d8.CheckDeviceMultiSampleType( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, d3d8_Mode.Format, TRUE, TD3DMultiSampleType( fsaa ) ) <> D3D_OK do
+          if fsaa > 0 Then
+ 	          DEC( fsaa );
+      end;
+  Result := TD3DMultiSampleType( fsaa );
 end;
 
 function d3d8_BeginScene;
