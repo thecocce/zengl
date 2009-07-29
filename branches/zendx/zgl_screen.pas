@@ -265,7 +265,8 @@ end;
 procedure scr_SetVSync;
 begin
   scr_VSync := VSync;
-  wnd_Update;
+  if wnd_Handle <> 0 Then
+    wnd_Update;
 end;
 
 procedure scr_SetFSAA;
@@ -278,7 +279,8 @@ begin
   else
     log_Add( 'Set FSAA: off' );
 
-  wnd_Update;
+  if wnd_Handle <> 0 Then
+    wnd_Update;
 end;
 
 initialization

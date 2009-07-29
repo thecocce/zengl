@@ -44,6 +44,8 @@ function  u_Length( const str : AnsiString ) : Integer;
 // Возвращает количество слов, разделеных разделителем d
 function  u_Words( const str : AnsiString; const d : AnsiChar = ' ' ) : Integer;
 function  u_GetWord( const Str : AnsiString; const n : Integer; const d : AnsiChar = ' ' ) : AnsiString;
+// Возвращает строку обрезанную до первого встречного символа d с конца
+procedure u_GetStr( const Str : AnsiString; var Result : AnsiString; const d : AnsiChar );
 procedure u_SortList( var List : zglTStringList; iLo, iHi: Integer );
 
 procedure u_Error( const errStr : AnsiString );
@@ -185,6 +187,21 @@ b:
     end;
 
   Delete( Result, p, length( Result ) - p + 1 );
+end;
+
+procedure u_GetStr;
+  var
+    i, pos, l : Integer;
+begin
+  pos := 0;
+  l := length( Str );
+  for i := l downto 1 do
+    if Str[ i ] = d Then
+      begin
+        pos := i;
+        break;
+      end;
+  Result := copy( Str, l - ( l - pos ) + 1, ( l - pos ) );
 end;
 
 procedure u_SortList;

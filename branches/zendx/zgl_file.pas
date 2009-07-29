@@ -27,8 +27,7 @@ interface
 
 uses
   Windows,
-  zgl_types
-  ;
+  zgl_types;
 
 type zglTFile = THandle;
 
@@ -65,6 +64,8 @@ var
   filePath : AnsiString;
 
 implementation
+uses
+  zgl_utils;
 
 procedure file_Open;
 begin
@@ -151,35 +152,20 @@ begin
   until not FindNextFileA( First, FList );
 end;
 
-procedure GetStr( const Str : AnsiString; var Result : AnsiString; const d : AnsiChar );
-  var
-    i, pos, l : Integer;
-begin
-  pos := 0;
-  l := length( Str );
-  for i := l downto 1 do
-    if Str[ i ] = d Then
-      begin
-        pos := i;
-        break;
-      end;
-  Result := copy( Str, l - ( l - pos ) + 1, ( l - pos ) );
-end;
-
 procedure file_GetName;
   var
     tmp : AnsiString;
 begin
-  GetStr( FileName, Result, '/' );
+  u_GetStr( FileName, Result, '/' );
   if Result = '' Then
-    GetStr( FileName, Result, '\' );
-  GetStr( Result, tmp, '.' );
+    u_GetStr( FileName, Result, '\' );
+  u_GetStr( Result, tmp, '.' );
   Result := copy( Result, 1, length( Result ) - length( tmp ) - 1 );
 end;
 
 procedure file_GetExtension;
 begin
-  GetStr( FileName, Result, '.' );
+  u_GetStr( FileName, Result, '.' );
 end;
 
 procedure file_SetPath;

@@ -258,7 +258,6 @@ begin
   d3d8_ParamsW.BackBufferHeight := wnd_Height;
   d3d8_ParamsF.BackBufferWidth  := scr_Width;
   d3d8_ParamsF.BackBufferHeight := scr_Height;
-  d3d8_ParamsW.MultiSampleType  := D3DMULTISAMPLE_NONE;
   d3d8_ParamsF.MultiSampleType  := d3d8_CheckFSAA;
   if scr_VSync Then
     begin
@@ -336,17 +335,24 @@ function d3d8_CheckFSAA;
     fsaa : Integer;
 begin
   fsaa := ogl_FSAA;
+  if ( fsaa = 0 ) or ( fsaa = 1 ) Then
+    Result := D3DMULTISAMPLE_NONE;
+  if fsaa > 16 Then
+    fsaa := 16;
   if wnd_FullScreen Then
     begin
       while d3d8.CheckDeviceMultiSampleType( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, d3d8_Format, FALSE, TD3DMultiSampleType( fsaa ) ) <> D3D_OK do
-        if fsaa > 0 Then
- 	        DEC( fsaa );
+        begin
+          if fsaa = 1 Then break;
+          DEC( fsaa );
+        end;
     end else
-      begin
-        while d3d8.CheckDeviceMultiSampleType( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, d3d8_Mode.Format, TRUE, TD3DMultiSampleType( fsaa ) ) <> D3D_OK do
-          if fsaa > 0 Then
- 	          DEC( fsaa );
-      end;
+      while d3d8.CheckDeviceMultiSampleType( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, d3d8_Mode.Format, TRUE, TD3DMultiSampleType( fsaa ) ) <> D3D_OK do
+        begin
+          if fsaa = 1 Then break;
+          DEC( fsaa );
+        end;
+
   Result := TD3DMultiSampleType( fsaa );
 end;
 
