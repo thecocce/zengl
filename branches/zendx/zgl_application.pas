@@ -187,27 +187,30 @@ function app_ProcessMessages;
     Key : DWORD;
 begin
   Result := 0;
+  if not app_Work Then
+    begin
+      Result := DefWindowProc( hWnd, Msg, wParam, lParam );
+      exit;
+    end;
   case Msg of
     WM_CLOSE, WM_DESTROY, WM_QUIT:
       app_Work := FALSE;
 
     WM_PAINT:
-      if app_Work then
-        begin
-          app_Draw;
-          ValidateRect( wnd_Handle, nil );
-        end;
+      begin
+        app_Draw;
+        ValidateRect( wnd_Handle, nil );
+      end;
     WM_KILLFOCUS:
-      if app_Work Then
-        begin
-          app_Focus := FALSE;
-          if app_AutoPause Then app_Pause := TRUE;
-          if wnd_FullScreen Then
-            begin
-              scr_Reset;
-              wnd_Update;
-            end;
-        end;
+      begin
+        app_Focus := FALSE;
+        if app_AutoPause Then app_Pause := TRUE;
+        if wnd_FullScreen Then
+          begin
+            scr_Reset;
+            wnd_Update;
+          end;
+      end;
     WM_SETFOCUS:
       begin
         app_Focus := TRUE;

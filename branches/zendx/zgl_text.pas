@@ -266,7 +266,7 @@ begin
                   font_GetCID( WordsArray[ i ].str, H, @H );
                 continue;
               end;
-            if ( j > 1 ) and ( Text[ j - 1 ] = ' ' ) Then
+            if ( j > 1 ) and ( ( Text[ j - 1 ] = ' ' ) and ( j <> l ) ) Then
               begin
                 INC( H );
                 continue;
