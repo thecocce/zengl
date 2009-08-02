@@ -29,6 +29,8 @@ uses
   zgl_types;
 
 const
+  cs_ZenGL = 'ZenDX 0.1.34';
+
   // zgl_Reg
   SYS_LOAD               = $000001;
   SYS_DRAW               = $000002;
@@ -40,7 +42,7 @@ const
   SND_FORMAT_EXTENSION   = $000020;
   SND_FORMAT_FILE_LOADER = $000021;
   SND_FORMAT_MEM_LOADER  = $000022;
-  SND_FORMAT_STREAM      = $000023;
+  SND_FORMAT_DECODER     = $000023;
   WIDGET_TYPE_ID         = $000030;
   WIDGET_FILL_DESC       = $000031;
   WIDGET_ONDRAW          = $000032;
@@ -65,6 +67,22 @@ const
   MANAGER_SOUND   = 16;
   MANAGER_GUI     = 17;
 
+  // zgl_Enable/zgl_Disable
+  COLOR_BUFFER_CLEAR    = $000001;
+  DEPTH_BUFFER          = $000002;
+  DEPTH_BUFFER_CLEAR    = $000004;
+  DEPTH_MASK            = $000008;
+  STENCIL_BUFFER_CLEAR  = $000010;
+  CORRECT_RESOLUTION    = $000020;
+  APP_USE_AUTOPAUSE     = $000040;
+  APP_USE_LOG           = $000080;
+  APP_USE_ENGLISH_INPUT = $000100;
+  APP_USE_UTF8          = $000200;
+  WND_USE_AUTOCENTER    = $000400;
+  SND_CAN_PLAY          = $000800;
+  SND_CAN_PLAY_FILE     = $001000;
+  CROP_INVISIBLE        = $002000;
+
 procedure zgl_Init( const FSAA : Byte = 0; const StencilBits : Byte = 0 );
 procedure zgl_InitToHandle( const Handle : DWORD; const FSAA : Byte = 0; const StencilBits : Byte = 0 );
 procedure zgl_Destroy;
@@ -78,7 +96,6 @@ procedure zgl_Disable( const What : DWORD );
 
 implementation
 uses
-  zgl_const,
   zgl_application,
   zgl_screen,
   zgl_window,
@@ -271,7 +288,7 @@ begin
       begin
         SetLength( managerSound.Formats, managerSound.Count.Formats + 1 );
         managerSound.Formats[ managerSound.Count.Formats ].Extension := u_StrUp( AnsiString( PAnsiChar( UserData ) ) );
-        managerSound.Formats[ managerSound.Count.Formats ].Stream    := nil;
+        managerSound.Formats[ managerSound.Count.Formats ].Decoder   := nil;
       end;
     SND_FORMAT_FILE_LOADER:
       begin
@@ -282,11 +299,11 @@ begin
         managerSound.Formats[  managerSound.Count.Formats ].MemLoader := UserData;
         INC( managerSound.Count.Formats );
       end;
-    SND_FORMAT_STREAM:
+    SND_FORMAT_DECODER:
       begin
         for i := 0 to managerSound.Count.Formats - 1 do
-          if managerSound.Formats[ i ].Extension = zglPSoundStream( UserData ).Extension Then
-            managerSound.Formats[ i ].Stream := UserData;
+          if managerSound.Formats[ i ].Extension = zglPSoundDecoder( UserData ).Ext Then
+            managerSound.Formats[ i ].Decoder := UserData;
       end;
     // GUI
     WIDGET_TYPE_ID:

@@ -26,7 +26,6 @@ unit zgl_window;
 interface
 uses
   Windows,
-  zgl_const,
   zgl_direct3d8,
   zgl_direct3d8_all;
 
@@ -43,10 +42,10 @@ procedure wnd_Select;
 var
   wnd_X          : Integer;
   wnd_Y          : Integer;
-  wnd_Width      : Integer = defWidth;
-  wnd_Height     : Integer = defHeight;
+  wnd_Width      : Integer = 800;
+  wnd_Height     : Integer = 600;
   wnd_FullScreen : Boolean;
-  wnd_Caption    : String = cs_ZenGL;
+  wnd_Caption    : String;
 
   wnd_Handle    : HWND;
   wnd_DC        : HDC;
@@ -60,7 +59,7 @@ var
 
 implementation
 uses
-  zgl_main, zgl_log,
+  zgl_main,
   zgl_application,
   zgl_screen,
   zgl_utils;
@@ -232,5 +231,8 @@ procedure wnd_Select;
 begin
   BringWindowToTop( wnd_Handle );
 end;
+
+initialization
+  wnd_Caption := cs_ZenGL;
 
 end.

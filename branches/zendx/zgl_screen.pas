@@ -56,9 +56,9 @@ type
 end;
 
 var
-  scr_Width   : Integer;
-  scr_Height  : Integer;
-  scr_BPP     : Integer;
+  scr_Width   : Integer = 800;
+  scr_Height  : Integer = 600;
+  scr_BPP     : Integer = 32;
   scr_Refresh : Integer;
   scr_VSync   : Boolean;
   scr_ResList : zglTResolutionList;
@@ -79,7 +79,6 @@ var
 
 implementation
 uses
-  zgl_const,
   zgl_main,
   zgl_application,
   zgl_window,
@@ -282,8 +281,5 @@ begin
   if wnd_Handle <> 0 Then
     wnd_Update;
 end;
-
-initialization
-  scr_BPP := defBPP;
 
 end.

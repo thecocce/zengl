@@ -269,8 +269,8 @@ var
 implementation
 uses
   zgl_direct3d8,
-  zgl_const,
   zgl_application,
+  zgl_main,
   zgl_screen,
   zgl_window,
   zgl_render_target,
@@ -553,7 +553,8 @@ begin
 end;
 
 procedure glMatrixMode;
-begin  case mode of
+begin
+  case mode of
     GL_MODELVIEW:  d3d8_MatrixMode := D3DTS_VIEW;
     GL_PROJECTION: d3d8_MatrixMode := D3DTS_PROJECTION;
     GL_TEXTURE:    d3d8_MatrixMode := D3DTS_TEXTURE0;

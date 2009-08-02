@@ -29,6 +29,10 @@ uses
   zgl_types,
   zgl_log;
 
+const
+  LIB_ERROR  = 0;
+  FILE_ERROR = 0;
+
 function u_IntToStr( const Value : Integer ) : AnsiString;
 function u_StrToInt( const Value : AnsiString ) : Integer;
 function u_BoolToStr( const Value : Boolean ) : AnsiString;

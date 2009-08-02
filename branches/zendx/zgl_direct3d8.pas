@@ -90,9 +90,9 @@ var
 
 implementation
 uses
-  zgl_const,
   zgl_direct3d8_all,
   zgl_application,
+  zgl_main,
   zgl_screen,
   zgl_window,
   zgl_camera_2d,

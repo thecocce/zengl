@@ -70,7 +70,6 @@ var
 
 implementation
 uses
-  zgl_const,
   zgl_main,
   zgl_application,
   zgl_screen,

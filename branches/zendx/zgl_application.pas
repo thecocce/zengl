@@ -27,7 +27,6 @@ interface
 uses
   Windows,
   Messages,
-  zgl_const,
   zgl_types,
   zgl_direct3d8,
   zgl_direct3d8_all;
@@ -64,10 +63,11 @@ var
   app_FPSCount : DWORD;
   app_FPSAll   : DWORD;
 
-  app_Flags : DWORD = WND_USE_AUTOCENTER or APP_USE_LOG or COLOR_BUFFER_CLEAR or DEPTH_BUFFER or DEPTH_BUFFER_CLEAR or CROP_INVISIBLE;
+  app_Flags : DWORD;
 
 implementation
 uses
+  zgl_main,
   zgl_screen,
   zgl_window,
   zgl_log,
@@ -129,15 +129,41 @@ begin
     begin
       OSProcess;
 
-      CanKillTimers := FALSE;
-      if not app_Pause Then
+      if app_Focus Then
         begin
           if sndAutoPaused Then
             begin
               sndAutoPaused := FALSE;
-              snd_ResumeFile;
+              {$IFDEF USE_OPENAL}
+              for i := 0 to length( oal_Sources ) - 1 do
+                if oal_SrcState[ i ] = AL_PLAYING Then
+                  alSourcePlay( oal_Sources[ i ] );
+              {$ENDIF}
+              if Assigned( sfStream ) Then
+                snd_ResumeFile;
             end;
+        end else
+          begin
+            sndAutoPaused := TRUE;
+            {$IFDEF USE_OPENAL}
+            for i := 0 to length( oal_Sources ) - 1 do
+              begin
+                alGetSourcei( oal_Sources[ i ], AL_SOURCE_STATE, z );
+                if z = AL_PLAYING Then
+                  begin
+                    oal_SrcState[ i ] := AL_PLAYING;
+                    alSourcePause( oal_Sources[ i ] );
+                  end else
+                    oal_SrcState[ i ] := AL_NONE;
+              end;
+            {$ENDIF}
+            if Assigned( sfStream ) and ( sfStream.Played ) Then
+              snd_StopFile;
+          end;
 
+      CanKillTimers := FALSE;
+      if not app_Pause Then
+        begin
           currTimer := @managerTimer.First;
           if currTimer <> nil Then
             for z := 0 to managerTimer.Count do
@@ -156,12 +182,6 @@ begin
               end;
         end else
           begin
-            if Assigned( sfStream ) and ( sfStream.Played ) Then
-              begin
-                sndAutoPaused := TRUE;
-                snd_StopFile;
-              end;
-
             timer_Reset;
             u_Sleep( 10 );
           end;
@@ -354,5 +374,8 @@ begin
   app_FPSCount := 0;
   INC( app_WorkTime );
 end;
+
+initialization
+  app_Flags := WND_USE_AUTOCENTER or APP_USE_LOG or COLOR_BUFFER_CLEAR or CROP_INVISIBLE;
 
 end.

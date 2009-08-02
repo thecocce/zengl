@@ -37,8 +37,8 @@ procedure csprite2d_Draw( const Texture : zglPTexture; X, Y, W, H, Angle : Singl
 
 implementation
 uses
-  zgl_const,
   zgl_application,
+  zgl_main,
   zgl_screen,
   zgl_direct3d8,
   zgl_direct3d8_all,
