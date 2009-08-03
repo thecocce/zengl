@@ -118,9 +118,11 @@ var
   oal_Velocity    : array[ 0..2 ] of Single = ( 0.0, 0.0, 0.0 ); //движение
   oal_Orientation : array[ 0..5 ] of Single = ( 0.0, 0.0, -1.0, 0.0, 1.0, 0.0 ); //ориентация
 
+  // Форматы звука для количества каналов
+  oal_Format  : array[ 1..2 ] of LongInt = ( AL_FORMAT_MONO16, AL_FORMAT_STEREO16 );
+
 implementation
 uses
-  zgl_const,
   zgl_utils;
 
 function InitOpenAL;
@@ -173,9 +175,9 @@ begin
       alGetSourcei( oal_Sources[ i ], AL_SOURCE_STATE, state );
       if state <> AL_PLAYING Then
         begin
-          if Assigned( oal_Pointer[ i ] ) Then
-            LongWord( oal_Pointer[ i ]^ ) := 0;
-          oal_Pointer[ i ] := Source;
+          if Assigned( oal_SrcPtrs[ i ] ) Then
+            LongWord( oal_SrcPtrs[ i ]^ ) := 0;
+          oal_SrcPtrs[ i ] := Source;
           Result := oal_Sources[ i ];
           break;
         end;

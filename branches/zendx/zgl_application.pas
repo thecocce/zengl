@@ -75,6 +75,9 @@ uses
   zgl_mouse,
   zgl_timers,
   zgl_sound,
+  {$IFDEF USE_OPENAL}
+  zgl_sound_openal,
+  {$ENDIF}
   zgl_utils;
 
 procedure zero;
