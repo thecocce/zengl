@@ -402,6 +402,7 @@ begin
   case cap of
     GL_TEXTURE_2D:
       begin
+        RenderTexID    := -1;
         RenderTextured := FALSE;
         d3d8_Device.SetTexture( 0, nil );
       end;
@@ -841,6 +842,7 @@ begin
 end;
 
 procedure glTexParameterf;
+  label _exit;
   var
     _type : TD3DTextureStageStateType;
     value : LongWord;
@@ -854,7 +856,7 @@ begin
       lMinFilter  := D3DTEXF_ANISOTROPIC;
       lMagFilter  := D3DTEXF_ANISOTROPIC;
       lMipFilter  := D3DTEXF_ANISOTROPIC;
-      exit;
+      goto _exit;
     end;
 
   case pname of
@@ -875,6 +877,14 @@ begin
   end;
 
   d3d8_Device.SetTextureStageState( 0, _type, value );
+
+_exit:
+  if RenderTexID <> -1 Then
+    begin
+      d3d8_texArray[ RenderTexID ].MinFilter := lMinFilter;
+      d3d8_texArray[ RenderTexID ].MagFilter := lMagFilter;
+      d3d8_texArray[ RenderTexID ].MipFilter := lMipFilter;
+    end;
 end;
 
 procedure glTexParameteri;
@@ -894,6 +904,9 @@ begin
 
   lWrap := param;
   d3d8_Device.SetTextureStageState( 0, _type, value );
+
+  if RenderTexID <> -1 Then
+    d3d8_texArray[ RenderTexID ].Wrap := lWrap;
 end;
 
 procedure FillTexture( Src, Dest : Pointer; W, H, P : Integer );
