@@ -83,7 +83,7 @@ end;
 
 function file_Exists;
   var
-    FileHandle : DWORD;
+    FileHandle : zglTFile;
 begin
   file_Open( FileHandle, filePath + FileName, FOM_OPENR );
   Result := FileHandle <> INVALID_HANDLE_VALUE;
