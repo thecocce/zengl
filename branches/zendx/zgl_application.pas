@@ -208,7 +208,7 @@ function app_ProcessMessages;
     Key : DWORD;
 begin
   Result := 0;
-  if not app_Work Then
+  if ( not app_Work ) and ( Msg <> WM_SETFOCUS ) Then
     begin
       Result := DefWindowProc( hWnd, Msg, wParam, lParam );
       exit;
