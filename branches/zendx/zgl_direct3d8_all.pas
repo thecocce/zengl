@@ -28,6 +28,8 @@ uses
   DirectXGraphics;
 
 const
+  libGLU = 'glu32.dll';
+
   GL_FALSE                          = 0;
   GL_TRUE                           = 1;
   GL_ZERO                           = 0;
@@ -81,6 +83,7 @@ const
   GL_LINES                          = $0001;
   GL_TRIANGLES                      = $0004;
   GL_TRIANGLE_STRIP                 = $0005;
+  GL_TRIANGLE_FAN                   = $0006;
   GL_QUADS                          = $0007;
 
   // Texture
@@ -163,6 +166,20 @@ const
   GL_REPLACE                        = $1E01;
   GL_INCR                           = $1E02;
   GL_DECR                           = $1E03;
+
+  // Triangulation
+  GLU_TESS_BEGIN                    = $18704;
+  GLU_TESS_VERTEX                   = $18705;
+  GLU_TESS_END                      = $18706;
+  GLU_TESS_ERROR                    = $18707;
+  GLU_TESS_EDGE_FLAG                = $18708;
+  GLU_TESS_COMBINE                  = $18709;
+  GLU_TESS_BEGIN_DATA               = $1870A;
+  GLU_TESS_VERTEX_DATA              = $1870B;
+  GLU_TESS_END_DATA                 = $1870C;
+  GLU_TESS_ERROR_DATA               = $1870D;
+  GLU_TESS_EDGE_FLAG_DATA           = $1870E;
+  GLU_TESS_COMBINE_DATA             = $1870F;
 
 type
   GLenum     = Cardinal;      PGLenum     = ^GLenum;
@@ -255,6 +272,16 @@ function  gluBuild2DMipmaps(target: GLenum; components, width, height: GLint; fo
 // TexCoords
 procedure glTexCoord2f(s, t: GLfloat);
 procedure glTexCoord2fv(v: PGLfloat);
+// Triangulation
+procedure gluDeleteTess(tess: Integer); stdcall external libGLU;
+function  gluErrorString(error: Integer): PChar; stdcall external libGLU;
+function  gluNewTess: Integer; stdcall external libGLU;
+procedure gluTessBeginContour(tess: Integer); stdcall external libGLU;
+procedure gluTessBeginPolygon(tess: Integer; data: Pointer); stdcall external libGLU;
+procedure gluTessCallback(tess: Integer; which: Integer; fn: Pointer); stdcall external libGLU;
+procedure gluTessEndContour(tess: Integer); stdcall external libGLU;
+procedure gluTessEndPolygon(tess: Integer); stdcall external libGLU;
+procedure gluTessVertex(tess: Integer; vertex: PDouble; data: Pointer); stdcall external libGLU;
 
 var
   gl_TexCoord2f   : procedure( U, V : Single );

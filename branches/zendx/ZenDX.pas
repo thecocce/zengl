@@ -199,6 +199,7 @@ exports
   pr2d_Rect                name prefix + 'pr2d_Rect',
   pr2d_Circle              name prefix + 'pr2d_Circle',
   pr2d_Ellipse             name prefix + 'pr2d_Ellipse',
+  pr2d_TriList             name prefix + 'pr2d_TriList',
 
   // Sprite Engine 2D
   sengine2d_AddSprite      name prefix + 'sengine2d_AddSprite',
@@ -252,6 +253,10 @@ exports
   m_Distance               name prefix + 'm_Distance',
   m_FDistance              name prefix + 'm_FDistance',
   m_Angle                  name prefix + 'm_Angle',
+
+  tess_Triangulate         name prefix + 'tess_Triangulate',
+  tess_AddHole             name prefix + 'tess_AddHole',
+  tess_GetData             name prefix + 'tess_GetData',
 
   // Collision 2D
   col2d_PointInRect        name prefix + 'col2d_PointInRect',
