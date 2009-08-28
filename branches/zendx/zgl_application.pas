@@ -226,26 +226,27 @@ begin
         app_Draw;
         ValidateRect( wnd_Handle, nil );
       end;
-    WM_KILLFOCUS:
+    WM_ACTIVATE:
       begin
-        app_Focus := FALSE;
-        if app_AutoPause Then app_Pause := TRUE;
-        if wnd_FullScreen Then
+        app_Focus := ( LOWORD( wParam ) <> WA_INACTIVE );
+        if app_Focus Then
           begin
-            scr_Reset;
-            wnd_Update;
-          end;
-      end;
-    WM_SETFOCUS:
-      begin
-        app_Focus := TRUE;
-        app_Pause := FALSE;
-        FillChar( keysDown[ 0 ], 256, 0 );
-        key_ClearState;
-        FillChar( mouseDown[ 0 ], 3, 0 );
-        mouse_ClearState;
-        if wnd_FullScreen Then
-          scr_SetOptions( scr_Width, scr_Height, scr_BPP, scr_Refresh, wnd_FullScreen, scr_VSync );
+            app_Pause := FALSE;
+            FillChar( keysDown[ 0 ], 256, 0 );
+            key_ClearState;
+            FillChar( mouseDown[ 0 ], 3, 0 );
+            mouse_ClearState;
+            if wnd_FullScreen Then
+              scr_SetOptions( scr_Width, scr_Height, scr_BPP, scr_Refresh, wnd_FullScreen, scr_VSync );
+          end else
+            begin
+              if app_AutoPause Then app_Pause := TRUE;
+              if wnd_FullScreen Then
+                begin
+                  scr_Reset;
+                  wnd_Update;
+                end;
+            end;
       end;
     WM_NCHITTEST:
       begin
