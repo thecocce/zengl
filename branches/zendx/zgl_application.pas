@@ -236,17 +236,8 @@ begin
             key_ClearState;
             FillChar( mouseDown[ 0 ], 3, 0 );
             mouse_ClearState;
-            if wnd_FullScreen Then
-              scr_SetOptions( scr_Width, scr_Height, scr_BPP, scr_Refresh, wnd_FullScreen, scr_VSync );
           end else
-            begin
-              if app_AutoPause Then app_Pause := TRUE;
-              if wnd_FullScreen Then
-                begin
-                  scr_Reset;
-                  wnd_Update;
-                end;
-            end;
+            if app_AutoPause Then app_Pause := TRUE;
       end;
     WM_NCHITTEST:
       begin
