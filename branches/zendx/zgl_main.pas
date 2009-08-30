@@ -29,7 +29,7 @@ uses
   zgl_types;
 
 const
-  cs_ZenGL = 'ZenDX 0.1.34';
+  cs_ZenGL = 'ZenDX 0.1.37';
 
   // zgl_Reg
   SYS_LOAD               = $000001;

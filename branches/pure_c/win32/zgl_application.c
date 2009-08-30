@@ -44,6 +44,9 @@ LRESULT CALLBACK app_WndProc( HWND hWnd, uint Msg, WPARAM wParam, LPARAM lParam 
 {
   int i, key;
 
+  if ( ( !app_Work ) && ( Msg != WM_ACTIVATE ) )
+    return DefWindowProc( hWnd, Msg, wParam, lParam );
+
   switch ( Msg ) {
     case WM_CLOSE:
     case WM_DESTROY:
@@ -53,35 +56,31 @@ LRESULT CALLBACK app_WndProc( HWND hWnd, uint Msg, WPARAM wParam, LPARAM lParam 
     }
 
     case WM_PAINT: {
-      if ( app_Work ) {
-        app_Draw();
-        ValidateRect( wnd_Handle, 0 );
-      }
+      app_Draw();
+      ValidateRect( wnd_Handle, 0 );
       return 0;
     }
     case WM_DISPLAYCHANGE: {
       wnd_Update();
       return 0;
     }
-    case WM_KILLFOCUS: {
-      if ( app_Work ) {
-        app_Focus = 0;
-        if ( app_AutoPause ) app_Pause = 1;
-        if ( ( wnd_FullScreen ) && ( !wnd_First ) ) {
-          scr_Reset();
-          wnd_Update();
+    case WM_ACTIVATE: {
+      app_Focus = LOWORD( wParam ) != WA_INACTIVE;
+      if ( app_Focus ) {
+        app_Pause = 0;
+        memset( mDown, 0, 3 );
+        mouse_ClearState();
+        memset( kDown, 0, 256 );
+        key_ClearState();
+        if ( ( wnd_FullScreen ) && ( !wnd_First ) )
+          scr_SetOptions( scr_Width, scr_Height, scr_BPP, scr_Refresh, wnd_FullScreen, scr_VSync );
+      } else {
+          if ( app_AutoPause ) app_Pause = 1;
+          if ( ( wnd_FullScreen ) && ( !wnd_First ) ) {
+            scr_Reset();
+            wnd_Update();
+          }
         }
-      }
-      return 0;
-    }
-    case WM_SETFOCUS: {
-      app_Focus = 1;
-      app_Pause = 0;
-      memset( mDown, 0, 3 );
-      mouse_ClearState();
-      memset( kDown, 0, 256 );
-      key_ClearState();
-      if ( ( wnd_FullScreen ) && ( !wnd_First ) ) scr_SetOptions( scr_Width, scr_Height, scr_BPP, scr_Refresh, wnd_FullScreen, scr_VSync );
       return 0;
     }
     case WM_NCHITTEST: {

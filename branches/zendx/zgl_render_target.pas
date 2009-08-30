@@ -154,8 +154,6 @@ procedure rtarget_Set;
 begin
   if Assigned( Target ) Then
     begin
-      if not d3d8_CanDraw Then
-        d3d8_Device.BeginScene;
       batch2d_Flush;
       lRTarget := Target;
       lMode := ogl_Mode;
@@ -230,8 +228,6 @@ begin
         lTexture := nil;
         SetCurrentMode;
         scr_SetViewPort;
-        if not d3d8_CanDraw Then
-          d3d8_Device.EndScene;
       end;
 end;
 

@@ -83,7 +83,7 @@ bool wnd_Create( int Width, int Height )
   if ( ogl_Format == 0 )
     wnd_Handle = CreateWindowEx( WS_EX_TOOLWINDOW, wnd_ClassName, wnd_Caption, WS_POPUP, 0, 0, 0, 0, 0, 0, 0, NULL );
   else
-    wnd_Handle = CreateWindowEx( WS_EX_APPWINDOW,
+    wnd_Handle = CreateWindowEx( WS_EX_APPWINDOW | ( WS_EX_TOPMOST * wnd_FullScreen ),
                                  wnd_ClassName,
                                  wnd_Caption,
                                  wnd_Style,
@@ -199,6 +199,5 @@ void wnd_ShowCursor( bool Show )
 
 void wnd_Select(void)
 {
-  ShowWindow( wnd_Handle, SW_NORMAL );
   BringWindowToTop( wnd_Handle );
 }

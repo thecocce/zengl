@@ -162,6 +162,8 @@ begin
                 snd_StopFile;
             end;
 
+      if not d3d8_BeginScene Then continue;
+
       CanKillTimers := FALSE;
       if not app_Pause Then
         begin

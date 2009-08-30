@@ -360,7 +360,12 @@ function d3d8_BeginScene;
   var
     hr : HRESULT;
 begin
-  Result := FALSE;
+  if d3d8_CanDraw Then
+    begin
+      Result := TRUE;
+      exit;
+    end else
+      Result := FALSE;
 
   hr := d3d8_Device.TestCooperativeLevel;
   case hr of
