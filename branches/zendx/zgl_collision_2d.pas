@@ -19,6 +19,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 }
+// Некоторые функции здесь записаны весьма страшно и в лоб :)
 unit zgl_collision_2d;
 
 {$I zgl_config.cfg}
@@ -29,7 +30,8 @@ uses
   zgl_math_2d;
 
 // point 2d
-function col2d_PointInRect  ( const X, Y : Single; const Rect : zglTRect   ) : Boolean;
+function col2d_PointInRect( const X, Y : Single; const Rect : zglTRect ) : Boolean;
+function col2d_PointInTriangle( const X, Y : Single; const p1, p2, p3 : zglTPoint2D ) : Boolean;
 function col2d_PointInCircle( const X, Y : Single; const Circ : zglTCircle ) : Boolean;
 // line 2d
 function col2d_Line          ( const A, B : zglTLine; ColPoint : zglPPoint2D ) : Boolean;
@@ -76,6 +78,30 @@ begin
             ( Y > Rect.Y ) and ( Y < Rect.Y + Rect.H );
 end;
 
+function col2d_PointInTriangle;
+  var
+    o1 : Integer;
+    o2 : Integer;
+    o3 : Integer;
+begin
+  o1 := m_Orientation( X, Y, p1.x, p1.y, p2.x, p2.y );
+  o2 := m_Orientation( X, Y, p2.x, p2.y, p3.x, p3.y );
+
+  Result := FALSE;
+  if ( o1 * o2 ) <> -1 Then
+    begin
+      o3 := m_Orientation( X, Y, p3.x, p3.y, p1.x, p1.y );
+      if ( o1 = o3 ) or ( o3 = 0 ) Then
+        Result := TRUE
+      else
+        if o1 = 0 Then
+          Result := ( o2 * o3 ) >= 0
+        else
+          if o2 = 0 Then
+            Result := ( o1 * o3 ) >= 0;
+    end;
+end;
+
 function col2d_PointInCircle;
 begin
   Result := sqr( Circ.cX - X ) + sqr( Circ.cY - Y ) < sqr( Circ.Radius );
@@ -116,23 +142,54 @@ function col2d_LineVsRect;
   var
     L : zglTLine;
 begin
-  Result := col2d_PointInRect( A.x0, A.y0, Rect ) or col2d_PointInRect( A.x1, A.y1, Rect );
-  if not Result Then
+  if not Assigned( ColPoint ) Then
     begin
-      L.x0 := Rect.X;
-      L.y0 := Rect.Y;
-      L.x1 := Rect.X + Rect.W;
-      L.y1 := Rect.Y + Rect.H;
-      Result := col2d_Line( A, L, ColPoint );
+      Result := col2d_PointInRect( A.x0, A.y0, Rect ) or col2d_PointInRect( A.x1, A.y1, Rect );
       if not Result Then
         begin
           L.x0 := Rect.X;
-          L.y0 := Rect.Y + Rect.H;
+          L.y0 := Rect.Y;
           L.x1 := Rect.X + Rect.W;
-          L.y1 := Rect.Y;
+          L.y1 := Rect.Y + Rect.H;
           Result := col2d_Line( A, L, ColPoint );
+          if not Result Then
+            begin
+              L.x0 := Rect.X;
+              L.y0 := Rect.Y + Rect.H;
+              L.x1 := Rect.X + Rect.W;
+              L.y1 := Rect.Y;
+              Result := col2d_Line( A, L, ColPoint );
+            end;
         end;
-    end;
+    end else
+      begin
+        L.x0 := Rect.X;
+        L.y0 := Rect.Y;
+        L.x1 := Rect.X + Rect.W;
+        L.y1 := Rect.Y;
+        Result := col2d_Line( A, L, ColPoint );
+        if Result Then exit;
+
+        L.x0 := Rect.X + Rect.W;
+        L.y0 := Rect.Y;
+        L.x1 := Rect.X + Rect.W;
+        L.y1 := Rect.Y + Rect.H;
+        Result := col2d_Line( A, L, ColPoint );
+        if Result Then exit;
+
+        L.x0 := Rect.X + Rect.W;
+        L.y0 := Rect.Y + Rect.H;
+        L.x1 := Rect.X;
+        L.y1 := Rect.Y + Rect.H;
+        Result := col2d_Line( A, L, ColPoint );
+        if Result Then exit;
+
+        L.x0 := Rect.X;
+        L.y0 := Rect.Y;
+        L.x1 := Rect.X;
+        L.y1 := Rect.Y + Rect.H;
+        Result := col2d_Line( A, L, ColPoint );
+      end;
 end;
 
 function col2d_LineVsCircle;
