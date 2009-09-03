@@ -63,6 +63,7 @@ var
   scr_VSync   : Boolean;
   scr_ResList : zglTResolutionList;
   scr_Initialized : Boolean;
+  scr_Changing : Boolean;
 
   // Resolution Correct
   scr_ResW  : Integer;
@@ -176,6 +177,7 @@ end;
 
 procedure scr_SetOptions;
 begin
+  scr_Changing   := TRUE;
   ogl_Width      := Width;
   ogl_Height     := Height;
   wnd_Width      := Width;

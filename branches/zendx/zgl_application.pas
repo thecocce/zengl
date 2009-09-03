@@ -228,6 +228,26 @@ begin
         app_Draw;
         ValidateRect( wnd_Handle, nil );
       end;
+    WM_DISPLAYCHANGE:
+      begin
+        if scr_Changing Then
+          begin
+            scr_Changing := FALSE;
+            exit;
+          end;
+        if not wnd_FullScreen Then
+          begin
+            scr_Init;
+            scr_Width  := scr_Desktop.dmPelsWidth;
+            scr_Height := scr_Desktop.dmPelsHeight;
+            scr_BPP    := scr_Desktop.dmBitsPerPel;
+            wnd_Update;
+          end else
+            begin
+              scr_Width  := wnd_Width;
+              scr_Height := wnd_Height;
+            end;
+      end;
     WM_ACTIVATE:
       begin
         app_Focus := ( LOWORD( wParam ) <> WA_INACTIVE );
