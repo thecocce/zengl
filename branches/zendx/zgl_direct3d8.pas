@@ -83,6 +83,7 @@ var
   ogl_CropY  : Integer;
   ogl_CropW  : Integer;
   ogl_CropH  : Integer;
+  ogl_CropR  : Integer;
 
   ogl_CanCompress   : Boolean;
   ogl_MaxTexSize    : Integer;

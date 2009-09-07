@@ -116,7 +116,7 @@ procedure snd_Del( var Sound : zglPSound );
 function  snd_LoadFromFile( const FileName : AnsiString; const SourceCount : Integer = 8 ) : zglPSound;
 function  snd_LoadFromMemory( const Memory : zglTMemory; const Extension : AnsiString; const SourceCount : Integer = 8 ) : zglPSound;
 
-function  snd_Play( const Sound : zglPSound; const Loop : Boolean = FALSE; const X : Single = 0; const Y : Single = 0; const Z : Single = 0) : Integer;
+function  snd_Play( const Sound : zglPSound; const Loop : Boolean = FALSE; const X : Single = 0; const Y : Single = 0; const Z : Single = 0 ) : Integer;
 procedure snd_Stop( const Sound : zglPSound; const Source : Integer );
 procedure snd_SetVolume( const Sound : zglPSound; const Volume : Single; const ID : Integer );
 procedure snd_SetFrequency( const Sound : zglPSound; const Frequency, ID : Integer );

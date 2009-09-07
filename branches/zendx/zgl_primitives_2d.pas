@@ -39,7 +39,7 @@ procedure pr2d_Line( const X1, Y1, X2, Y2 : Single; const Color : DWORD; const A
 procedure pr2d_Rect( const X, Y, W, H : Single; const Color : DWORD; const Alpha : Byte = 255; const FX : DWORD = 0 );
 procedure pr2d_Circle( const X, Y, Radius : Single; const Color : DWORD; const Alpha : Byte = 255; const Quality : WORD = 32; const FX : DWORD = 0 );
 procedure pr2d_Ellipse( const X, Y, xRadius, yRadius : Single; const Color : DWORD; const Alpha : Byte = 255; const Quality : WORD = 32; const FX : DWORD = 0 );
-procedure pr2d_TriList( const Texture : zglPTexture; const TriList : zglPPoints2D; const iLo, iHi : Integer; const Color : DWORD = $FFFFFF; const Alpha : Byte = 255; const FX : DWORD = FX_BLEND );
+procedure pr2d_TriList( const Texture : zglPTexture; const TriList, TexCoords : zglPPoints2D; const iLo, iHi : Integer; const Color : DWORD = $FFFFFF; const Alpha : Byte = 255; const FX : DWORD = FX_BLEND );
 
 implementation
 uses
@@ -377,13 +377,21 @@ begin
 
   if Assigned( Texture ) Then
     begin
-      w := 1 / ( Texture.Width / Texture.U );
-      h := 1 / ( Texture.Height / Texture.V );
-      for i := iLo to iHi do
+      if not Assigned( TexCoords ) Then
         begin
-          glTexCoord2f( TriList[ i ].X * w, Texture.V - TriList[ i ].Y * h );
-          gl_Vertex2fv( @TriList[ i ] );
-        end;
+          w := 1 / ( Texture.Width / Texture.U );
+          h := 1 / ( Texture.Height / Texture.V );
+          for i := iLo to iHi do
+            begin
+              glTexCoord2f( TriList[ i ].X * w, Texture.V - TriList[ i ].Y * h );
+              gl_Vertex2fv( @TriList[ i ] );
+            end;
+        end else
+          for i := iLo to iHi do
+            begin
+              glTexCoord2fv( @TexCoords[ i ] );
+              gl_Vertex2fv( @TriList[ i ] );
+            end;
     end else
       for i := iLo to iHi do
         gl_Vertex2fv( @TriList[ i ] );
