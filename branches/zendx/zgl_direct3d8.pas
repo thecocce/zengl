@@ -305,7 +305,7 @@ end;
 procedure d3d8_ResetState;
 begin
   glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-  glAlphaFunc( GL_GREATER, 0 );
+  glAlphaFunc( GL_EQUAL, 1 );
 
   glDisable( GL_BLEND );
   glDisable( GL_ALPHA_TEST );

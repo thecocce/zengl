@@ -110,6 +110,7 @@ procedure tex_GetData( const Texture : zglPTexture; var pData : Pointer; var pSi
 
 var
   managerTexture : zglTTextureManager;
+  zeroTexture    : zglPTexture;
 
 implementation
 uses
@@ -239,7 +240,9 @@ begin
   Result := nil;
   pData  := nil;
 
-  Result := tex_CreateZero( 4, 4, $FFFFFFFF, TEX_DEFAULT_2D );
+  if not Assigned( zeroTexture ) Then
+    zeroTexture := tex_CreateZero( 4, 4, $FFFFFFFF, TEX_DEFAULT_2D );
+  Result := zeroTexture;
 
   if not file_Exists( FileName ) Then
     begin
@@ -260,7 +263,6 @@ begin
       exit;
     end;
 
-  tex_Del( Result );
   Result         := tex_Add;
   Result.Width   := w;
   Result.Height  := h;
@@ -289,7 +291,9 @@ begin
   Result := nil;
   pData  := nil;
 
-  Result := tex_CreateZero( 4, 4, $FFFFFFFF, TEX_DEFAULT_2D );
+  if not Assigned( zeroTexture ) Then
+    zeroTexture := tex_CreateZero( 4, 4, $FFFFFFFF, TEX_DEFAULT_2D );
+  Result := zeroTexture;
 
   for i := managerTexture.Count.Formats - 1 downto 0 do
     if u_StrUp( Extension ) = managerTexture.Formats[ i ].Extension Then
@@ -301,7 +305,6 @@ begin
       exit;
     end;
 
-  tex_Del( Result );
   Result         := tex_Add;
   Result.Width   := w;
   Result.Height  := h;
@@ -373,7 +376,6 @@ begin
   Result.FramesY := 1;
   Result.Flags   := Texture.Flags xor TEX_GRAYSCALE * Byte( Texture.Flags and TEX_GRAYSCALE > 0 )
                                   xor TEX_INVERT * Byte( Texture.Flags and TEX_INVERT > 0 );
-  tex_CalcTransparent( pData, $FF000000, Result.Width, Result.Height );
   tex_Create( Result^, pData );
   tex_Del( Texture );
 
@@ -474,12 +476,10 @@ begin
   zgl_GetMem( pData, w * h * 4 );
 
   for i := 0 to Height - 1 do
-    for j := 0 to Width - 1 do
-      PDWORD( Ptr( pData ) + j * 4 + i * w * 4 + 0 )^ := PDWORD( @Data[ j * 4 + i * Width * 4 ] )^;
+    Move( Data[ i * Width * 4 ], PDWORD( Ptr( pData ) + i * w * 4 )^, Width * 4 );
 
   for i := Height to h - 1 do
-    for j := 0 to Width - 1 do
-      PDWORD( Ptr( pData ) + j * 4 + i * w * 4 )^ := PDWORD( Ptr( pData ) + j * 4 + ( Height - 1 ) * w * 4 )^;
+    Move( PByte( Ptr( pData ) + ( Height - 1 ) * w * 4 )^, PByte( Ptr( pData ) + i * w * 4 )^, Width * 4 );
   for i := 0 to h - 1 do
     for j := Width to w - 1 do
       PDWORD( Ptr( pData ) + j * 4 + i * w * 4 )^ := PDWORD( Ptr( pData ) + ( Width - 1 ) * 4 + i * w * 4 )^;
