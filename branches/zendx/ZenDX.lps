@@ -2,7 +2,7 @@
 <CONFIG>
   <ProjectSession>
     <Version Value="7"/>
-    <Units Count="40">
+    <Units Count="41">
       <Unit0>
         <Filename Value="ZenDX.pas"/>
         <IsPartOfProject Value="True"/>
@@ -251,6 +251,13 @@
         <UsageCount Value="20"/>
         <SyntaxHighlighter Value="Delphi"/>
       </Unit39>
+      <Unit40>
+        <Filename Value="zgl_grid_2d.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="zgl_grid_2d"/>
+        <UsageCount Value="20"/>
+        <SyntaxHighlighter Value="Text"/>
+      </Unit40>
     </Units>
     <General>
       <ActiveEditorIndexAtStart Value="0"/>
