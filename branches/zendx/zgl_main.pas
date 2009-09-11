@@ -74,14 +74,16 @@ const
   DEPTH_MASK            = $000008;
   STENCIL_BUFFER_CLEAR  = $000010;
   CORRECT_RESOLUTION    = $000020;
-  APP_USE_AUTOPAUSE     = $000040;
-  APP_USE_LOG           = $000080;
-  APP_USE_ENGLISH_INPUT = $000100;
-  APP_USE_UTF8          = $000200;
-  WND_USE_AUTOCENTER    = $000400;
-  SND_CAN_PLAY          = $000800;
-  SND_CAN_PLAY_FILE     = $001000;
-  CROP_INVISIBLE        = $002000;
+  CORRECT_WIDTH         = $000040;
+  CORRECT_HEIGHT        = $000080;
+  APP_USE_AUTOPAUSE     = $000100;
+  APP_USE_LOG           = $000200;
+  APP_USE_ENGLISH_INPUT = $000400;
+  APP_USE_UTF8          = $000800;
+  WND_USE_AUTOCENTER    = $001000;
+  SND_CAN_PLAY          = $002000;
+  SND_CAN_PLAY_FILE     = $004000;
+  CROP_INVISIBLE        = $008000;
 
 procedure zgl_Init( const FSAA : Byte = 0; const StencilBits : Byte = 0 );
 procedure zgl_InitToHandle( const Handle : DWORD; const FSAA : Byte = 0; const StencilBits : Byte = 0 );
@@ -308,12 +310,11 @@ begin
     // GUI
     WIDGET_TYPE_ID:
       begin
-        if DWORD( UserData ) > managerGUI.Count.Types Then
+        if DWORD( UserData ) > length( managerGUI.Types ) Then
           begin
-            SetLength( managerGUI.Types, managerGUI.Count.Types + 1 );
-            managerGUI.Types[ managerGUI.Count.Types ]._type := DWORD( UserData );
-            widgetTLast := managerGUI.Count.Types;
-            INC( managerGUI.Count.Types );
+            SetLength( managerGUI.Types, length( managerGUI.Types ) + 1 );
+            managerGUI.Types[ length( managerGUI.Types ) - 1 ]._type := DWORD( UserData );
+            widgetTLast := length( managerGUI.Types ) - 1;
           end else
             widgetTLast := DWORD( UserData );
       end;
@@ -380,6 +381,9 @@ begin
 
   {if What and DEPTH_MASK > 0 Then
     glDepthMask( GL_TRUE );}
+
+  if What and CORRECT_RESOLUTION > 0 Then
+    app_Flags := app_Flags or CORRECT_WIDTH or CORRECT_HEIGHT;
 
   if What and APP_USE_AUTOPAUSE > 0 Then
     app_AutoPause := TRUE;
