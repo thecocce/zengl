@@ -248,7 +248,6 @@ begin
                 Target.Handle.Texture.Flags := Target.Handle.Texture.Flags xor TEX_RESTORE;
                 d3d_texArray[ Target.Handle.Texture.ID ].Texture.GetSurfaceLevel( 0, src );
                 d3d_texArray[ Target.Surface.ID ].Texture.GetSurfaceLevel( 0, dst );
-                // FIXME:
                 //d3d_Device.UpdateSurface( dst, nil, src, nil );
 
                 src := nil;
@@ -267,24 +266,17 @@ begin
 
       if app_Flags and CORRECT_RESOLUTION = 0 Then
         begin
-          scr_ResW := Round( ogl_Width * Target.Surface.U );
-          scr_ResH := Round( ogl_Height * Target.Surface.V );
-        end else
-          begin
-            // FIXME:
-            ogl_CropX := -scr_AddCX;
-            ogl_CropY := -scr_AddCY;
-            scr_ResW := Round( ( ogl_Width - scr_AddCX * 2 ) * Target.Surface.U );
-            scr_ResH := Round( ( ogl_Height - scr_AddCY * 2 ) * Target.Surface.V );
-          end;
+          scr_ResW := ogl_Width;
+          scr_ResH := ogl_Height;
+        end;
       if Target.Flags and RT_FULL_SCREEN = 0 Then
         begin
-          rt_ScaleW := scr_ResW / Target.Surface.Width;
-          rt_ScaleH := scr_ResH / Target.Surface.Height;
+          rt_ScaleW := Target.Surface.U;
+          rt_ScaleH := Target.Surface.V;
         end else
           begin
-            rt_ScaleW := Target.Surface.U;
-            rt_ScaleH := Target.Surface.V;
+            rt_ScaleW := scr_ResW / Target.Surface.Width;
+            rt_ScaleH := scr_ResH / Target.Surface.Height;
           end;
 
       case lMode of
@@ -316,7 +308,6 @@ begin
               d3d_Device.CopyRects( src, nil, 0, dst, nil );
               {$ENDIF}
               {$IFDEF USE_DIRECT3D9}
-              // FIXME:
               lRTarget.Surface := lRTarget.Handle.Texture;
               //d3d_Device.UpdateSurface( src, nil, dst, nil );
               {$ENDIF}

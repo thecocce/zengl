@@ -384,14 +384,14 @@ begin
       {$IFDEF USE_DIRECT3D8}
       glGenTextures( 1, @r.Handle.ID );
       r.Handle.Flags := r.Handle.Flags or TEX_RESTORE;
-      d3d_Device.CreateTexture( r.Surface.Width, r.Surface.Height, 1,
+      d3d_Device.CreateTexture( Round( r.Surface.Width / r.Surface.U ), Round( r.Surface.Height / r.Surface.V ), 1,
                                  D3DUSAGE_RENDERTARGET, fmt, D3DPOOL_DEFAULT,
                                  d3d_texArray[ r.Handle.ID ].Texture );
       {$ENDIF}
       {$IFDEF USE_DIRECT3D9}
       glGenTextures( 1, @r.Handle.Texture.ID );
       r.Handle.Texture.Flags := r.Handle.Texture.Flags or TEX_RESTORE;
-      d3d_Device.CreateTexture( r.Surface.Width, r.Surface.Height, 1,
+      d3d_Device.CreateTexture( Round( r.Surface.Width / r.Surface.U ), Round( r.Surface.Height / r.Surface.V ), 1,
                                  D3DUSAGE_RENDERTARGET, fmt, D3DPOOL_DEFAULT,
                                  d3d_texArray[ r.Handle.Texture.ID ].Texture, nil );
       {$ENDIF}
@@ -527,10 +527,11 @@ begin
   glMatrixMode( GL_MODELVIEW );
   glLoadIdentity;
 
-  if ogl_Mode = 1 Then
+ if ogl_Mode = 1 Then
     begin
       glScalef( rt_ScaleW, -rt_ScaleH, 1 );
       glTranslatef( 0, scr_ResH, 0 );
+      glViewPort( 0, 0, lRTarget.Surface.Width, lRTarget.Surface.Height );
     end;
 
   scr_SetViewPort;
