@@ -26,8 +26,8 @@ unit zgl_screen;
 interface
 uses
   Windows,
-  zgl_direct3d8,
-  zgl_direct3d8_all;
+  zgl_direct3d,
+  zgl_direct3d_all;
 
 const
   REFRESH_MAXIMUM = 0;
@@ -206,7 +206,7 @@ begin
         scr_Refresh := GetDisplayRefresh;
       end;
 
-  if Assigned( d3d8_Device ) Then
+  if Assigned( d3d_Device ) Then
     glClear( GL_COLOR_BUFFER_BIT );
 
   if wnd_FullScreen Then

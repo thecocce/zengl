@@ -29,7 +29,7 @@ uses
   zgl_types;
 
 const
-  cs_ZenGL = 'ZenDX 0.1.37';
+  cs_ZenGL = 'ZenDX 0.1.38';
 
   // zgl_Reg
   SYS_LOAD               = $000001;
@@ -101,8 +101,8 @@ uses
   zgl_application,
   zgl_screen,
   zgl_window,
-  zgl_direct3d8,
-  zgl_direct3d8_all,
+  zgl_direct3d,
+  zgl_direct3d_all,
   zgl_timers,
   zgl_log,
   zgl_textures,
@@ -150,7 +150,7 @@ begin
     wnd_FullScreen := TRUE;
 
   if not wnd_Create( wnd_Width, wnd_Height ) Then exit;
-  if not d3d8_Create Then exit;
+  if not d3d_Create Then exit;
   wnd_SetCaption( wnd_Caption );
   app_Work := TRUE;
 
@@ -173,7 +173,7 @@ begin
   app_InitToHandle := TRUE;
   wnd_Handle := Handle;
   wnd_DC := GetDC( wnd_Handle );
-  if not d3d8_Create Then exit;
+  if not d3d_Create Then exit;
   wnd_SetCaption( wnd_Caption );
   app_Work := TRUE;
 

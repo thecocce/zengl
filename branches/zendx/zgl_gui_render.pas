@@ -58,8 +58,8 @@ procedure gui_DrawScrollBar  ( const Widget : zglPWidget );
 implementation
 uses
   zgl_types,
-  zgl_direct3d8,
-  zgl_direct3d8_all,
+  zgl_direct3d,
+  zgl_direct3d_all,
   zgl_render_2d,
   zgl_mouse,
   zgl_primitives_2d,

@@ -73,7 +73,7 @@ var
 
 implementation
 uses
-  zgl_direct3d8_all,
+  zgl_direct3d_all,
   zgl_render_2d;
 
 procedure fx_SetBlendMode;

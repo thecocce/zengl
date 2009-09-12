@@ -29,7 +29,7 @@ uses
 
   zgl_screen,
   zgl_window,
-  zgl_direct3d8,
+  zgl_direct3d,
 
   zgl_timers,
 

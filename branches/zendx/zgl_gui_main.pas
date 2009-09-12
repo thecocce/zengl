@@ -48,7 +48,7 @@ var
 implementation
 uses
   zgl_main,
-  zgl_direct3d8_all,
+  zgl_direct3d_all,
   zgl_window,
   zgl_math_2d,
   zgl_gui_process,

@@ -49,7 +49,7 @@ implementation
 uses
   zgl_gui_main,
   zgl_gui_render,
-  zgl_direct3d8,
+  zgl_direct3d,
   zgl_mouse,
   zgl_collision_2d;
 

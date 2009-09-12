@@ -43,7 +43,7 @@ procedure pr2d_TriList( const Texture : zglPTexture; const TriList, TexCoords : 
 
 implementation
 uses
-  zgl_direct3d8_all,
+  zgl_direct3d_all,
   zgl_render_2d;
 
 procedure pr2d_Pixel;

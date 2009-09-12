@@ -26,8 +26,8 @@ unit zgl_window;
 interface
 uses
   Windows,
-  zgl_direct3d8,
-  zgl_direct3d8_all;
+  zgl_direct3d,
+  zgl_direct3d_all;
 
 function  wnd_Create( const Width, Height : Integer ) : Boolean;
 procedure wnd_Destroy;
@@ -200,7 +200,7 @@ begin
   if not app_InitToHandle Then
     wnd_SetPos( wnd_X, wnd_Y );
 
-  d3d8_Restore;
+  d3d_Restore;
 
   ogl_Width  := Width;
   ogl_Height := Height;

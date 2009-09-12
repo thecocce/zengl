@@ -28,8 +28,8 @@ uses
   Windows,
   Messages,
   zgl_types,
-  zgl_direct3d8,
-  zgl_direct3d8_all;
+  zgl_direct3d,
+  zgl_direct3d_all;
 
 procedure zero;
 procedure zerou( dt : Double );
@@ -100,11 +100,11 @@ end;
 
 procedure app_Draw;
 begin
-  if not d3d8_BeginScene Then exit;
+  if not d3d_BeginScene Then exit;
   scr_Clear;
   app_PDraw;
   scr_Flush;
-  d3d8_EndScene;
+  d3d_EndScene;
   if not app_Pause Then
     INC( app_FPSCount );
 end;
@@ -162,7 +162,7 @@ begin
                 snd_StopFile;
             end;
 
-      if not d3d8_BeginScene Then continue;
+      if not d3d_BeginScene Then continue;
 
       CanKillTimers := FALSE;
       if not app_Pause Then

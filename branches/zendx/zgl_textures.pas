@@ -27,8 +27,8 @@ interface
 
 uses
   zgl_types,
-  zgl_direct3d8,
-  zgl_direct3d8_all,
+  zgl_direct3d,
+  zgl_direct3d_all,
   zgl_memory;
 
 const

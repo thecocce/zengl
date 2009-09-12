@@ -19,24 +19,35 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 }
-unit zgl_direct3d8;
+unit zgl_direct3d;
 
 {$I zgl_config.cfg}
 
 interface
 uses
   Windows,
-  DirectXGraphics;
+  {$IFDEF USE_DIRECT3D8}
+  DirectXGraphics
+  {$ENDIF}
+  {$IFDEF USE_DIRECT3D9}
+  Direct3D9
+  {$ENDIF}
+  ;
 
-function  d3d8_Create : Boolean;
-procedure d3d8_Destroy;
-function  d3d8_Restore : Boolean;
-procedure d3d8_ResetState;
-function  d3d8_GetFormatID( Format : DWORD ) : DWORD;
-function  d3d8_CheckFSAA : TD3DMultiSampleType;
+function  d3d_Create : Boolean;
+procedure d3d_Destroy;
+function  d3d_Restore : Boolean;
+procedure d3d_ResetState;
+{$IFDEF USE_DIRECT3D8}
+function  d3d_GetFormatID( Format : DWORD ) : DWORD;
+{$ENDIF}
+{$IFDEF USE_DIRECT3D9}
+function  d3d_GetFormatID( Format : TD3DFormat ) : DWORD;
+{$ENDIF}
+function  d3d_CheckFSAA : TD3DMultiSampleType;
 
-function  d3d8_BeginScene : Boolean;
-procedure d3d8_EndScene;
+function  d3d_BeginScene : Boolean;
+procedure d3d_EndScene;
 
 procedure Set2DMode;
 procedure Set3DMode( const FOVY : Single = 45 );
@@ -49,21 +60,34 @@ procedure scissor_Begin( X, Y, Width, Height : Integer );
 procedure scissor_End;
 
 var
-  d3d8          : IDirect3D8;
-  d3d8_Device   : IDirect3DDevice8;
-  d3d8_Surface  : IDirect3DSurface8;
-  d3d8_Stencil  : IDirect3DSurface8;
-  d3d8_Viewport : TD3DViewport8;
-  d3d8_Caps     : TD3DCaps8;
-  d3d8_Adapter  : TD3DAdapterIdentifier8;
-  d3d8_Mode     : TD3DDisplayMode;
-  d3d8_Format   : TD3DFormat = D3DFMT_UNKNOWN;
+  {$IFDEF USE_DIRECT3D8}
+  d3d          : IDirect3D8;
+  d3d_Device   : IDirect3DDevice8;
+  d3d_Surface  : IDirect3DSurface8;
+  d3d_Stencil  : IDirect3DSurface8;
+  d3d_Viewport : TD3DViewport8;
+  d3d_Caps     : TD3DCaps8;
+  d3d_Adapter  : TD3DAdapterIdentifier8;
+  d3d_Mode     : TD3DDisplayMode;
+  d3d_Format   : TD3DFormat = D3DFMT_UNKNOWN;
+  {$ENDIF}
+  {$IFDEF USE_DIRECT3D9}
+  d3d          : IDirect3D9;
+  d3d_Device   : IDirect3DDevice9;
+  d3d_Surface  : IDirect3DSurface9;
+  d3d_Stencil  : IDirect3DSurface9;
+  d3d_Viewport : TD3DViewport9;
+  d3d_Caps     : TD3DCaps9;
+  d3d_Adapter  : TD3DAdapterIdentifier9;
+  d3d_Mode     : TD3DDisplayMode;
+  d3d_Format   : TD3DFormat = D3DFMT_UNKNOWN;
+  {$ENDIF}
 
-  d3d8_Params   : TD3DPresentParameters;
-  d3d8_ParamsW  : TD3DPresentParameters;
-  d3d8_ParamsF  : TD3DPresentParameters;
+  d3d_Params   : TD3DPresentParameters;
+  d3d_ParamsW  : TD3DPresentParameters;
+  d3d_ParamsF  : TD3DPresentParameters;
 
-  d3d8_CanDraw : Boolean;
+  d3d_CanDraw : Boolean;
 
   ogl_zDepth     : Byte;
   ogl_Stencil    : Byte;
@@ -91,7 +115,7 @@ var
 
 implementation
 uses
-  zgl_direct3d8_all,
+  zgl_direct3d_all,
   zgl_application,
   zgl_main,
   zgl_screen,
@@ -107,112 +131,161 @@ var
   tSCount  : Integer;
   tScissor : array of array[ 0..3 ] of Integer;
 
-function d3d8_Create;
+function d3d_Create;
   var
     i, modeCount : Integer;
 begin
   Result := FALSE;
 
-  d3d8 := Direct3DCreate8( D3D_SDK_VERSION );
-  if not Assigned( d3d8 ) Then
+  {$IFDEF USE_DIRECT3D8}
+  d3d := Direct3DCreate8( D3D_SDK_VERSION );
+  if not Assigned( d3d ) Then
     begin
       u_Error( 'Direct3DCreate8 Error' );
       exit;
     end else log_Add( 'Direct3DCreate8' );
 
-  d3d8.GetAdapterIdentifier( D3DADAPTER_DEFAULT, D3DENUM_NO_WHQL_LEVEL, d3d8_Adapter );
-  log_Add( 'D3D8_RENDERER: ' + d3d8_Adapter.Description );
+  d3d.GetAdapterIdentifier( D3DADAPTER_DEFAULT, D3DENUM_NO_WHQL_LEVEL, d3d_Adapter );
+  log_Add( 'D3D8_RENDERER: ' + d3d_Adapter.Description );
+  {$ENDIF}
+  {$IFDEF USE_DIRECT3D9}
+  d3d := Direct3DCreate9( D3D_SDK_VERSION );
+  if not Assigned( d3d ) Then
+    begin
+      u_Error( 'Direct3DCreate9 Error' );
+      exit;
+    end else log_Add( 'Direct3DCreate9' );
 
-  d3d8.GetDeviceCaps( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, d3d8_Caps );
-  ogl_MaxTexSize    := d3d8_Caps.MaxTextureWidth;
-  ogl_MaxAnisotropy := d3d8_Caps.MaxAnisotropy;
+  d3d.GetAdapterIdentifier( D3DADAPTER_DEFAULT, 0, d3d_Adapter );
+  log_Add( 'D3D9_RENDERER: ' + d3d_Adapter.Description );
+  {$ENDIF}
+
+  d3d.GetDeviceCaps( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, d3d_Caps );
+  ogl_MaxTexSize    := d3d_Caps.MaxTextureWidth;
+  ogl_MaxAnisotropy := d3d_Caps.MaxAnisotropy;
+  {$IFDEF USE_DIRECT3D8}
   log_Add( 'D3D8_MAX_TEXTURE_SIZE: ' + u_IntToStr( ogl_MaxTexSize ) );
   log_Add( 'D3D8_MAX_TEXTURE_ANISOTROPY: ' + u_IntToStr( ogl_MaxAnisotropy ) );
+  {$ENDIF}
+  {$IFDEF USE_DIRECT3D9}
+  log_Add( 'D3D9_MAX_TEXTURE_SIZE: ' + u_IntToStr( ogl_MaxTexSize ) );
+  log_Add( 'D3D9_MAX_TEXTURE_ANISOTROPY: ' + u_IntToStr( ogl_MaxAnisotropy ) );
+  {$ENDIF}
 
   // Windowed
-  if ( d3d8.GetAdapterDisplayMode( D3DADAPTER_DEFAULT, d3d8_Mode ) <> D3D_OK ) or ( d3d8_Mode.Format = D3DFMT_UNKNOWN ) Then
+  if ( d3d.GetAdapterDisplayMode( D3DADAPTER_DEFAULT, d3d_Mode ) <> D3D_OK ) or ( d3d_Mode.Format = D3DFMT_UNKNOWN ) Then
     begin
       u_Warning( 'GetAdapterDisplayMode = D3DFMT_UNKNOWN' );
       if not wnd_FullScreen Then exit;
     end;
 
   // FullScreen
-  modeCount := d3d8.GetAdapterModeCount( D3DADAPTER_DEFAULT );
-
+  {$IFDEF USE_DIRECT3D8}
+  modeCount := d3d.GetAdapterModeCount( D3DADAPTER_DEFAULT );
   for i := 0 to modeCount - 1 do
     begin
-      d3d8.EnumAdapterModes( D3DADAPTER_DEFAULT, i, d3d8_Mode );
-      if ( d3d8_Mode.Width <> scr_Width ) or ( d3d8_Mode.Height <> scr_Height) Then continue;
-      if ( scr_BPP = 16 ) and ( d3d8_GetFormatID( d3d8_Mode.Format ) > d3d8_GetFormatID( D3DFMT_A1R5G5B5 ) ) Then continue;
-      if ( d3d8_GetFormatID( d3d8_Mode.Format ) > d3d8_GetFormatID( d3d8_Format ) ) Then d3d8_Format := d3d8_Mode.Format;
+      d3d.EnumAdapterModes( D3DADAPTER_DEFAULT, i, d3d_Mode );
+      if ( d3d_Mode.Width <> scr_Width ) or ( d3d_Mode.Height <> scr_Height) Then continue;
+      if ( scr_BPP = 16 ) and ( d3d_GetFormatID( d3d_Mode.Format ) > d3d_GetFormatID( D3DFMT_A1R5G5B5 ) ) Then continue;
+      if ( d3d_GetFormatID( d3d_Mode.Format ) > d3d_GetFormatID( d3d_Format ) ) Then d3d_Format := d3d_Mode.Format;
     end;
+  {$ENDIF}
+  {$IFDEF USE_DIRECT3D9}
+  d3d_Format := D3DFMT_X8R8G8B8;
+  modeCount := d3d.GetAdapterModeCount( D3DADAPTER_DEFAULT, d3d_Format );
+  for i := 0 to modeCount - 1 do
+    begin
+      d3d.EnumAdapterModes( D3DADAPTER_DEFAULT, d3d_Format, i, d3d_Mode );
+      if ( d3d_Mode.Width <> scr_Width ) or ( d3d_Mode.Height <> scr_Height) Then continue;
+      if ( scr_BPP = 16 ) and ( d3d_GetFormatID( d3d_Mode.Format ) > d3d_GetFormatID( D3DFMT_A1R5G5B5 ) ) Then continue;
+      if ( d3d_GetFormatID( d3d_Mode.Format ) > d3d_GetFormatID( d3d_Format ) ) Then d3d_Format := d3d_Mode.Format;
+    end;
+  {$ENDIF}
 
-  if ( d3d8_Format = D3DFMT_UNKNOWN ) and wnd_FullScreen Then
+  if ( d3d_Format = D3DFMT_UNKNOWN ) and wnd_FullScreen Then
     begin
       u_Warning( 'Cannot set fullscreen mode' );
       wnd_FullScreen := FALSE;
       exit;
     end;
 
-  FillChar( d3d8_ParamsW, SizeOf( TD3DPresentParameters ), 0 );
-  with d3d8_ParamsW do
+  FillChar( d3d_ParamsW, SizeOf( TD3DPresentParameters ), 0 );
+  with d3d_ParamsW do
     begin
       BackBufferWidth  := wnd_Width;
       BackBufferHeight := wnd_Height;
-      BackBufferFormat := d3d8_Mode.Format;
+      BackBufferFormat := d3d_Mode.Format;
       BackBufferCount  := 1;
       MultiSampleType  := D3DMULTISAMPLE_NONE;
       hDeviceWindow    := wnd_Handle;
       Windowed         := TRUE;
+      {$IFDEF USE_DIRECT3D8}
       if scr_VSync Then
         SwapEffect := D3DSWAPEFFECT_COPY_VSYNC
       else
         SwapEffect := D3DSWAPEFFECT_COPY;
+      {$ENDIF}
+      {$IFDEF USE_DIRECT3D9}
+      SwapEffect := D3DSWAPEFFECT_COPY;
+      if scr_VSync Then
+        PresentationInterval := D3DPRESENT_INTERVAL_ONE
+      else
+        PresentationInterval := D3DPRESENT_INTERVAL_IMMEDIATE;
+      {$ENDIF}
       EnableAutoDepthStencil := TRUE;
       AutoDepthStencilFormat := D3DFMT_D16;
     end;
 
-  FillChar( d3d8_ParamsF, SizeOf( TD3DPresentParameters ), 0 );
-  with d3d8_ParamsF do
+  FillChar( d3d_ParamsF, SizeOf( TD3DPresentParameters ), 0 );
+  with d3d_ParamsF do
     begin
       BackBufferWidth  := scr_Width;
       BackBufferHeight := scr_Height;
-      BackBufferFormat := d3d8_Format;
+      BackBufferFormat := d3d_Format;
       BackBufferCount  := 1;
-      MultiSampleType  := d3d8_CheckFSAA;
+      MultiSampleType  := d3d_CheckFSAA;
       hDeviceWindow    := wnd_Handle;
       Windowed         := FALSE;
       SwapEffect       := D3DSWAPEFFECT_DISCARD;
+      {$IFDEF USE_DIRECT3D8}
       FullScreen_RefreshRateInHz := D3DPRESENT_RATE_DEFAULT;
       if scr_VSync Then
         FullScreen_PresentationInterval := D3DPRESENT_INTERVAL_ONE
       else
         FullScreen_PresentationInterval := D3DPRESENT_INTERVAL_IMMEDIATE;
+      {$ENDIF}
+      {$IFDEF USE_DIRECT3D9}
+      SwapEffect := D3DSWAPEFFECT_COPY;
+      if scr_VSync Then
+        PresentationInterval := D3DPRESENT_INTERVAL_ONE
+      else
+        PresentationInterval := D3DPRESENT_INTERVAL_IMMEDIATE;
+      {$ENDIF}
       EnableAutoDepthStencil := TRUE;
       AutoDepthStencilFormat := D3DFMT_D16;
     end;
 
   if wnd_FullScreen Then
-    d3d8_Params := d3d8_ParamsF
+    d3d_Params := d3d_ParamsF
   else
-    d3d8_Params := d3d8_ParamsW;
+    d3d_Params := d3d_ParamsW;
 
-  if d3d8_GetFormatID( d3d8_Params.BackBufferFormat ) < 4 Then
+  if d3d_GetFormatID( d3d_Params.BackBufferFormat ) < 4 Then
     scr_BPP := 16
   else
     scr_BPP := 32;
 
   // D3D Device
   // D3DCREATE_HARDWARE_VERTEXPROCESSING
-  if d3d8.CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, wnd_Handle, $40 or D3DCREATE_FPU_PRESERVE, d3d8_Params, d3d8_Device ) <> D3D_OK Then
+  if d3d.CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, wnd_Handle, $40 or D3DCREATE_FPU_PRESERVE, d3d_Params, d3d_Device ) <> D3D_OK Then
     begin
       //D3DCREATE_SOFTWARE_VERTEXPROCESSING
-      if d3d8.CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, wnd_Handle, $20 or D3DCREATE_FPU_PRESERVE, d3d8_Params, d3d8_Device ) <> D3D_OK Then
+      if d3d.CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, wnd_Handle, $20 or D3DCREATE_FPU_PRESERVE, d3d_Params, d3d_Device ) <> D3D_OK Then
         begin
           //D3DCREATE_PUREDEVICE
-          if d3d8.CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, wnd_Handle, $10 or D3DCREATE_FPU_PRESERVE, d3d8_Params, d3d8_Device ) <> D3D_OK Then
+          if d3d.CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, wnd_Handle, $10 or D3DCREATE_FPU_PRESERVE, d3d_Params, d3d_Device ) <> D3D_OK Then
             begin
-              u_Error( 'Can''t create D3D8 device' );
+              u_Error( 'Can''t create d3d device' );
               exit;
             end else log_Add( 'D3DCREATE_PUREDEVICE' );
         end else log_Add( 'D3DCREATE_SOFTWARE_VERTEXPROCESSING' );
@@ -224,29 +297,29 @@ begin
   gl_TexCoord2f  := @glTexCoord2f;
   gl_TexCoord2fv := @glTexCoord2fv;
 
-  d3d8_ResetState;
+  d3d_ResetState;
 
   Result := TRUE;
 end;
 
-procedure d3d8_Destroy;
+procedure d3d_Destroy;
 begin
-  d3d8_Device._Release;
-  d3d8_Device := nil;
-  d3d8._Release;
-  d3d8        := nil;
+  d3d_Device._Release;
+  d3d_Device := nil;
+  d3d._Release;
+  d3d        := nil;
 
-  d3d8_texCount := 0;
-  SetLength( d3d8_texArray, 0 );
+  d3d_texCount := 0;
+  SetLength( d3d_texArray, 0 );
 end;
 
-function d3d8_Restore;
+function d3d_Restore;
   var
     r : zglPRenderTarget;
     fmt : TD3DFormat;
 begin
   Result := FALSE;
-  if not Assigned( d3d8_Device ) Then exit;
+  if not Assigned( d3d_Device ) Then exit;
 
   r := managerRTarget.First.Next;
   while Assigned( r ) do
@@ -255,32 +328,45 @@ begin
       r := r.Next;
     end;
 
-  d3d8_ParamsW.BackBufferWidth  := wnd_Width;
-  d3d8_ParamsW.BackBufferHeight := wnd_Height;
-  d3d8_ParamsF.BackBufferWidth  := scr_Width;
-  d3d8_ParamsF.BackBufferHeight := scr_Height;
-  d3d8_ParamsF.MultiSampleType  := d3d8_CheckFSAA;
+  d3d_ParamsW.BackBufferWidth  := wnd_Width;
+  d3d_ParamsW.BackBufferHeight := wnd_Height;
+  d3d_ParamsF.BackBufferWidth  := scr_Width;
+  d3d_ParamsF.BackBufferHeight := scr_Height;
+  d3d_ParamsF.MultiSampleType  := d3d_CheckFSAA;
+  {$IFDEF USE_DIRECT3D8}
   if scr_VSync Then
     begin
-      d3d8_ParamsW.SwapEffect := D3DSWAPEFFECT_COPY_VSYNC;
-      d3d8_ParamsF.FullScreen_PresentationInterval := D3DPRESENT_INTERVAL_ONE
+      d3d_ParamsW.SwapEffect := D3DSWAPEFFECT_COPY_VSYNC;
+      d3d_ParamsF.FullScreen_PresentationInterval := D3DPRESENT_INTERVAL_ONE
     end else
       begin
-        d3d8_ParamsW.SwapEffect := D3DSWAPEFFECT_COPY;
-        d3d8_ParamsF.FullScreen_PresentationInterval := D3DPRESENT_INTERVAL_IMMEDIATE;
+        d3d_ParamsW.SwapEffect := D3DSWAPEFFECT_COPY;
+        d3d_ParamsF.FullScreen_PresentationInterval := D3DPRESENT_INTERVAL_IMMEDIATE;
       end;
+  {$ENDIF}
+  {$IFDEF USE_DIRECT3D9}
+  if scr_VSync Then
+    begin
+      d3d_ParamsW.PresentationInterval := D3DPRESENT_INTERVAL_ONE;
+      d3d_ParamsF.PresentationInterval := D3DPRESENT_INTERVAL_ONE;
+    end else
+      begin
+        d3d_ParamsW.PresentationInterval := D3DPRESENT_INTERVAL_IMMEDIATE;
+        d3d_ParamsF.PresentationInterval := D3DPRESENT_INTERVAL_IMMEDIATE;
+      end;
+  {$ENDIF}
 
   if wnd_FullScreen Then
-    d3d8_Params := d3d8_ParamsF
+    d3d_Params := d3d_ParamsF
   else
-    d3d8_Params := d3d8_ParamsW;
+    d3d_Params := d3d_ParamsW;
 
-  if d3d8_GetFormatID( d3d8_Params.BackBufferFormat ) < 4 Then
+  if d3d_GetFormatID( d3d_Params.BackBufferFormat ) < 4 Then
     scr_BPP := 16
   else
     scr_BPP := 32;
 
-  d3d8_Device.Reset( d3d8_Params );
+  d3d_Device.Reset( d3d_Params );
 
   r := managerRTarget.First.Next;
   while Assigned( r ) do
@@ -291,18 +377,25 @@ begin
         fmt := D3DFMT_A8R8G8B8;
       glGenTextures( 1, @r.Handle.ID );
       r.Handle.Flags := r.Handle.Flags or TEX_RESTORE;
-      d3d8_Device.CreateTexture( r.Surface.Width, r.Surface.Height, 1,
+      {$IFDEF USE_DIRECT3D8}
+      d3d_Device.CreateTexture( r.Surface.Width, r.Surface.Height, 1,
                                  D3DUSAGE_RENDERTARGET, fmt, D3DPOOL_DEFAULT,
-                                 d3d8_texArray[ r.Handle.ID ].Texture );
+                                 d3d_texArray[ r.Handle.ID ].Texture );
+      {$ENDIF}
+      {$IFDEF USE_DIRECT3D9}
+      d3d_Device.CreateTexture( r.Surface.Width, r.Surface.Height, 1,
+                                 D3DUSAGE_RENDERTARGET, fmt, D3DPOOL_DEFAULT,
+                                 d3d_texArray[ r.Handle.ID ].Texture, nil );
+      {$ENDIF}
       r := r.Next;
     end;
 
-  d3d8_ResetState;
+  d3d_ResetState;
 
   Result := TRUE;
 end;
 
-procedure d3d8_ResetState;
+procedure d3d_ResetState;
 begin
   glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
   glAlphaFunc( GL_EQUAL, 1 );
@@ -314,11 +407,11 @@ begin
 
   glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
 
-  d3d8_Device.SetRenderState( D3DRS_CULLMODE, D3DCULL_NONE );
-  d3d8_Device.SetRenderState( D3DRS_LIGHTING, iFALSE );
+  d3d_Device.SetRenderState( D3DRS_CULLMODE, D3DCULL_NONE );
+  d3d_Device.SetRenderState( D3DRS_LIGHTING, iFALSE );
 end;
 
-function d3d8_GetFormatID;
+function d3d_GetFormatID;
 begin
   case Format of
     D3DFMT_R5G6B5:   Result := 1;
@@ -331,7 +424,7 @@ begin
   end;
 end;
 
-function d3d8_CheckFSAA;
+function d3d_CheckFSAA;
   var
     fsaa : Integer;
 begin
@@ -342,13 +435,23 @@ begin
     fsaa := 16;
   if wnd_FullScreen Then
     begin
-      while d3d8.CheckDeviceMultiSampleType( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, d3d8_Format, FALSE, TD3DMultiSampleType( fsaa ) ) <> D3D_OK do
+      {$IFDEF USE_DIRECT3D8}
+      while d3d.CheckDeviceMultiSampleType( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, d3d_Format, FALSE, TD3DMultiSampleType( fsaa ) ) <> D3D_OK do
+      {$ENDIF}
+      {$IFDEF USE_DIRECT3D9}
+      while d3d.CheckDeviceMultiSampleType( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, d3d_Format, FALSE, TD3DMultiSampleType( fsaa ), nil ) <> D3D_OK do
+      {$ENDIF}
         begin
           if fsaa = 1 Then break;
           DEC( fsaa );
         end;
     end else
-      while d3d8.CheckDeviceMultiSampleType( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, d3d8_Mode.Format, TRUE, TD3DMultiSampleType( fsaa ) ) <> D3D_OK do
+      {$IFDEF USE_DIRECT3D8}
+      while d3d.CheckDeviceMultiSampleType( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, d3d_Mode.Format, TRUE, TD3DMultiSampleType( fsaa ) ) <> D3D_OK do
+      {$ENDIF}
+      {$IFDEF USE_DIRECT3D9}
+      while d3d.CheckDeviceMultiSampleType( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, d3d_Mode.Format, TRUE, TD3DMultiSampleType( fsaa ), nil ) <> D3D_OK do
+      {$ENDIF}
         begin
           if fsaa = 1 Then break;
           DEC( fsaa );
@@ -357,49 +460,49 @@ begin
   Result := TD3DMultiSampleType( fsaa );
 end;
 
-function d3d8_BeginScene;
+function d3d_BeginScene;
   var
     hr : HRESULT;
 begin
-  if d3d8_CanDraw Then
+  if d3d_CanDraw Then
     begin
       Result := TRUE;
       exit;
     end else
       Result := FALSE;
 
-  hr := d3d8_Device.TestCooperativeLevel;
+  hr := d3d_Device.TestCooperativeLevel;
   case hr of
     D3DERR_DEVICELOST: exit;
     D3DERR_DEVICENOTRESET:
       begin
         if not wnd_FullScreen Then
           begin
-            if ( d3d8.GetAdapterDisplayMode( D3DADAPTER_DEFAULT, d3d8_Mode ) <> D3D_OK ) or ( d3d8_Mode.Format = D3DFMT_UNKNOWN ) Then
+            if ( d3d.GetAdapterDisplayMode( D3DADAPTER_DEFAULT, d3d_Mode ) <> D3D_OK ) or ( d3d_Mode.Format = D3DFMT_UNKNOWN ) Then
               begin
                 u_Warning( 'GetAdapterDisplayMode = D3DFMT_UNKNOWN' );
                 exit;
               end;
 
-            d3d8_ParamsW.BackBufferFormat := d3d8_Mode.Format;
+            d3d_ParamsW.BackBufferFormat := d3d_Mode.Format;
           end;
 
-        if not d3d8_Restore Then exit;
+        if not d3d_Restore Then exit;
       end;
   end;
 
-  if d3d8_Device.BeginScene <> D3D_OK Then exit;
+  if d3d_Device.BeginScene <> D3D_OK Then exit;
 
-  d3d8_CanDraw := TRUE;
+  d3d_CanDraw := TRUE;
 
   Result := TRUE;
 end;
 
-procedure d3d8_EndScene;
+procedure d3d_EndScene;
 begin
-  d3d8_CanDraw := FALSE;
-  d3d8_Device.EndScene;
-  d3d8_Device.Present( nil, nil, 0, nil );
+  d3d_CanDraw := FALSE;
+  d3d_Device.EndScene;
+  d3d_Device.Present( nil, nil, 0, nil );
 end;
 
 procedure Set2DMode;

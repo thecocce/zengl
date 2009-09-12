@@ -83,7 +83,7 @@ var
 implementation
 uses
   zgl_main,
-  zgl_direct3d8_all;
+  zgl_direct3d_all;
 
 var
   tess        : Integer;

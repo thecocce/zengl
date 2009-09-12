@@ -19,13 +19,19 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 }
-unit zgl_direct3d8_all;
+unit zgl_direct3d_all;
 
 {$I zgl_config.cfg}
 
 interface
 uses
-  DirectXGraphics;
+  {$IFDEF USE_DIRECT3D8}
+  DirectXGraphics
+  {$ENDIF}
+  {$IFDEF USE_DIRECT3D9}
+  Direct3D9
+  {$ENDIF}
+  ;
 
 const
   libGLU = 'glu32.dll';
@@ -224,7 +230,8 @@ const
 
 type
   zglD3D8Texture = record
-    Texture    : IDirect3DTexture8;
+    Texture    : {$IFDEF USE_DIRECT3D8} IDirect3DTexture8 {$ENDIF}
+                 {$IFDEF USE_DIRECT3D9} IDirect3DTexture9 {$ENDIF};
     MagFilter  : LongWord;
     MinFilter  : LongWord;
     MipFilter  : LongWord;
@@ -288,14 +295,15 @@ var
   gl_TexCoord2fv  : procedure( Coord : PSingle );
   gl_Vertex2f     : procedure( X, Y : Single );
   gl_Vertex2fv    : procedure( v : PSingle );
-  d3d8_texCount   : Integer;
-  d3d8_texArray   : array of zglD3D8Texture;
-  d3d8_Matrices   : array[ 0..23 ] of TD3DMatrix;
-  d3d8_MatrixMode : LongWord;
+  d3d_texCount    : Integer;
+  d3d_texArray    : array of zglD3D8Texture;
+  d3d_Matrices    : array[ 0..23 ] of TD3DMatrix;
+  d3d_MatrixMode  : {$IFDEF USE_DIRECT3D8} LongWord {$ENDIF}
+                    {$IFDEF USE_DIRECT3D9} TD3DTransformStateType {$ENDIF};
 
 implementation
 uses
-  zgl_direct3d8,
+  zgl_direct3d,
   zgl_application,
   zgl_main,
   zgl_screen,
@@ -336,11 +344,11 @@ procedure glClear;
 begin
   glViewPort( 0, 0, wnd_Width, wnd_Height );
   if mask and GL_DEPTH_BUFFER_BIT > 0 Then
-    d3d8_Device.Clear( 0, nil, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB( 0, 0, 0 ), 1, 0 );
+    d3d_Device.Clear( 0, nil, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB( 0, 0, 0 ), 1, 0 );
   if mask and GL_STENCIL_BUFFER_BIT > 0 Then
-    d3d8_Device.Clear( 0, nil, D3DCLEAR_STENCIL, D3DCOLOR_XRGB( 0, 0, 0 ), 1, 0 );
+    d3d_Device.Clear( 0, nil, D3DCLEAR_STENCIL, D3DCOLOR_XRGB( 0, 0, 0 ), 1, 0 );
   if mask and GL_COLOR_BUFFER_BIT > 0 Then
-    d3d8_Device.Clear( 0, nil, D3DCLEAR_TARGET, D3DCOLOR_XRGB( 0, 0, 0 ), 1, 0 );
+    d3d_Device.Clear( 0, nil, D3DCLEAR_TARGET, D3DCOLOR_XRGB( 0, 0, 0 ), 1, 0 );
   SetCurrentMode;
 end;
 
@@ -394,15 +402,28 @@ begin
     D3DPT_TRIANGLEFAN:;
   end;
 
+  {$IFDEF USE_DIRECT3D8}
   if RenderTextured Then
     begin
-      d3d8_Device.SetVertexShader( D3DFVF_XYZCT );
-      d3d8_Device.DrawPrimitiveUP( RenderMode, Count, @bTVertices[ 0 ], s_D3DFVF_XYZCT );
+      d3d_Device.SetVertexShader( D3DFVF_XYZCT );
+      d3d_Device.DrawPrimitiveUP( RenderMode, Count, @bTVertices[ 0 ], s_D3DFVF_XYZCT );
     end else
       begin
-        d3d8_Device.SetVertexShader( D3DFVF_XYZC );
-        d3d8_Device.DrawPrimitiveUP( RenderMode, Count, @bPVertices[ 0 ], s_D3DFVF_XYZC );
+        d3d_Device.SetVertexShader( D3DFVF_XYZC );
+        d3d_Device.DrawPrimitiveUP( RenderMode, Count, @bPVertices[ 0 ], s_D3DFVF_XYZC );
       end;
+  {$ENDIF}
+  {$IFDEF USE_DIRECT3D9}
+  if RenderTextured Then
+    begin
+      d3d_Device.SetFVF( D3DFVF_XYZCT );
+      d3d_Device.DrawPrimitiveUP( RenderMode, Count, bTVertices[ 0 ], s_D3DFVF_XYZCT );
+    end else
+      begin
+        d3d_Device.SetFVF( D3DFVF_XYZC );
+        d3d_Device.DrawPrimitiveUP( RenderMode, Count, bPVertices[ 0 ], s_D3DFVF_XYZC );
+      end;
+  {$ENDIF}
 
 _end:
   bTVCount := 0;
@@ -416,11 +437,16 @@ procedure glEnable;
 begin
   case cap of
     GL_TEXTURE_2D: RenderTextured := TRUE;
-    GL_BLEND: d3d8_Device.SetRenderState( D3DRS_ALPHABLENDENABLE, iTRUE );
-    GL_ALPHA_TEST: d3d8_Device.SetRenderState( D3DRS_ALPHATESTENABLE, iTRUE );
-    GL_DEPTH_TEST: d3d8_Device.SetRenderState( D3DRS_ZENABLE, D3DZB_TRUE );
+    GL_BLEND: d3d_Device.SetRenderState( D3DRS_ALPHABLENDENABLE, iTRUE );
+    GL_ALPHA_TEST: d3d_Device.SetRenderState( D3DRS_ALPHATESTENABLE, iTRUE );
+    GL_DEPTH_TEST: d3d_Device.SetRenderState( D3DRS_ZENABLE, D3DZB_TRUE );
     GL_SCISSOR_TEST: ScissorEnabled := TRUE;
-    GL_LINE_SMOOTH, GL_POLYGON_SMOOTH: d3d8_Device.SetRenderState( D3DRS_EDGEANTIALIAS, iTRUE );
+    {$IFDEF USE_DIRECT3D8}
+    GL_LINE_SMOOTH, GL_POLYGON_SMOOTH: d3d_Device.SetRenderState( D3DRS_EDGEANTIALIAS, iTRUE );
+    {$ENDIF}
+    {$IFDEF USE_DIRECT3D9}
+    GL_LINE_SMOOTH, GL_POLYGON_SMOOTH: d3d_Device.SetRenderState( D3DRS_ANTIALIASEDLINEENABLE, iTRUE );
+    {$ENDIF}
   end;
 end;
 
@@ -431,17 +457,22 @@ begin
       begin
         RenderTexID    := -1;
         RenderTextured := FALSE;
-        d3d8_Device.SetTexture( 0, nil );
+        d3d_Device.SetTexture( 0, nil );
       end;
-    GL_BLEND: d3d8_Device.SetRenderState( D3DRS_ALPHABLENDENABLE, iFALSE );
-    GL_ALPHA_TEST: d3d8_Device.SetRenderState( D3DRS_ALPHATESTENABLE, iFALSE );
-    GL_DEPTH_TEST: d3d8_Device.SetRenderState( D3DRS_ZENABLE, D3DZB_FALSE );
+    GL_BLEND: d3d_Device.SetRenderState( D3DRS_ALPHABLENDENABLE, iFALSE );
+    GL_ALPHA_TEST: d3d_Device.SetRenderState( D3DRS_ALPHATESTENABLE, iFALSE );
+    GL_DEPTH_TEST: d3d_Device.SetRenderState( D3DRS_ZENABLE, D3DZB_FALSE );
     GL_SCISSOR_TEST:
       begin
         ScissorEnabled := FALSE;
         SetCurrentMode;
       end;
-    GL_LINE_SMOOTH, GL_POLYGON_SMOOTH: d3d8_Device.SetRenderState( D3DRS_EDGEANTIALIAS, iFALSE );
+    {$IFDEF USE_DIRECT3D8}
+    GL_LINE_SMOOTH, GL_POLYGON_SMOOTH: d3d_Device.SetRenderState( D3DRS_EDGEANTIALIAS, iFALSE );
+    {$ENDIF}
+    {$IFDEF USE_DIRECT3D9}
+    GL_LINE_SMOOTH, GL_POLYGON_SMOOTH: d3d_Device.SetRenderState( D3DRS_ANTIALIASEDLINEENABLE, iFALSE );
+    {$ENDIF}
   end;
 end;
 
@@ -449,20 +480,20 @@ procedure glViewport;
 begin
   if not ScissorEnabled Then
     begin
-      d3d8_Viewport.X      := X;
-      d3d8_Viewport.Y      := Y;
-      d3d8_Viewport.Width  := Width;
-      d3d8_Viewport.Height := Height;
+      d3d_Viewport.X      := X;
+      d3d_Viewport.Y      := Y;
+      d3d_Viewport.Width  := Width;
+      d3d_Viewport.Height := Height;
       if ogl_Mode = 2 Then
         begin
-          d3d8_Viewport.MinZ := -1;
-          d3d8_Viewport.MaxZ := 1;
+          d3d_Viewport.MinZ := -1;
+          d3d_Viewport.MaxZ := 1;
         end else
           begin
-            d3d8_Viewport.MinZ := ogl_zNear;
-            d3d8_Viewport.MaxZ := ogl_zFar;
+            d3d_Viewport.MinZ := ogl_zNear;
+            d3d_Viewport.MaxZ := ogl_zFar;
           end;
-      d3d8_Device.SetViewport( d3d8_Viewport );
+      d3d_Device.SetViewport( d3d_Viewport );
     end else
       begin
         glDisable( GL_DEPTH_TEST );
@@ -486,7 +517,7 @@ end;
 procedure glOrtho;
 begin
   glFrustum( -left - 0.5, -right - 0.5, -bottom - 0.5, -top - 0.5, zNear, zFar );
-  d3d8_Device.SetTransform( d3d8_MatrixMode, d3d8_Matrices[ d3d8_MatrixMode ] );
+  d3d_Device.SetTransform( d3d_MatrixMode, d3d_Matrices[ DWORD( d3d_MatrixMode ) ] );
 end;
 
 procedure glScissor;
@@ -540,8 +571,8 @@ begin
     GL_ALWAYS:   value := D3DCMP_ALWAYS;
   end;
 
-  d3d8_Device.SetRenderState( D3DRS_ALPHAREF,  Trunc( ref * 255 ) );
-  d3d8_Device.SetRenderState( D3DRS_ALPHAFUNC, value );
+  d3d_Device.SetRenderState( D3DRS_ALPHAREF,  Trunc( ref * 255 ) );
+  d3d_Device.SetRenderState( D3DRS_ALPHAFUNC, value );
 end;
 
 procedure glBlendFunc;
@@ -576,22 +607,22 @@ begin
     GL_SRC_ALPHA_SATURATE:  dest := D3DBLEND_SRCALPHASAT;
   end;
 
-  d3d8_Device.SetRenderState( D3DRS_SRCBLEND,  src );
-  d3d8_Device.SetRenderState( D3DRS_DESTBLEND, dest );
+  d3d_Device.SetRenderState( D3DRS_SRCBLEND,  src );
+  d3d_Device.SetRenderState( D3DRS_DESTBLEND, dest );
 end;
 
 procedure glMatrixMode;
 begin
   case mode of
-    GL_MODELVIEW:  d3d8_MatrixMode := D3DTS_VIEW;
-    GL_PROJECTION: d3d8_MatrixMode := D3DTS_PROJECTION;
-    GL_TEXTURE:    d3d8_MatrixMode := D3DTS_TEXTURE0;
+    GL_MODELVIEW:  d3d_MatrixMode := D3DTS_VIEW;
+    GL_PROJECTION: d3d_MatrixMode := D3DTS_PROJECTION;
+    GL_TEXTURE:    d3d_MatrixMode := D3DTS_TEXTURE0;
   end;
 end;
 
 procedure glLoadIdentity;
 begin
-  with d3d8_Matrices[ d3d8_MatrixMode ] do
+  with d3d_Matrices[ DWORD( d3d_MatrixMode ) ] do
     begin
       _11 := 1;
       _12 := 0;
@@ -613,7 +644,7 @@ begin
       _43 := 0;
       _44 := 1;
     end;
-  d3d8_Device.SetTransform( d3d8_MatrixMode, d3d8_Matrices[ d3d8_MatrixMode ] );
+  d3d_Device.SetTransform( d3d_MatrixMode, d3d_Matrices[ DWORD( d3d_MatrixMode ) ] );
 end;
 
 procedure gluPerspective(fovy, aspect, zNear, zFar: GLdouble);
@@ -624,12 +655,12 @@ begin
   xmax := ymax * aspect;
 
   glFrustum( -xmax, xmax, -ymax, ymax, zNear, zFar );
-  d3d8_Device.SetTransform( d3d8_MatrixMode, d3d8_Matrices[ d3d8_MatrixMode ] );
+  d3d_Device.SetTransform( d3d_MatrixMode, d3d_Matrices[ DWORD( d3d_MatrixMode ) ] );
 end;
 
 procedure glFrustum;
 begin
-  with d3d8_Matrices[ d3d8_MatrixMode ] do
+  with d3d_Matrices[ DWORD( d3d_MatrixMode ) ] do
     begin
       _11 := ( zNear * 2 ) / ( Right - Left );
       _12 := 0;
@@ -655,7 +686,7 @@ end;
 
 procedure glScalef;
 begin
-  with d3d8_Matrices[ d3d8_MatrixMode ] do
+  with d3d_Matrices[ DWORD( d3d_MatrixMode ) ] do
     begin
       _11 := x * _11;
       _12 := x * _12;
@@ -672,19 +703,19 @@ begin
       _33 := z * _33;
       _34 := z * _34;
     end;
-  d3d8_Device.SetTransform( d3d8_MatrixMode, d3d8_Matrices[ d3d8_MatrixMode ] );
+  d3d_Device.SetTransform( d3d_MatrixMode, d3d_Matrices[ DWORD( d3d_MatrixMode ) ] );
 end;
 
 procedure glTranslatef;
 begin
-  with d3d8_Matrices[ d3d8_MatrixMode ] do
+  with d3d_Matrices[ DWORD( d3d_MatrixMode ) ] do
     begin
       _41 := _41 + x;
       _42 := _42 + y;
       _43 := _43 + z;
       _44 := _44;
     end;
-  d3d8_Device.SetTransform( d3d8_MatrixMode, d3d8_Matrices[ d3d8_MatrixMode ] );
+  d3d_Device.SetTransform( d3d_MatrixMode, d3d_Matrices[ DWORD( d3d_MatrixMode ) ] );
 end;
 
 procedure glVertex2f;
@@ -799,28 +830,46 @@ end;
 
 procedure glBindTexture;
 begin
-  if texture >= d3d8_texCount Then
+  if texture >= d3d_texCount Then
     begin
-      d3d8_Device.SetTexture( 0, nil );
+      d3d_Device.SetTexture( 0, nil );
       exit;
     end;
 
   if Assigned( lRTarget ) and ( texture = lRTarget.Surface.ID ) Then
     begin
-      d3d8_Device.SetTextureStageState( 0, D3DTSS_MAGFILTER, D3DTEXF_POINT );
-      d3d8_Device.SetTextureStageState( 0, D3DTSS_MINFILTER, D3DTEXF_POINT );
+      {$IFDEF USE_DIRECT3D8}
+      d3d_Device.SetTextureStageState( 0, D3DTSS_MAGFILTER, D3DTEXF_POINT );
+      d3d_Device.SetTextureStageState( 0, D3DTSS_MINFILTER, D3DTEXF_POINT );
+      {$ENDIF}
+      {$IFDEF USE_DIRECT3D9}
+      d3d_Device.SetSamplerState( 0, D3DSAMP_MAGFILTER, D3DTEXF_POINT );
+      d3d_Device.SetSamplerState( 0, D3DSAMP_MINFILTER, D3DTEXF_POINT );
+      {$ENDIF}
     end else
       begin
-        if d3d8_texArray[ texture ].MagFilter > 0 Then
-          d3d8_Device.SetTextureStageState( 0, D3DTSS_MAGFILTER, d3d8_texArray[ texture ].MagFilter );
-        if d3d8_texArray[ texture ].MinFilter > 0 Then
-          d3d8_Device.SetTextureStageState( 0, D3DTSS_MINFILTER, d3d8_texArray[ texture ].MinFilter );
-        if d3d8_texArray[ texture ].MipFilter > 0 Then
-          d3d8_Device.SetTextureStageState( 0, D3DTSS_MIPFILTER, d3d8_texArray[ texture ].MipFilter );
+        {$IFDEF USE_DIRECT3D8}
+        if d3d_texArray[ texture ].MagFilter > 0 Then
+          d3d_Device.SetTextureStageState( 0, D3DTSS_MAGFILTER, d3d_texArray[ texture ].MagFilter );
+        if d3d_texArray[ texture ].MinFilter > 0 Then
+          d3d_Device.SetTextureStageState( 0, D3DTSS_MINFILTER, d3d_texArray[ texture ].MinFilter );
+        if d3d_texArray[ texture ].MipFilter > 0 Then
+          d3d_Device.SetTextureStageState( 0, D3DTSS_MIPFILTER, d3d_texArray[ texture ].MipFilter );
         if ogl_Anisotropy > 0 Then
-          d3d8_Device.SetTextureStageState( 0, D3DTSS_MAXANISOTROPY, ogl_Anisotropy );
+          d3d_Device.SetTextureStageState( 0, D3DTSS_MAXANISOTROPY, ogl_Anisotropy );
+        {$ENDIF}
+        {$IFDEF USE_DIRECT3D9}
+        if d3d_texArray[ texture ].MagFilter > 0 Then
+          d3d_Device.SetSamplerState( 0, D3DSAMP_MAGFILTER, d3d_texArray[ texture ].MagFilter );
+        if d3d_texArray[ texture ].MinFilter > 0 Then
+          d3d_Device.SetSamplerState( 0, D3DSAMP_MINFILTER, d3d_texArray[ texture ].MinFilter );
+        if d3d_texArray[ texture ].MipFilter > 0 Then
+          d3d_Device.SetSamplerState( 0, D3DSAMP_MIPFILTER, d3d_texArray[ texture ].MipFilter );
+        if ogl_Anisotropy > 0 Then
+          d3d_Device.SetSamplerState( 0, D3DSAMP_MAXANISOTROPY, ogl_Anisotropy );
+        {$ENDIF}
       end;
-  case  d3d8_texArray[ texture ].Wrap of
+  case  d3d_texArray[ texture ].Wrap of
     GL_CLAMP_TO_EDGE:
       begin
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
@@ -834,7 +883,7 @@ begin
   end;
 
   RenderTexID := texture;
-  d3d8_Device.SetTexture( 0, d3d8_texArray[ texture ].Texture );
+  d3d_Device.SetTexture( 0, d3d_texArray[ texture ].Texture );
 end;
 
 procedure glGenTextures;
@@ -842,8 +891,8 @@ procedure glGenTextures;
     i : Integer;
 begin
   RenderTexID := -1;
-  for i := 0 to d3d8_texCount - 1 do
-    if d3d8_texArray[ i ].Texture = nil Then
+  for i := 0 to d3d_texCount - 1 do
+    if d3d_texArray[ i ].Texture = nil Then
       begin
         RenderTexID := i;
         break;
@@ -851,19 +900,19 @@ begin
 
   if RenderTexID = -1 Then
     begin
-      INC( d3d8_texCount );
-      SetLength( d3d8_texArray, d3d8_texCount );
-      RenderTexID := d3d8_texCount - 1;
+      INC( d3d_texCount );
+      SetLength( d3d_texArray, d3d_texCount );
+      RenderTexID := d3d_texCount - 1;
     end else RenderTexID := RenderTexID;
   textures^ := RenderTexID;
 end;
 
 procedure glDeleteTextures;
 begin
-  if textures^ >= d3d8_texCount Then exit;
+  if textures^ >= d3d_texCount Then exit;
 
-  if Assigned( d3d8_texArray[ textures^ ].Texture ) Then
-    d3d8_texArray[ textures^ ].Texture := nil;
+  if Assigned( d3d_texArray[ textures^ ].Texture ) Then
+    d3d_texArray[ textures^ ].Texture := nil;
 
   textures^ := 0;
 end;
@@ -871,15 +920,25 @@ end;
 procedure glTexParameterf;
   label _exit;
   var
+    {$IFDEF USE_DIRECT3D8}
     _type : TD3DTextureStageStateType;
+    {$ENDIF}
+    {$IFDEF USE_DIRECT3D9}
+    _type : TD3DSamplerStateType;
+    {$ENDIF}
     value : LongWord;
 begin
   if pname = GL_TEXTURE_MAX_ANISOTROPY_EXT Then
     begin
-      d3d8_Device.SetTextureStageState( 0, D3DTSS_MAGFILTER, D3DTEXF_ANISOTROPIC );
-      d3d8_Device.SetTextureStageState( 0, D3DTSS_MINFILTER, D3DTEXF_ANISOTROPIC );
-      d3d8_Device.SetTextureStageState( 0, D3DTSS_MIPFILTER, D3DTEXF_ANISOTROPIC );
-      d3d8_Device.SetTextureStageState( 0, D3DTSS_MAXANISOTROPY, ogl_Anisotropy );
+      {$IFDEF USE_DIRECT3D8}
+      d3d_Device.SetTextureStageState( 0, D3DTSS_MAGFILTER, D3DTEXF_ANISOTROPIC );
+      d3d_Device.SetTextureStageState( 0, D3DTSS_MINFILTER, D3DTEXF_ANISOTROPIC );
+      d3d_Device.SetTextureStageState( 0, D3DTSS_MIPFILTER, D3DTEXF_ANISOTROPIC );
+      d3d_Device.SetTextureStageState( 0, D3DTSS_MAXANISOTROPY, ogl_Anisotropy );
+      {$ENDIF}
+      // FIXME:
+      {$IFDEF USE_DIRECT3D8}
+      {$ENDIF}
       lMinFilter  := D3DTEXF_ANISOTROPIC;
       lMagFilter  := D3DTEXF_ANISOTROPIC;
       lMipFilter  := D3DTEXF_ANISOTROPIC;
@@ -887,15 +946,26 @@ begin
     end;
 
   case pname of
+    {$IFDEF USE_DIRECT3D8}
     GL_TEXTURE_MIN_FILTER: _type := D3DTSS_MINFILTER;
     GL_TEXTURE_MAG_FILTER: _type := D3DTSS_MAGFILTER;
+    {$ENDIF}
+    {$IFDEF USE_DIRECT3D9}
+    GL_TEXTURE_MIN_FILTER: _type := D3DSAMP_MINFILTER;
+    GL_TEXTURE_MAG_FILTER: _type := D3DSAMP_MAGFILTER;
+    {$ENDIF}
   end;
 
   case Round( param ) of
     GL_NEAREST: value := D3DTEXF_POINT;
     GL_LINEAR: value := D3DTEXF_LINEAR;
+    {$IFDEF USE_DIRECT3D8}
     GL_LINEAR_MIPMAP_NEAREST: value := D3DTEXF_FLATCUBIC;
     GL_LINEAR_MIPMAP_LINEAR:  value := D3DTEXF_GAUSSIANCUBIC;
+    {$ENDIF}
+    // FIXME:
+    {$IFDEF USE_DIRECT3D9}
+    {$ENDIF}
   end;
 
   case pname of
@@ -903,25 +973,41 @@ begin
     GL_TEXTURE_MAG_FILTER: lMagFilter := value;
   end;
 
-  d3d8_Device.SetTextureStageState( 0, _type, value );
+  {$IFDEF USE_DIRECT3D8}
+  d3d_Device.SetTextureStageState( 0, _type, value );
+  {$ENDIF}
+  {$IFDEF USE_DIRECT3D9}
+  d3d_Device.SetSamplerState( 0, _type, value );
+  {$ENDIF}
 
 _exit:
   if RenderTexID <> -1 Then
     begin
-      d3d8_texArray[ RenderTexID ].MinFilter := lMinFilter;
-      d3d8_texArray[ RenderTexID ].MagFilter := lMagFilter;
-      d3d8_texArray[ RenderTexID ].MipFilter := lMipFilter;
+      d3d_texArray[ RenderTexID ].MinFilter := lMinFilter;
+      d3d_texArray[ RenderTexID ].MagFilter := lMagFilter;
+      d3d_texArray[ RenderTexID ].MipFilter := lMipFilter;
     end;
 end;
 
 procedure glTexParameteri;
   var
+    {$IFDEF USE_DIRECT3D8}
     _type : TD3DTextureStageStateType;
+    {$ENDIF}
+    {$IFDEF USE_DIRECT3D9}
+    _type : TD3DSamplerStateType;
+    {$ENDIF}
     value : LongWord;
 begin
   case pname of
+    {$IFDEF USE_DIRECT3D8}
     GL_TEXTURE_WRAP_S: _type := D3DTSS_ADDRESSU;
     GL_TEXTURE_WRAP_T: _type := D3DTSS_ADDRESSV;
+    {$ENDIF}
+    {$IFDEF USE_DIRECT3D9}
+    GL_TEXTURE_WRAP_S: _type := D3DSAMP_ADDRESSU;
+    GL_TEXTURE_WRAP_T: _type := D3DSAMP_ADDRESSV;
+    {$ENDIF}
   end;
 
   case param of
@@ -930,10 +1016,15 @@ begin
   end;
 
   lWrap := param;
-  d3d8_Device.SetTextureStageState( 0, _type, value );
+  {$IFDEF USE_DIRECT3D8}
+  d3d_Device.SetTextureStageState( 0, _type, value );
+  {$ENDIF}
+  {$IFDEF USE_DIRECT3D9}
+  d3d_Device.SetSamplerState( 0, _type, value );
+  {$ENDIF}
 
   if RenderTexID <> -1 Then
-    d3d8_texArray[ RenderTexID ].Wrap := lWrap;
+    d3d_texArray[ RenderTexID ].Wrap := lWrap;
 end;
 
 procedure FillTexture( Src, Dest : Pointer; W, H, P : Integer );
@@ -987,18 +1078,23 @@ begin
 
   if target = GL_TEXTURE_2D Then
     begin
-      d3d8_texArray[ RenderTexID ].MagFilter  := lMagFilter;
-      d3d8_texArray[ RenderTexID ].MinFilter  := lMinFilter;
-      d3d8_texArray[ RenderTexID ].MipFilter  := lMipFilter;
-      d3d8_texArray[ RenderTexID ].Wrap       := lWrap;
-      if d3d8_Device.CreateTexture( width, height, 1, 0, fmt, D3DPOOL_MANAGED, d3d8_texArray[ RenderTexID ].Texture ) <> D3D_OK Then
+      d3d_texArray[ RenderTexID ].MagFilter  := lMagFilter;
+      d3d_texArray[ RenderTexID ].MinFilter  := lMinFilter;
+      d3d_texArray[ RenderTexID ].MipFilter  := lMipFilter;
+      d3d_texArray[ RenderTexID ].Wrap       := lWrap;
+      {$IFDEF USE_DIRECT3D8}
+      if d3d_Device.CreateTexture( width, height, 1, 0, fmt, D3DPOOL_MANAGED, d3d_texArray[ RenderTexID ].Texture ) <> D3D_OK Then
+      {$ENDIF}
+      {$IFDEF USE_DIRECT3D9}
+      if d3d_Device.CreateTexture( width, height, 1, 0, fmt, D3DPOOL_MANAGED, d3d_texArray[ RenderTexID ].Texture, nil ) <> D3D_OK Then
+      {$ENDIF}
         begin
           log_Add( 'Can''t CreateTexture' );
           exit;
         end;
-      d3d8_texArray[ RenderTexID ].Texture.LockRect( 0, r, nil, D3DLOCK_DISCARD );
+      d3d_texArray[ RenderTexID ].Texture.LockRect( 0, r, nil, D3DLOCK_DISCARD );
       FillTexture( pixels, r.pBits, width, height, size );
-      d3d8_texArray[ RenderTexID ].Texture.UnlockRect( 0 );
+      d3d_texArray[ RenderTexID ].Texture.UnlockRect( 0 );
     end;
 end;
 
@@ -1007,13 +1103,13 @@ procedure glGetTexImage;
     r : TD3DLockedRect;
     d : TD3DSurface_Desc;
 begin
-  if ( RenderTexID > d3d8_texCount ) or
-     ( not Assigned( d3d8_texArray[ RenderTexID ].Texture ) ) Then exit;
+  if ( RenderTexID > d3d_texCount ) or
+     ( not Assigned( d3d_texArray[ RenderTexID ].Texture ) ) Then exit;
 
-  d3d8_texArray[ RenderTexID ].Texture.GetLevelDesc( 0, d );
-  d3d8_texArray[ RenderTexID ].Texture.LockRect( 0, r, nil, D3DLOCK_READONLY or D3DLOCK_DISCARD );
+  d3d_texArray[ RenderTexID ].Texture.GetLevelDesc( 0, d );
+  d3d_texArray[ RenderTexID ].Texture.LockRect( 0, r, nil, D3DLOCK_READONLY or D3DLOCK_DISCARD );
   Move( r.pBits^, pixels^, d.Width * d.Height * 4 );
-  d3d8_texArray[ RenderTexID ].Texture.UnlockRect( 0 );
+  d3d_texArray[ RenderTexID ].Texture.UnlockRect( 0 );
 end;
 
 procedure glCopyTexSubImage2D;
@@ -1029,13 +1125,13 @@ begin
 
   if ( pname = GL_TEXTURE_ENV_MODE ) and ( param = GL_MODULATE ) Then
     begin
-      d3d8_Device.SetTextureStageState( 0, D3DTSS_COLOROP, D3DTOP_MODULATE );
-      d3d8_Device.SetTextureStageState( 0, D3DTSS_COLORARG1, D3DTA_TEXTURE );
-      d3d8_Device.SetTextureStageState( 0, D3DTSS_COLORARG2, D3DTA_DIFFUSE );
+      d3d_Device.SetTextureStageState( 0, D3DTSS_COLOROP, D3DTOP_MODULATE );
+      d3d_Device.SetTextureStageState( 0, D3DTSS_COLORARG1, D3DTA_TEXTURE );
+      d3d_Device.SetTextureStageState( 0, D3DTSS_COLORARG2, D3DTA_DIFFUSE );
 
-      d3d8_Device.SetTextureStageState( 0, D3DTSS_ALPHAOP, D3DTOP_MODULATE );
-      d3d8_Device.SetTextureStageState( 0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE );
-      d3d8_Device.SetTextureStageState( 0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE );
+      d3d_Device.SetTextureStageState( 0, D3DTSS_ALPHAOP, D3DTOP_MODULATE );
+      d3d_Device.SetTextureStageState( 0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE );
+      d3d_Device.SetTextureStageState( 0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE );
 
       exit;
     end;
@@ -1059,7 +1155,7 @@ begin
     GL_PRIMARY_COLOR_ARB: value := D3DTA_DIFFUSE;
   end;
 
-  d3d8_Device.SetTextureStageState( 0, _type, value );
+  d3d_Device.SetTextureStageState( 0, _type, value );
 end;
 
 function gluBuild2DMipmaps;
@@ -1083,14 +1179,19 @@ begin
 
   if target = GL_TEXTURE_2D Then
     begin
-      d3d8_texArray[ d3d8_texCount - 1 ].MagFilter  := lMagFilter;
-      d3d8_texArray[ d3d8_texCount - 1 ].MinFilter  := lMinFilter;
-      d3d8_texArray[ d3d8_texCount - 1 ].MipFilter  := lMipFilter;
-      d3d8_texArray[ d3d8_texCount - 1 ].Wrap       := lWrap;
-      d3d8_Device.CreateTexture( width, height, 0, 0, fmt, D3DPOOL_MANAGED, d3d8_texArray[ d3d8_texCount - 1 ].Texture );
-      d3d8_texArray[ d3d8_texCount - 1 ].Texture.LockRect( 0, r, nil, D3DLOCK_DISCARD );
+      d3d_texArray[ d3d_texCount - 1 ].MagFilter  := lMagFilter;
+      d3d_texArray[ d3d_texCount - 1 ].MinFilter  := lMinFilter;
+      d3d_texArray[ d3d_texCount - 1 ].MipFilter  := lMipFilter;
+      d3d_texArray[ d3d_texCount - 1 ].Wrap       := lWrap;
+      {$IFDEF USE_DIRECT3D8}
+      d3d_Device.CreateTexture( width, height, 0, 0, fmt, D3DPOOL_MANAGED, d3d_texArray[ d3d_texCount - 1 ].Texture );
+      {$ENDIF}
+      {$IFDEF USE_DIRECT3D9}
+      d3d_Device.CreateTexture( width, height, 0, 0, fmt, D3DPOOL_MANAGED, d3d_texArray[ d3d_texCount - 1 ].Texture, nil );
+      {$ENDIF}
+      d3d_texArray[ d3d_texCount - 1 ].Texture.LockRect( 0, r, nil, D3DLOCK_DISCARD );
       FillTexture( data, r.pBits, width, height, size );
-      d3d8_texArray[ d3d8_texCount - 1 ].Texture.UnlockRect( 0 );
+      d3d_texArray[ d3d_texCount - 1 ].Texture.UnlockRect( 0 );
     end;
 end;
 

@@ -48,8 +48,8 @@ uses
   zgl_application,
   zgl_main,
   zgl_screen,
-  zgl_direct3d8,
-  zgl_direct3d8_all,
+  zgl_direct3d,
+  zgl_direct3d_all,
   zgl_render_2d,
   zgl_camera_2d;
 
