@@ -324,7 +324,12 @@ begin
   r := managerRTarget.First.Next;
   while Assigned( r ) do
     begin
+      {$IFDEF USE_DIRECT3D8}
       glDeleteTextures( 1, @r.Handle.ID );
+      {$ENDIF}
+      {$IFDEF USE_DIRECT3D9}
+      glDeleteTextures( 1, @r.Handle.Texture.ID );
+      {$ENDIF}
       r := r.Next;
     end;
 
@@ -375,17 +380,19 @@ begin
         fmt := D3DFMT_X8R8G8B8
       else
         fmt := D3DFMT_A8R8G8B8;
+      {$IFDEF USE_DIRECT3D8}
       glGenTextures( 1, @r.Handle.ID );
       r.Handle.Flags := r.Handle.Flags or TEX_RESTORE;
-      {$IFDEF USE_DIRECT3D8}
       d3d_Device.CreateTexture( r.Surface.Width, r.Surface.Height, 1,
                                  D3DUSAGE_RENDERTARGET, fmt, D3DPOOL_DEFAULT,
                                  d3d_texArray[ r.Handle.ID ].Texture );
       {$ENDIF}
       {$IFDEF USE_DIRECT3D9}
+      glGenTextures( 1, @r.Handle.Texture.ID );
+      r.Handle.Texture.Flags := r.Handle.Texture.Flags or TEX_RESTORE;
       d3d_Device.CreateTexture( r.Surface.Width, r.Surface.Height, 1,
                                  D3DUSAGE_RENDERTARGET, fmt, D3DPOOL_DEFAULT,
-                                 d3d_texArray[ r.Handle.ID ].Texture, nil );
+                                 d3d_texArray[ r.Handle.Texture.ID ].Texture, nil );
       {$ENDIF}
       r := r.Next;
     end;

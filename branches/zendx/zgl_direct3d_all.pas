@@ -229,7 +229,7 @@ const
   s_D3DFVF_XYZCT = SizeOf( TXYZCTVertex );
 
 type
-  zglD3D8Texture = record
+  zglD3DTexture = record
     Texture    : {$IFDEF USE_DIRECT3D8} IDirect3DTexture8 {$ENDIF}
                  {$IFDEF USE_DIRECT3D9} IDirect3DTexture9 {$ENDIF};
     MagFilter  : LongWord;
@@ -296,7 +296,7 @@ var
   gl_Vertex2f     : procedure( X, Y : Single );
   gl_Vertex2fv    : procedure( v : PSingle );
   d3d_texCount    : Integer;
-  d3d_texArray    : array of zglD3D8Texture;
+  d3d_texArray    : array of zglD3DTexture;
   d3d_Matrices    : array[ 0..23 ] of TD3DMatrix;
   d3d_MatrixMode  : {$IFDEF USE_DIRECT3D8} LongWord {$ENDIF}
                     {$IFDEF USE_DIRECT3D9} TD3DTransformStateType {$ENDIF};
