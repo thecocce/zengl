@@ -191,7 +191,8 @@ begin
     end;
   {$ENDIF}
   {$IFDEF USE_DIRECT3D9}
-  d3d_Format := D3DFMT_X8R8G8B8;
+  d3d.GetAdapterDisplayMode( D3DADAPTER_DEFAULT, d3d_Mode );
+  d3d_Format := d3d_Mode.Format;
   modeCount := d3d.GetAdapterModeCount( D3DADAPTER_DEFAULT, d3d_Format );
   for i := 0 to modeCount - 1 do
     begin
