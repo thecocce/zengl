@@ -271,12 +271,24 @@ begin
         end;
       if Target.Flags and RT_FULL_SCREEN = 0 Then
         begin
-          rt_ScaleW := Target.Surface.U;
-          rt_ScaleH := Target.Surface.V;
+          if Target.Surface.Width > scr_ResW Then
+            rt_ScaleW := Target.Surface.U
+          else
+            rt_ScaleW := scr_ResW / Target.Surface.Width;
+          if Target.Surface.Height > scr_ResH Then
+            rt_ScaleH := Target.Surface.V
+          else
+            rt_ScaleH := scr_ResH / Target.Surface.Height;
         end else
           begin
-            rt_ScaleW := scr_ResW / Target.Surface.Width;
-            rt_ScaleH := scr_ResH / Target.Surface.Height;
+            if Target.Surface.Width < scr_ResW Then
+              rt_ScaleW := Target.Surface.U
+            else
+              rt_ScaleW := scr_ResW / Target.Surface.Width;
+            if Target.Surface.Height < scr_ResH Then
+              rt_ScaleH := Target.Surface.V
+            else
+              rt_ScaleH := scr_ResH / Target.Surface.Height;
           end;
 
       case lMode of
