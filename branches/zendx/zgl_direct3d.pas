@@ -330,6 +330,7 @@ begin
       {$ENDIF}
       {$IFDEF USE_DIRECT3D9}
       glDeleteTextures( 1, @r.Handle.Texture.ID );
+      r.Handle.Depth := nil;
       {$ENDIF}
       r := r.Next;
     end;
@@ -394,6 +395,11 @@ begin
       d3d_Device.CreateTexture( Round( r.Surface.Width / r.Surface.U ), Round( r.Surface.Height / r.Surface.V ), 1,
                                  D3DUSAGE_RENDERTARGET, fmt, D3DPOOL_DEFAULT,
                                  d3d_texArray[ r.Handle.Texture.ID ].Texture, nil );
+      d3d_Device.CreateDepthStencilSurface( Round( r.Surface.Width / r.Surface.U ), Round( r.Surface.Height / r.Surface.V ),
+                                            d3d_Params.AutoDepthStencilFormat,
+                                            D3DMULTISAMPLE_NONE, 0, TRUE,
+                                            r.Handle.Depth, nil );
+      r.Surface := r.Handle.Texture;
       {$ENDIF}
       r := r.Next;
     end;
@@ -406,7 +412,7 @@ end;
 procedure d3d_ResetState;
 begin
   glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-  glAlphaFunc( GL_EQUAL, 1 );
+  glAlphaFunc( GL_GREATER, 0 );
 
   glDisable( GL_BLEND );
   glDisable( GL_ALPHA_TEST );
@@ -555,6 +561,7 @@ begin
     begin
       glScalef( rt_ScaleW, -rt_ScaleH, 1 );
       glTranslatef( 0, scr_ResH, 0 );
+      glViewPort( 0, 0, lRTarget.Surface.Width, lRTarget.Surface.Height );
     end;
 
   scr_SetViewPort;

@@ -836,39 +836,27 @@ begin
       exit;
     end;
 
-  if Assigned( lRTarget ) and ( texture = lRTarget.Surface.ID ) Then
-    begin
-      {$IFDEF USE_DIRECT3D8}
-      d3d_Device.SetTextureStageState( 0, D3DTSS_MAGFILTER, D3DTEXF_POINT );
-      d3d_Device.SetTextureStageState( 0, D3DTSS_MINFILTER, D3DTEXF_POINT );
-      {$ENDIF}
-      {$IFDEF USE_DIRECT3D9}
-      d3d_Device.SetSamplerState( 0, D3DSAMP_MAGFILTER, D3DTEXF_POINT );
-      d3d_Device.SetSamplerState( 0, D3DSAMP_MINFILTER, D3DTEXF_POINT );
-      {$ENDIF}
-    end else
-      begin
-        {$IFDEF USE_DIRECT3D8}
-        if d3d_texArray[ texture ].MagFilter > 0 Then
-          d3d_Device.SetTextureStageState( 0, D3DTSS_MAGFILTER, d3d_texArray[ texture ].MagFilter );
-        if d3d_texArray[ texture ].MinFilter > 0 Then
-          d3d_Device.SetTextureStageState( 0, D3DTSS_MINFILTER, d3d_texArray[ texture ].MinFilter );
-        if d3d_texArray[ texture ].MipFilter > 0 Then
-          d3d_Device.SetTextureStageState( 0, D3DTSS_MIPFILTER, d3d_texArray[ texture ].MipFilter );
-        if ogl_Anisotropy > 0 Then
-          d3d_Device.SetTextureStageState( 0, D3DTSS_MAXANISOTROPY, ogl_Anisotropy );
-        {$ENDIF}
-        {$IFDEF USE_DIRECT3D9}
-        if d3d_texArray[ texture ].MagFilter > 0 Then
-          d3d_Device.SetSamplerState( 0, D3DSAMP_MAGFILTER, d3d_texArray[ texture ].MagFilter );
-        if d3d_texArray[ texture ].MinFilter > 0 Then
-          d3d_Device.SetSamplerState( 0, D3DSAMP_MINFILTER, d3d_texArray[ texture ].MinFilter );
-        if d3d_texArray[ texture ].MipFilter > 0 Then
-          d3d_Device.SetSamplerState( 0, D3DSAMP_MIPFILTER, d3d_texArray[ texture ].MipFilter );
-        if ogl_Anisotropy > 0 Then
-          d3d_Device.SetSamplerState( 0, D3DSAMP_MAXANISOTROPY, ogl_Anisotropy );
-        {$ENDIF}
-      end;
+  {$IFDEF USE_DIRECT3D8}
+  if d3d_texArray[ texture ].MagFilter > 0 Then
+    d3d_Device.SetTextureStageState( 0, D3DTSS_MAGFILTER, d3d_texArray[ texture ].MagFilter );
+  if d3d_texArray[ texture ].MinFilter > 0 Then
+    d3d_Device.SetTextureStageState( 0, D3DTSS_MINFILTER, d3d_texArray[ texture ].MinFilter );
+  if d3d_texArray[ texture ].MipFilter > 0 Then
+    d3d_Device.SetTextureStageState( 0, D3DTSS_MIPFILTER, d3d_texArray[ texture ].MipFilter );
+  if ogl_Anisotropy > 0 Then
+    d3d_Device.SetTextureStageState( 0, D3DTSS_MAXANISOTROPY, ogl_Anisotropy );
+  {$ENDIF}
+  {$IFDEF USE_DIRECT3D9}
+  if d3d_texArray[ texture ].MagFilter > 0 Then
+    d3d_Device.SetSamplerState( 0, D3DSAMP_MAGFILTER, d3d_texArray[ texture ].MagFilter );
+  if d3d_texArray[ texture ].MinFilter > 0 Then
+    d3d_Device.SetSamplerState( 0, D3DSAMP_MINFILTER, d3d_texArray[ texture ].MinFilter );
+  if d3d_texArray[ texture ].MipFilter > 0 Then
+    d3d_Device.SetSamplerState( 0, D3DSAMP_MIPFILTER, d3d_texArray[ texture ].MipFilter );
+  if ogl_Anisotropy > 0 Then
+    d3d_Device.SetSamplerState( 0, D3DSAMP_MAXANISOTROPY, ogl_Anisotropy );
+  {$ENDIF}
+
   case  d3d_texArray[ texture ].Wrap of
     GL_CLAMP_TO_EDGE:
       begin
