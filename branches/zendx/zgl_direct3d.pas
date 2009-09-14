@@ -316,7 +316,9 @@ end;
 
 function d3d_Restore;
   var
-    r : zglPRenderTarget;
+    r   : zglPRenderTarget;
+    t   : zglPTexture;
+    d   : TD3DSurface_Desc;
     fmt : TD3DFormat;
 begin
   Result := FALSE;
@@ -325,12 +327,19 @@ begin
   r := managerRTarget.First.Next;
   while Assigned( r ) do
     begin
-      rtarget_Save( r );
-      glDeleteTextures( 1, @r.Surface.ID );
-      {$IFDEF USE_DIRECT3D9}
       r.Handle.Depth := nil;
-      {$ENDIF}
       r := r.Next;
+    end;
+  t := managerTexture.First.Next;
+  while Assigned( t ) do
+    begin
+      d3d_texArray[ t.ID ].Texture.GetLevelDesc( 0, d );
+      if d.Pool = D3DPOOL_DEFAULT Then
+        begin
+          rtarget_Save( t );
+          d3d_texArray[ t.ID ].Texture := nil;
+        end;
+      t := t.Next;
     end;
 
   d3d_ParamsW.BackBufferWidth  := wnd_Width;
@@ -377,29 +386,41 @@ begin
   r := managerRTarget.First.Next;
   while Assigned( r ) do
     begin
-      if r.Surface.Flags and TEX_RGB > 0 Then
-        fmt := D3DFMT_X8R8G8B8
-      else
-        fmt := D3DFMT_A8R8G8B8;
       {$IFDEF USE_DIRECT3D8}
-      glGenTextures( 1, @r.Surface.ID );
-      d3d_Device.CreateTexture( Round( r.Surface.Width / r.Surface.U ), Round( r.Surface.Height / r.Surface.V ), 1,
-                                 D3DUSAGE_RENDERTARGET, fmt, D3DPOOL_DEFAULT,
-                                 d3d_texArray[ r.Surface.ID ].Texture );
-      rtarget_Restore( r );
+      d3d_Device.CreateDepthStencilSurface( Round( r.Surface.Width / r.Surface.U ), Round( r.Surface.Height / r.Surface.V ),
+                                            d3d_Params.AutoDepthStencilFormat,
+                                            D3DMULTISAMPLE_NONE, r.Handle.Depth );
       {$ENDIF}
       {$IFDEF USE_DIRECT3D9}
-      glGenTextures( 1, @r.Surface.ID );
-      d3d_Device.CreateTexture( Round( r.Surface.Width / r.Surface.U ), Round( r.Surface.Height / r.Surface.V ), 1,
-                                D3DUSAGE_RENDERTARGET, fmt, D3DPOOL_DEFAULT,
-                                d3d_texArray[ r.Surface.ID ].Texture, nil );
       d3d_Device.CreateDepthStencilSurface( Round( r.Surface.Width / r.Surface.U ), Round( r.Surface.Height / r.Surface.V ),
                                             d3d_Params.AutoDepthStencilFormat,
                                             D3DMULTISAMPLE_NONE, 0, TRUE,
                                             r.Handle.Depth, nil );
-      rtarget_Restore( r );
       {$ENDIF}
       r := r.Next;
+    end;
+  t := managerTexture.First.Next;
+  while Assigned( t ) do
+    begin
+      if t.Flags and TEX_RGB > 0 Then
+        fmt := D3DFMT_X8R8G8B8
+      else
+        fmt := D3DFMT_A8R8G8B8;
+      if not Assigned( d3d_texArray[ t.ID ].Texture ) Then
+        begin
+          {$IFDEF USE_DIRECT3D8}
+          d3d_Device.CreateTexture( Round( t.Width / t.U ), Round( t.Height / t.V ), 1,
+                                    D3DUSAGE_RENDERTARGET, fmt, D3DPOOL_DEFAULT,
+                                    d3d_texArray[ t.ID ].Texture );
+          {$ENDIF}
+          {$IFDEF USE_DIRECT3D9}
+          d3d_Device.CreateTexture( Round( t.Width / t.U ), Round( t.Height / t.V ), 1,
+                                    D3DUSAGE_RENDERTARGET, fmt, D3DPOOL_DEFAULT,
+                                    d3d_texArray[ t.ID ].Texture, nil );
+          {$ENDIF}
+          rtarget_Restore( t );
+        end;
+      t := t.Next;
     end;
 
   Result := TRUE;
@@ -497,7 +518,8 @@ begin
             d3d_ParamsW.BackBufferFormat := d3d_Mode.Format;
           end;
 
-        if not d3d_Restore Then exit;
+        d3d_Restore;
+        exit;
       end;
   end;
 
@@ -522,17 +544,21 @@ begin
   glDisable( GL_DEPTH_TEST );
   glMatrixMode( GL_PROJECTION );
   glLoadIdentity;
-  if app_Flags and CORRECT_RESOLUTION > 0 Then
-    glOrtho( 0, ogl_Width - scr_AddCX * 2 / scr_ResCX, ogl_Height - scr_AddCY * 2 / scr_ResCY, 0, -1, 1 )
-  else
-    glOrtho( 0, wnd_Width, wnd_Height, 0, -1, 1 );
+  if ogl_Mode = 2 Then
+    begin
+      if app_Flags and CORRECT_RESOLUTION > 0 Then
+        glOrtho( 0, ogl_Width - scr_AddCX * 2 / scr_ResCX, ogl_Height - scr_AddCY * 2 / scr_ResCY, 0, -1, 1 )
+      else
+        glOrtho( 0, wnd_Width, wnd_Height, 0, -1, 1 );
+    end else
+      glOrtho( 0, lRTarget.Surface.Width, lRTarget.Surface.Height, 0, -1, 1 );
   glMatrixMode( GL_MODELVIEW );
   glLoadIdentity;
 
  if ogl_Mode = 1 Then
     begin
-      glScalef( rt_ScaleW, -rt_ScaleH, 1 );
-      glTranslatef( 0, scr_ResH, 0 );
+      glScalef( 1, -1, 1 );
+      glTranslatef( 0, lRTarget.Surface.Height, 0 );
       glViewPort( 0, 0, lRTarget.Surface.Width, lRTarget.Surface.Height );
     end;
 
@@ -555,8 +581,8 @@ begin
 
   if ogl_Mode = 1 Then
     begin
-      glScalef( rt_ScaleW, -rt_ScaleH, 1 );
-      glTranslatef( 0, scr_ResH, 0 );
+      glScalef( 1, -1, 1 );
+      glTranslatef( 0, lRTarget.Surface.Height, 0 );
       glViewPort( 0, 0, lRTarget.Surface.Width, lRTarget.Surface.Height );
     end;
 

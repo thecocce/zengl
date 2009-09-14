@@ -297,6 +297,12 @@ var
   gl_Vertex2fv    : procedure( v : PSingle );
   d3d_texCount    : Integer;
   d3d_texArray    : array of zglD3DTexture;
+  {$IFDEF USE_DIRECT3D8}
+  d3d_resArray    : array of IDirect3DTexture8;
+  {$ENDIF}
+  {$IFDEF USE_DIRECT3D9}
+  d3d_resArray    : array of IDirect3DSurface9;
+  {$ENDIF}
   d3d_Matrices    : array[ 0..23 ] of TD3DMatrix;
   d3d_MatrixMode  : {$IFDEF USE_DIRECT3D8} LongWord {$ENDIF}
                     {$IFDEF USE_DIRECT3D9} TD3DTransformStateType {$ENDIF};
@@ -890,6 +896,7 @@ begin
     begin
       INC( d3d_texCount );
       SetLength( d3d_texArray, d3d_texCount );
+      SetLength( d3d_resArray, d3d_texCount );
       RenderTexID := d3d_texCount - 1;
     end else RenderTexID := RenderTexID;
   textures^ := RenderTexID;
@@ -924,8 +931,11 @@ begin
       d3d_Device.SetTextureStageState( 0, D3DTSS_MIPFILTER, D3DTEXF_ANISOTROPIC );
       d3d_Device.SetTextureStageState( 0, D3DTSS_MAXANISOTROPY, ogl_Anisotropy );
       {$ENDIF}
-      // FIXME:
-      {$IFDEF USE_DIRECT3D8}
+      {$IFDEF USE_DIRECT3D9}
+      d3d_Device.SetSamplerState( 0, D3DSAMP_MAGFILTER, D3DTEXF_ANISOTROPIC );
+      d3d_Device.SetSamplerState( 0, D3DSAMP_MINFILTER, D3DTEXF_ANISOTROPIC );
+      d3d_Device.SetSamplerState( 0, D3DSAMP_MIPFILTER, D3DTEXF_ANISOTROPIC );
+      d3d_Device.SetSamplerState( 0, D3DSAMP_MAXANISOTROPY, ogl_Anisotropy );
       {$ENDIF}
       lMinFilter  := D3DTEXF_ANISOTROPIC;
       lMagFilter  := D3DTEXF_ANISOTROPIC;
@@ -951,8 +961,10 @@ begin
     GL_LINEAR_MIPMAP_NEAREST: value := D3DTEXF_FLATCUBIC;
     GL_LINEAR_MIPMAP_LINEAR:  value := D3DTEXF_GAUSSIANCUBIC;
     {$ENDIF}
-    // FIXME:
     {$IFDEF USE_DIRECT3D9}
+    // FIXME:
+    GL_LINEAR_MIPMAP_NEAREST: value := D3DTEXF_PYRAMIDALQUAD;
+    GL_LINEAR_MIPMAP_LINEAR:  value := D3DTEXF_GAUSSIANQUAD;
     {$ENDIF}
   end;
 
