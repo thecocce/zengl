@@ -1090,14 +1090,42 @@ procedure glGetTexImage;
   var
     r : TD3DLockedRect;
     d : TD3DSurface_Desc;
+    {$IFDEF USE_DIRECT3D8}
+    src, dst : IDirect3DSurface8;
+    {$ENDIF}
+    {$IFDEF USE_DIRECT3D9}
+    src, dst : IDirect3DSurface9;
+    {$ENDIF}
 begin
   if ( RenderTexID > d3d_texCount ) or
      ( not Assigned( d3d_texArray[ RenderTexID ].Texture ) ) Then exit;
 
   d3d_texArray[ RenderTexID ].Texture.GetLevelDesc( 0, d );
-  d3d_texArray[ RenderTexID ].Texture.LockRect( 0, r, nil, D3DLOCK_READONLY or D3DLOCK_DISCARD );
-  Move( r.pBits^, pixels^, d.Width * d.Height * 4 );
-  d3d_texArray[ RenderTexID ].Texture.UnlockRect( 0 );
+  if d.Pool = D3DPOOL_MANAGED Then
+    begin
+      d3d_texArray[ RenderTexID ].Texture.LockRect( 0, r, nil, D3DLOCK_READONLY or D3DLOCK_DISCARD );
+      Move( r.pBits^, pixels^, d.Width * d.Height * 4 );
+      d3d_texArray[ RenderTexID ].Texture.UnlockRect( 0 );
+    end else
+      if d.Pool = D3DPOOL_DEFAULT Then
+        begin
+          d3d_texArray[ RenderTexID ].Texture.GetSurfaceLevel( 0, src );
+          {$IFDEF USE_DIRECT3D8}
+          d3d_Device.CreateImageSurface( d.Width, d.Height, d.Format, dst );
+          d3d_Device.CopyRects( src, nil, 0, dst, nil );
+          {$ENDIF}
+          {$IFDEF USE_DIRECT3D9}
+          d3d_Device.CreateOffscreenPlainSurface( d.Width, d.Height, d.Format, D3DPOOL_SYSTEMMEM, dst, 0 );
+          d3d_Device.GetRenderTargetData( src, dst );
+          {$ENDIF}
+
+          dst.LockRect( r, nil, D3DLOCK_READONLY );
+          Move( r.pBits^, pixels^, d.Width * d.Height * 4 );
+          dst.UnlockRect;
+
+          dst := nil;
+          src := nil;
+        end;
 end;
 
 procedure glCopyTexSubImage2D;

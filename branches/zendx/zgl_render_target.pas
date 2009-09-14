@@ -56,33 +56,36 @@ type
 type
   zglPRenderTarget = ^zglTRenderTarget;
   zglTRenderTarget = record
-    rtType     : Byte;
+    rtType  : Byte;
     {$IFDEF USE_DIRECT3D8}
-    Handle     : zglPTexture;
+    Handle  : zglPTexture;
     {$ENDIF}
     {$IFDEF USE_DIRECT3D9}
-    Handle     : zglTD3D9Target;
+    Handle  : zglTD3D9Target;
     {$ENDIF}
-    Surface    : zglPTexture;
-    Flags      : Byte;
+    Surface : zglPTexture;
+    Flags   : Byte;
 
     Prev, Next : zglPRenderTarget;
-end;
+  end;
 
 type
   zglPRenderTargetManager = ^zglTRenderTargetManager;
   zglTRenderTargetManager = record
     Count : DWORD;
     First : zglTRenderTarget;
-end;
+  end;
 
-function  rtarget_Add( rtType : Byte; const Surface : zglPTexture; const Flags : Byte ) : zglPRenderTarget;
+function rtarget_Add( rtType : Byte; const Surface : zglPTexture; const Flags : Byte ) : zglPRenderTarget;
 procedure rtarget_Del( var Target : zglPRenderTarget );
 procedure rtarget_Set( const Target : zglPRenderTarget );
 
+procedure rtarget_Save( const Target : zglPRenderTarget );
+procedure rtarget_Restore( const Target : zglPRenderTarget );
+
 var
   managerRTarget : zglTRenderTargetManager;
-  lRTarget : zglPRenderTarget;
+  lRTarget  : zglPRenderTarget;
   rt_ScaleW : Single;
   rt_ScaleH : Single;
 
@@ -90,12 +93,13 @@ implementation
 uses
   zgl_main,
   zgl_application,
-  zgl_screen,zgl_log,zgl_utils,
+  zgl_screen, zgl_log, zgl_utils,
   zgl_sprite_2d,
   zgl_render_2d;
 
 var
-  lMode : Integer;
+  lCanDraw : Boolean;
+  lMode    : Integer;
   {$IFDEF USE_DIRECT3D8}
   lSurface : IDirect3DSurface8;
   {$ENDIF}
@@ -104,16 +108,79 @@ var
   {$ENDIF}
   lTexture : zglPTexture;
 
-function rtarget_Add;
+procedure rtarget_Save;
   var
-    fmt : TD3DFormat;
-    Handle : zglPTexture;
+    i : Integer;
     {$IFDEF USE_DIRECT3D8}
     src, dst : IDirect3DSurface8;
     {$ENDIF}
     {$IFDEF USE_DIRECT3D9}
-    src, dst : IDirect3DSurface9;
+    src, dst   : IDirect3DSurface9;
+    rsrc, rdst : TD3DLockedRect;
+    d          : TD3DSurface_Desc;
     {$ENDIF}
+begin
+  {$IFDEF USE_DIRECT3D8}
+  d3d_texArray[ Target.Handle.ID  ].Texture.GetSurfaceLevel( 0, dst );
+  d3d_texArray[ Target.Surface.ID ].Texture.GetSurfaceLevel( 0, src );
+  d3d_Device.CopyRects( src, nil, 0, dst, nil );
+
+  src := nil;
+  dst := nil;
+  {$ENDIF}
+  {$IFDEF USE_DIRECT3D9}
+  if Target.Handle.Texture.Flags and TEX_RESTORE = 0 Then
+    Target.Handle.Texture.Flags := Target.Handle.Texture.Flags or TEX_RESTORE
+  else
+    exit;
+  d3d_texArray[ Target.Surface.ID ].Texture.GetLevelDesc( 0, d );
+  d3d_texArray[ Target.Surface.ID ].Texture.GetSurfaceLevel( 0, src );
+
+  d3d_Device.CreateOffscreenPlainSurface( d.Width, d.Height, D3DFMT_A8R8G8B8, D3DPOOL_SYSTEMMEM, dst, 0 );
+  d3d_Device.GetRenderTargetData( src, dst );
+  src := dst;
+  d3d_texArray[ Target.Handle.Texture.ID ].Texture.GetSurfaceLevel( 0, dst );
+
+  src.LockRect( rsrc, nil, D3DLOCK_READONLY );
+  dst.LockRect( rdst, nil, 0 );
+  Move( rsrc.pBits^, rdst.pBits^, d.Width * d.Height * 4 );
+  dst.UnlockRect;
+  src.UnlockRect;
+
+  src := nil;
+  dst := nil;
+  {$ENDIF}
+end;
+
+procedure rtarget_Restore;
+  var
+    {$IFDEF USE_DIRECT3D8}
+    src, dst : IDirect3DSurface8;
+    {$ENDIF}
+    {$IFDEF USE_DIRECT3D9}
+    src, dst   : IDirect3DSurface9;
+    rsrc, rdst : TD3DLockedRect;
+    d          : TD3DSurface_Desc;
+    {$ENDIF}
+begin
+  {$IFDEF USE_DIRECT3D8}
+  d3d_texArray[ Target.Handle.ID  ].Texture.GetSurfaceLevel( 0, src );
+  d3d_texArray[ Target.Surface.ID ].Texture.GetSurfaceLevel( 0, dst );
+  d3d_Device.CopyRects( src, nil, 0, dst, nil );
+
+  src := nil;
+  dst := nil;
+  {$ENDIF}
+  {$IFDEF USE_DIRECT3D9}
+  {rtarget_Set( Target );
+  rtarget_Set( nil );}
+  {$ENDIF}
+end;
+
+function rtarget_Add;
+var
+  fmt    : TD3DFormat;
+  Handle : zglPTexture;
 begin
   Result := @managerRTarget.First;
   while Assigned( Result.Next ) do
@@ -138,12 +205,6 @@ begin
         Handle.FramesY := Surface.FramesY;
         Handle.Flags   := Surface.Flags;
         glGenTextures( 1, @Handle.ID );
-        {$IFDEF USE_DIRECT3D8}
-        Result.Next.Handle := Handle;
-        {$ENDIF}
-        {$IFDEF USE_DIRECT3D9}
-        Result.Next.Handle.Texture := Handle;
-        {$ENDIF}
         d3d_texArray[ Handle.ID ].MagFilter := d3d_texArray[ Surface.ID ].MagFilter;
         d3d_texArray[ Handle.ID ].MinFilter := d3d_texArray[ Surface.ID ].MinFilter;
         d3d_texArray[ Handle.ID ].MipFilter := d3d_texArray[ Surface.ID ].MipFilter;
@@ -158,31 +219,30 @@ begin
                                   D3DUSAGE_RENDERTARGET, fmt, D3DPOOL_DEFAULT,
                                   d3d_texArray[ Handle.ID ].Texture, nil );
         d3d_Device.CreateDepthStencilSurface( Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ),
-                                              d3d_Params.AutoDepthStencilFormat,
-                                              D3DMULTISAMPLE_NONE, 0, TRUE,
+                                              d3d_Params.AutoDepthStencilFormat, D3DMULTISAMPLE_NONE, 0, TRUE,
                                               Result.Next.Handle.Depth, nil );
         {$ENDIF}
       end;
   end;
   Result.Next.rtType  := rtType;
-  Result.Next.Surface := Surface;
-  Result.Next.Flags   := Flags;
+  {$IFDEF USE_DIRECt3D8}
+  Result.Next.Handle  := Surface;
+  Result.Next.Surface := Handle;
+  {$ENDIF}
+  {$IFDEF USE_DIRECt3D9}
+  Result.Next.Handle.Texture := Surface;
+  Result.Next.Surface        := Handle;
+  {$ENDIF}
+  Result.Next.Flags := Flags;
 
   Result.Next.Prev := Result;
   Result.Next.Next := nil;
   Result := Result.Next;
   INC( managerRTarget.Count );
 
-  d3d_texArray[ Result.Surface.ID ].Texture.GetSurfaceLevel( 0, src );
-  d3d_texArray[ Handle.ID ].Texture.GetSurfaceLevel( 0, dst );
-  {$IFDEF USE_DIRECT3D8}
-  d3d_Device.CopyRects( src, nil, 0, dst, nil );
-  {$ENDIF}
-  {$IFDEF USE_DIRECT3D9}
-  tex_Del( Result.Surface );
-  Result.Surface := Handle;
-  //d3d_Device.UpdateSurface( src, nil, dst, nil );
-  {$ENDIF}
+  rtarget_Set( Result );
+  scr_Clear;
+  rtarget_Set( nil );
 end;
 
 procedure rtarget_Del;
@@ -220,46 +280,26 @@ begin
 
   if Assigned( Target ) Then
     begin
+      lCanDraw := d3d_CanDraw;
+      d3d_BeginScene;
       lRTarget := Target;
-      lMode := ogl_Mode;
+      lMode    := ogl_Mode;
       ogl_Mode := 1;
 
       case Target.rtType of
         RT_TYPE_SIMPLE, RT_TYPE_FBO, RT_TYPE_PBUFFER:
           begin
             {$IFDEF USE_DIRECT3D8}
-            if Target.Handle.Flags and TEX_RESTORE > 0 Then
-              begin
-                Target.Handle.Flags := Target.Handle.Flags xor TEX_RESTORE;
-                d3d_texArray[ Target.Handle.ID ].Texture.GetSurfaceLevel( 0, src );
-                d3d_texArray[ Target.Surface.ID ].Texture.GetSurfaceLevel( 0, dst );
-                d3d_Device.CopyRects( dst, nil, 0, src, nil );
-
-                src := nil;
-                dst := nil;
-              end;
-
             d3d_Device.GetRenderTarget( d3d_Surface );
             d3d_Device.GetDepthStencilSurface( d3d_Stencil );
-            d3d_texArray[ Target.Handle.ID ].Texture.GetSurfaceLevel( 0, lSurface );
+            d3d_texArray[ Target.Surface.ID ].Texture.GetSurfaceLevel( 0, lSurface );
             lTexture := Target.Surface;
             d3d_Device.SetRenderTarget( lSurface, nil );
             {$ENDIF}
             {$IFDEF USE_DIRECT3D9}
-            if Target.Handle.Texture.Flags and TEX_RESTORE > 0 Then
-              begin
-                Target.Handle.Texture.Flags := Target.Handle.Texture.Flags xor TEX_RESTORE;
-                {d3d_texArray[ Target.Handle.Texture.ID ].Texture.GetSurfaceLevel( 0, src );
-                d3d_texArray[ Target.Surface.ID ].Texture.GetSurfaceLevel( 0, dst );
-                d3d_Device.UpdateSurface( dst, nil, src, nil );
-
-                src := nil;
-                dst := nil;}
-              end;
-
             d3d_Device.GetDepthStencilSurface( d3d_Stencil );
             d3d_Device.GetRenderTarget( 0, d3d_Surface );
-            d3d_texArray[ Target.Handle.Texture.ID ].Texture.GetSurfaceLevel( 0, lSurface );
+            d3d_texArray[ Target.Surface.ID ].Texture.GetSurfaceLevel( 0, lSurface );
             lTexture := Target.Surface;
             d3d_Device.SetRenderTarget( 0, lSurface );
             d3d_Device.SetDepthStencilSurface( Target.Handle.Depth );
@@ -299,8 +339,8 @@ begin
         3: Set3DMode;
       end;
 
-//      if Target.Flags and RT_CLEAR_SCREEN = 0 Then
-//        d3d_Device.Clear( 0, nil, D3DCLEAR_TARGET, D3DCOLOR_ARGB( 0, 0, 0, 0 ), 1, 0 );
+      if Target.Flags and RT_CLEAR_SCREEN > 0 then
+        d3d_Device.Clear( 0, nil, D3DCLEAR_TARGET, D3DCOLOR_ARGB( 0, 0, 0, 0 ), 1, 0 );
     end else
       begin
         case lRTarget.rtType of
@@ -310,24 +350,17 @@ begin
               d3d_Device.SetRenderTarget( d3d_Surface, d3d_Stencil );
               {$ENDIF}
               {$IFDEF USE_DIRECT3D9}
+              {if lRTarget.Handle.Texture.Flags and TEX_RESTORE > 0 Then
+                begin
+                  ssprite2d_Draw( lRTarget.Handle.Texture, 0, 0, lTexture.Width, lTexture.Height, 0, 255, 0 );
+                  lRTarget.Handle.Texture.Flags := lRTarget.Handle.Texture.Flags xor TEX_RESTORE;
+                end;}
               d3d_Device.SetRenderTarget( 0, d3d_Surface );
               d3d_Device.SetDepthStencilSurface( d3d_Stencil );
               {$ENDIF}
-              lSurface := nil;
+              lSurface    := nil;
               d3d_Surface := nil;
               d3d_Stencil := nil;
-
-              {$IFDEF USE_DIRECT3D8}
-              d3d_texArray[ lRTarget.Handle.ID ].Texture.GetSurfaceLevel( 0, src );
-              d3d_texArray[ lTexture.ID ].Texture.GetSurfaceLevel( 0, dst );
-              d3d_Device.CopyRects( src, nil, 0, dst, nil );
-              {$ENDIF}
-              {$IFDEF USE_DIRECT3D9}
-              //d3d_texArray[ lRTarget.Handle.Texture.ID ].Texture.GetSurfaceLevel( 0, src );
-              //d3d_texArray[ lTexture.ID ].Texture.GetSurfaceLevel( 0, dst );
-              lRTarget.Surface := lRTarget.Handle.Texture;
-              //d3d_Device.UpdateSurface( src, nil, dst, nil );
-              {$ENDIF}
 
               src := nil;
               dst := nil;
@@ -339,6 +372,8 @@ begin
         lTexture := nil;
         SetCurrentMode;
         scr_SetViewPort;
+        if not lCanDraw then
+          d3d_EndScene;
       end;
 end;
 

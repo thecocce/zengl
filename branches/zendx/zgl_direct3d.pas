@@ -325,11 +325,9 @@ begin
   r := managerRTarget.First.Next;
   while Assigned( r ) do
     begin
-      {$IFDEF USE_DIRECT3D8}
-      glDeleteTextures( 1, @r.Handle.ID );
-      {$ENDIF}
+      rtarget_Save( r );
+      glDeleteTextures( 1, @r.Surface.ID );
       {$IFDEF USE_DIRECT3D9}
-      glDeleteTextures( 1, @r.Handle.Texture.ID );
       r.Handle.Depth := nil;
       {$ENDIF}
       r := r.Next;
@@ -374,6 +372,7 @@ begin
     scr_BPP := 32;
 
   d3d_Device.Reset( d3d_Params );
+  d3d_ResetState;
 
   r := managerRTarget.First.Next;
   while Assigned( r ) do
@@ -383,28 +382,25 @@ begin
       else
         fmt := D3DFMT_A8R8G8B8;
       {$IFDEF USE_DIRECT3D8}
-      glGenTextures( 1, @r.Handle.ID );
-      r.Handle.Flags := r.Handle.Flags or TEX_RESTORE;
+      glGenTextures( 1, @r.Surface.ID );
       d3d_Device.CreateTexture( Round( r.Surface.Width / r.Surface.U ), Round( r.Surface.Height / r.Surface.V ), 1,
                                  D3DUSAGE_RENDERTARGET, fmt, D3DPOOL_DEFAULT,
-                                 d3d_texArray[ r.Handle.ID ].Texture );
+                                 d3d_texArray[ r.Surface.ID ].Texture );
+      rtarget_Restore( r );
       {$ENDIF}
       {$IFDEF USE_DIRECT3D9}
-      glGenTextures( 1, @r.Handle.Texture.ID );
-      r.Handle.Texture.Flags := r.Handle.Texture.Flags or TEX_RESTORE;
+      glGenTextures( 1, @r.Surface.ID );
       d3d_Device.CreateTexture( Round( r.Surface.Width / r.Surface.U ), Round( r.Surface.Height / r.Surface.V ), 1,
-                                 D3DUSAGE_RENDERTARGET, fmt, D3DPOOL_DEFAULT,
-                                 d3d_texArray[ r.Handle.Texture.ID ].Texture, nil );
+                                D3DUSAGE_RENDERTARGET, fmt, D3DPOOL_DEFAULT,
+                                d3d_texArray[ r.Surface.ID ].Texture, nil );
       d3d_Device.CreateDepthStencilSurface( Round( r.Surface.Width / r.Surface.U ), Round( r.Surface.Height / r.Surface.V ),
                                             d3d_Params.AutoDepthStencilFormat,
                                             D3DMULTISAMPLE_NONE, 0, TRUE,
                                             r.Handle.Depth, nil );
-      r.Surface := r.Handle.Texture;
+      rtarget_Restore( r );
       {$ENDIF}
       r := r.Next;
     end;
-
-  d3d_ResetState;
 
   Result := TRUE;
 end;
