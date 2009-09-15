@@ -577,7 +577,10 @@ begin
 
  if ogl_Mode = 1 Then
     begin
-      glScalef( 1, -1, 1 );
+      if lRTarget.Flags and RT_FULL_SCREEN > 0 Then
+        glScalef( lRTarget.Surface.Width / ogl_Width, -lRTarget.Surface.Height / ogl_Height, 1 )
+      else
+        glScalef( 1, -1, 1 );
       glTranslatef( 0, lRTarget.Surface.Height, 0 );
       glViewPort( 0, 0, lRTarget.Surface.Width, lRTarget.Surface.Height );
     end;
@@ -601,7 +604,10 @@ begin
 
   if ogl_Mode = 1 Then
     begin
-      glScalef( 1, -1, 1 );
+      if lRTarget.Flags and RT_FULL_SCREEN > 0 Then
+        glScalef( lRTarget.Surface.Width / ogl_Width, -lRTarget.Surface.Height / ogl_Height, 1 )
+      else
+        glScalef( 1, -1, 1 );
       glTranslatef( 0, lRTarget.Surface.Height, 0 );
       glViewPort( 0, 0, lRTarget.Surface.Width, lRTarget.Surface.Height );
     end;

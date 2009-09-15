@@ -84,8 +84,6 @@ procedure rtarget_Restore( const Target : zglPTexture );
 var
   managerRTarget : zglTRenderTargetManager;
   lRTarget  : zglPRenderTarget;
-  rt_ScaleW : Single;
-  rt_ScaleH : Single;
 
 implementation
 uses

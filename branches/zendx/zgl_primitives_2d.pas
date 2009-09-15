@@ -31,8 +31,8 @@ uses
   zgl_math_2d;
 
 const
-  PR2D_FILL   = $000001;
-  PR2D_SMOOTH = $000002;
+  PR2D_FILL   = $010000;
+  PR2D_SMOOTH = $020000;
 
 procedure pr2d_Pixel( const X, Y : Single; const Color : DWORD; const Alpha : Byte = 255 );
 procedure pr2d_Line( const X1, Y1, X2, Y2 : Single; const Color : DWORD; const Alpha : Byte = 255; const FX : DWORD = 0 );
@@ -98,7 +98,7 @@ begin
             _y2 := Y2 + 0.5;
           end;
 
-  if ( not b2d_Started ) or batch2d_Check( GL_LINES, FX_BLEND, nil ) Then
+  if ( not b2d_Started ) or batch2d_Check( GL_LINES, FX, nil ) Then
     begin
       if FX and PR2D_SMOOTH > 0 Then
         begin
@@ -133,7 +133,7 @@ procedure pr2d_Rect;
 begin
  if FX and PR2D_FILL > 0 Then
    begin
-      if ( not b2d_Started ) or batch2d_Check( GL_QUADS, FX_BLEND, nil ) Then
+      if ( not b2d_Started ) or batch2d_Check( GL_QUADS, FX, nil ) Then
         begin
           glEnable( GL_BLEND );
           glBegin( GL_QUADS );
@@ -200,7 +200,7 @@ begin
 
   if FX and PR2D_FILL = 0 Then
     begin
-      if ( not b2d_Started ) or batch2d_Check( GL_LINES, FX_BLEND, nil ) Then
+      if ( not b2d_Started ) or batch2d_Check( GL_LINES, FX, nil ) Then
         begin
           if FX and PR2D_SMOOTH > 0 Then
             begin
@@ -232,7 +232,7 @@ begin
         end;
     end else
       begin
-        if ( not b2d_Started ) or batch2d_Check( GL_TRIANGLES, FX_BLEND, nil ) Then
+        if ( not b2d_Started ) or batch2d_Check( GL_TRIANGLES, FX, nil ) Then
           begin
             if FX and PR2D_SMOOTH > 0 Then
               begin
@@ -278,7 +278,7 @@ begin
 
   if FX and PR2D_FILL = 0 Then
     begin
-      if ( not b2d_Started ) or batch2d_Check( GL_LINES, FX_BLEND, nil ) Then
+      if ( not b2d_Started ) or batch2d_Check( GL_LINES, FX, nil ) Then
         begin
           if FX and PR2D_SMOOTH > 0 Then
             begin
@@ -310,7 +310,7 @@ begin
         end;
     end else
       begin
-        if ( not b2d_Started ) or batch2d_Check( GL_TRIANGLES, FX_BLEND, nil ) Then
+        if ( not b2d_Started ) or batch2d_Check( GL_TRIANGLES, FX, nil ) Then
           begin
             if FX and PR2D_SMOOTH > 0 Then
               begin
