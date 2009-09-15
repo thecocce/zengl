@@ -431,6 +431,14 @@ begin
   glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
   glAlphaFunc( GL_GREATER, 0 );
 
+  {$IFDEF USE_DIRECT3D9}
+  d3d_Device.SetRenderState( D3DRS_SEPARATEALPHABLENDENABLE, iTRUE );
+  d3d_Device.SetRenderState( D3DRS_BLENDOP,        D3DBLENDOP_ADD );
+  d3d_Device.SetRenderState( D3DRS_BLENDOPALPHA,   D3DBLENDOP_ADD );
+  d3d_Device.SetRenderState( D3DRS_SRCBLENDALPHA,  D3DBLEND_ONE );
+  d3d_Device.SetRenderState( D3DRS_DESTBLENDALPHA, D3DBLEND_INVSRCALPHA);
+  {$ENDIF}
+
   glDisable( GL_BLEND );
   glDisable( GL_ALPHA_TEST );
   glDisable( GL_DEPTH_TEST );

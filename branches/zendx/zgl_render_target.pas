@@ -91,7 +91,7 @@ implementation
 uses
   zgl_main,
   zgl_application,
-  zgl_screen, zgl_log, zgl_utils,
+  zgl_screen,
   zgl_sprite_2d,
   zgl_render_2d;
 
