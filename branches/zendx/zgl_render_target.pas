@@ -46,6 +46,7 @@ const
   TEX_RESTORE     = $200000;
 
 type
+  zglPD3DTarget = ^zglTD3DTarget;
   zglTD3DTarget = record
     Old   : zglPTexture;
     {$IFDEF USE_DIRECT3D8}
@@ -60,7 +61,7 @@ type
   zglPRenderTarget = ^zglTRenderTarget;
   zglTRenderTarget = record
     rtType  : Byte;
-    Handle  : zglTD3DTarget;
+    Handle  : zglPD3DTarget;
     Surface : zglPTexture;
     Flags   : Byte;
 
@@ -187,6 +188,7 @@ begin
     Result := Result.Next;
 
   zgl_GetMem( Pointer( Result.Next ), SizeOf( zglTRenderTarget ) );
+  zgl_GetMem( Pointer( Result.Next.Handle ), SizeOf( zglTD3DTarget ) );
 
   case rtType of
     RT_TYPE_SIMPLE, RT_TYPE_FBO, RT_TYPE_PBUFFER:
@@ -238,6 +240,7 @@ begin
   if Assigned( Target.Next ) Then
     Target.Next.Prev := Target.Prev;
 
+  FreeMemory( Target.Handle );
   FreeMemory( Target );
   DEC( managerRTarget.Count );
 
