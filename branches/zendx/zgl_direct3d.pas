@@ -98,6 +98,7 @@ var
   ogl_zFar       : Single = 100;
   ogl_MTexActive : array[ 0..8 ] of Boolean;
   ogl_MTexture   : array[ 0..8 ] of DWORD;
+  ogl_Separate   : Boolean;
 
   ogl_Mode : WORD = 3; // 2D/3D Modes
 
@@ -170,6 +171,14 @@ begin
   {$IFDEF USE_DIRECT3D9}
   log_Add( 'D3D9_MAX_TEXTURE_SIZE: ' + u_IntToStr( ogl_MaxTexSize ) );
   log_Add( 'D3D9_MAX_TEXTURE_ANISOTROPY: ' + u_IntToStr( ogl_MaxAnisotropy ) );
+  {$ENDIF}
+
+  {$IFDEF USE_DIRECT3D8}
+  ogl_Separate := FALSE;
+  {$ENDIF}
+  {$IFDEF USE_DIRECT3D9}
+  ogl_Separate := d3d_Caps.PrimitiveMiscCaps and D3DPMISCCAPS_SEPARATEALPHABLEND > 0;
+  log_Add( 'D3DPMISCCAPS_SEPARATEALPHABLEND: ' + u_BoolToStr( ogl_Separate ) );
   {$ENDIF}
 
   // Windowed
@@ -432,11 +441,14 @@ begin
   glAlphaFunc( GL_GREATER, 0 );
 
   {$IFDEF USE_DIRECT3D9}
-  d3d_Device.SetRenderState( D3DRS_SEPARATEALPHABLENDENABLE, iTRUE );
-  d3d_Device.SetRenderState( D3DRS_BLENDOP,        D3DBLENDOP_ADD );
-  d3d_Device.SetRenderState( D3DRS_BLENDOPALPHA,   D3DBLENDOP_ADD );
-  d3d_Device.SetRenderState( D3DRS_SRCBLENDALPHA,  D3DBLEND_ONE );
-  d3d_Device.SetRenderState( D3DRS_DESTBLENDALPHA, D3DBLEND_INVSRCALPHA);
+  if ogl_Separate Then
+    begin
+      d3d_Device.SetRenderState( D3DRS_SEPARATEALPHABLENDENABLE, iTRUE );
+      d3d_Device.SetRenderState( D3DRS_BLENDOP,        D3DBLENDOP_ADD );
+      d3d_Device.SetRenderState( D3DRS_BLENDOPALPHA,   D3DBLENDOP_ADD );
+      d3d_Device.SetRenderState( D3DRS_SRCBLENDALPHA,  D3DBLEND_ONE );
+      d3d_Device.SetRenderState( D3DRS_DESTBLENDALPHA, D3DBLEND_INVSRCALPHA);
+    end;
   {$ENDIF}
 
   glDisable( GL_BLEND );
