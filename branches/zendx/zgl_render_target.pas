@@ -75,9 +75,13 @@ type
     First : zglTRenderTarget;
   end;
 
+type
+  zglTRenderCallback = procedure( Data : Pointer );
+
 function rtarget_Add( rtType : Byte; const Surface : zglPTexture; const Flags : Byte ) : zglPRenderTarget;
 procedure rtarget_Del( var Target : zglPRenderTarget );
 procedure rtarget_Set( const Target : zglPRenderTarget );
+procedure rtarget_DrawIn( const Target : zglPRenderTarget; const RenderCallback : zglTRenderCallback; const Data : Pointer );
 
 procedure rtarget_Save( const Target : zglPTexture );
 procedure rtarget_Restore( const Target : zglPTexture );
@@ -116,8 +120,9 @@ procedure rtarget_Save;
     src : IDirect3DSurface9;
     {$ENDIF}
 begin
+  d3d_resArray[ Target.ID ] := nil;
   {$IFDEF USE_DIRECT3D8}
-  d3d_texArray[ Target.ID  ].Texture.GetLevelDesc( 0, d );
+  d3d_texArray[ Target.ID ].Texture.GetLevelDesc( 0, d );
   if Assigned( d3d_resArray[ Target.ID ] ) Then
     begin
       d3d_resArray[ Target.ID ].GetLevelDesc( 0, s );
@@ -135,7 +140,7 @@ begin
   dst := nil;
   {$ENDIF}
   {$IFDEF USE_DIRECT3D9}
-  d3d_texArray[ Target.ID  ].Texture.GetLevelDesc( 0, d );
+  d3d_texArray[ Target.ID ].Texture.GetLevelDesc( 0, d );
   if Assigned( d3d_resArray[ Target.ID ] ) Then
     begin
       d3d_resArray[ Target.ID ].GetDesc( s );
@@ -166,14 +171,13 @@ begin
   d3d_resArray[ Target.ID ].GetSurfaceLevel( 0, src );
   d3d_Device.CopyRects( src, nil, 0, dst, nil );
 
-  d3d_resArray[ Target.ID ] := nil;
   src := nil;
   dst := nil;
   {$ENDIF}
   {$IFDEF USE_DIRECT3D9}
   d3d_texArray[ Target.ID ].Texture.GetSurfaceLevel( 0, dst );
   d3d_Device.UpdateSurface( d3d_resArray[ Target.ID ], nil, dst, nil );
-  d3d_resArray[ Target.ID ] := nil;
+
   dst := nil;
   {$ENDIF}
 end;
@@ -277,9 +281,9 @@ begin
                   begin
                     Target.Handle.Old := Target.Surface;
                     rtarget_Save( Target.Surface );
-                    {$IFDEF USE_DIRECT3D8}
                     d3d_texArray[ Target.Surface.ID ].Texture := nil;
                     Target.Handle.Depth := nil;
+                    {$IFDEF USE_DIRECT3D8}
                     d3d_Device.CreateTexture( d.Width, d.Height, 1,
                                               D3DUSAGE_RENDERTARGET, d.Format, D3DPOOL_DEFAULT,
                                               d3d_texArray[ Target.Surface.ID ].Texture );
@@ -287,8 +291,6 @@ begin
                                                           D3DMULTISAMPLE_NONE, Target.Handle.Depth );
                     {$ENDIF}
                     {$IFDEF USE_DIRECT3D9}
-                    d3d_texArray[ Target.Surface.ID ].Texture := nil;
-                    Target.Handle.Depth := nil;
                     d3d_Device.CreateTexture( d.Width, d.Height, 1,
                                               D3DUSAGE_RENDERTARGET, d.Format, D3DPOOL_DEFAULT,
                                               d3d_texArray[ Target.Surface.ID ].Texture, nil );
@@ -351,6 +353,34 @@ begin
         scr_SetViewPort;
         if not lCanDraw then
           d3d_EndScene;
+      end;
+end;
+
+procedure rtarget_DrawIn;
+begin
+  if ogl_Separate or ( Target.Surface.Flags and TEX_RGB > 0 ) Then
+    begin
+      rtarget_Set( Target );
+      RenderCallback( Data );
+      rtarget_Set( nil );
+    end else
+      begin
+        rtarget_Set( Target );
+
+        glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+        glColorMask( GL_TRUE, GL_TRUE, GL_TRUE, GL_FALSE );
+        RenderCallback( Data );
+        batch2d_Flush;
+
+        glBlendFunc( GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
+        glColorMask( GL_FALSE, GL_FALSE, GL_FALSE, GL_TRUE );
+        RenderCallback( Data );
+        batch2d_Flush;
+
+        rtarget_Set( nil );
+
+        glColorMask( GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE );
+        glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
       end;
 end;
 

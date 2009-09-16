@@ -259,7 +259,10 @@ begin
             FillChar( mouseDown[ 0 ], 3, 0 );
             mouse_ClearState;
           end else
-            if app_AutoPause Then app_Pause := TRUE;
+            begin
+              d3d_SaveRT;
+              if app_AutoPause Then app_Pause := TRUE;
+            end;
       end;
     WM_NCHITTEST:
       begin

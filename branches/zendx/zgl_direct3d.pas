@@ -36,6 +36,8 @@ uses
 
 function  d3d_Create : Boolean;
 procedure d3d_Destroy;
+procedure d3d_ClearGarbage;
+procedure d3d_SaveRT;
 function  d3d_Restore : Boolean;
 procedure d3d_ResetState;
 {$IFDEF USE_DIRECT3D8}
@@ -88,6 +90,7 @@ var
   d3d_ParamsF  : TD3DPresentParameters;
 
   d3d_CanDraw : Boolean;
+  d3d_Cleared : Boolean = TRUE;
 
   ogl_zDepth     : Byte;
   ogl_Stencil    : Byte;
@@ -323,6 +326,39 @@ begin
   SetLength( d3d_texArray, 0 );
 end;
 
+procedure d3d_ClearGarbage;
+  var
+    t : zglPTexture;
+    d : TD3DSurface_Desc;
+begin
+  d3d_Cleared := TRUE;
+  t := managerTexture.First.Next;
+  while Assigned( t ) do
+    begin
+      d3d_texArray[ t.ID ].Texture.GetLevelDesc( 0, d );
+      if d.Pool = D3DPOOL_DEFAULT Then
+        d3d_resArray[ t.ID ] := nil;
+      t := t.Next;
+    end;
+end;
+
+procedure d3d_SaveRT;
+  var
+    h : HRESULT;
+    t : zglPTexture;
+    d : TD3DSurface_Desc;
+begin
+  d3d_Cleared := FALSE;
+  t := managerTexture.First.Next;
+  while Assigned( t ) do
+    begin
+      d3d_texArray[ t.ID ].Texture.GetLevelDesc( 0, d );
+      if d.Pool = D3DPOOL_DEFAULT Then
+        rtarget_Save( t );
+      t := t.Next;
+    end;
+end;
+
 function d3d_Restore;
   var
     r   : zglPRenderTarget;
@@ -339,15 +375,15 @@ begin
       r.Handle.Depth := nil;
       r := r.Next;
     end;
+  log_Add('d3d_Restore');
+  if scr_Changing Then
+    d3d_SaveRT;
   t := managerTexture.First.Next;
   while Assigned( t ) do
     begin
       d3d_texArray[ t.ID ].Texture.GetLevelDesc( 0, d );
       if d.Pool = D3DPOOL_DEFAULT Then
-        begin
-          rtarget_Save( t );
-          d3d_texArray[ t.ID ].Texture := nil;
-        end;
+        d3d_texArray[ t.ID ].Texture := nil;
       t := t.Next;
     end;
 
@@ -514,6 +550,8 @@ end;
 function d3d_BeginScene;
   var
     hr : HRESULT;
+    t  : zglPTexture;
+    fmt : TD3DFormat;
 begin
   if d3d_CanDraw Then
     begin
@@ -546,6 +584,8 @@ begin
   if d3d_Device.BeginScene <> D3D_OK Then exit;
 
   d3d_CanDraw := TRUE;
+  if not d3d_Cleared Then
+    d3d_ClearGarbage;
 
   Result := TRUE;
 end;

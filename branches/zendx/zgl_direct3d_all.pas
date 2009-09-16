@@ -252,6 +252,7 @@ procedure glScissor(x, y: GLint; width, height: GLsizei);
 // Color
 procedure glColor4ub(red, green, blue, alpha: GLubyte);
 procedure glColor4f(red, green, blue, alpha: GLfloat);
+procedure glColorMask(red, green, blue, alpha: GLboolean);
 // Alpha
 procedure glAlphaFunc(func: GLenum; ref: GLclampf);
 procedure glBlendFunc(sfactor, dfactor: GLenum);
@@ -561,6 +562,14 @@ end;
 procedure glColor4f;
 begin
   bColor := D3DCOLOR_ARGB( Round( alpha * 255 ), Round( red * 255 ), Round( green * 255 ), Round( blue * 255 ) );
+end;
+
+procedure glColorMask;
+begin
+  d3d_Device.SetRenderState( D3DRS_COLORWRITEENABLE, D3DCOLORWRITEENABLE_RED   * red or
+                                                     D3DCOLORWRITEENABLE_GREEN * green or
+                                                     D3DCOLORWRITEENABLE_BLUE  * blue or
+                                                     D3DCOLORWRITEENABLE_ALPHA * alpha );
 end;
 
 procedure glAlphaFunc;
