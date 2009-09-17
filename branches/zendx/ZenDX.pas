@@ -206,6 +206,7 @@ exports
   // Sprite Engine 2D
   sengine2d_AddSprite      name prefix + 'sengine2d_AddSprite',
   sengine2d_DelSprite      name prefix + 'sengine2d_DelSprite',
+  sengine2d_ClearAll       name prefix + 'sengine2d_ClearAll',
   sengine2d_Set            name prefix + 'sengine2d_Set',
   sengine2d_Draw           name prefix + 'sengine2d_Draw',
   sengine2d_Proc           name prefix + 'sengine2d_Proc',
@@ -214,7 +215,7 @@ exports
   ssprite2d_Draw           name prefix + 'ssprite2d_Draw',
   asprite2d_Draw           name prefix + 'asprite2d_Draw',
   csprite2d_Draw           name prefix + 'csprite2d_Draw',
-  tiles2d_Draw             name prefix + 'tiles2d2d_Draw',
+  tiles2d_Draw             name prefix + 'tiles2d_Draw',
   sgrid2d_Draw             name prefix + 'sgrid2d_Draw',
   agrid2d_Draw             name prefix + 'agrid2d_Draw',
   cgrid2d_Draw             name prefix + 'cgrid2d_Draw',
