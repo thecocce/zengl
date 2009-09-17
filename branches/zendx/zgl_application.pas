@@ -162,11 +162,11 @@ begin
                 snd_StopFile;
             end;
 
-      if not d3d_BeginScene Then continue;
-
       CanKillTimers := FALSE;
       if not app_Pause Then
         begin
+          if not d3d_BeginScene Then continue;
+
           currTimer := @managerTimer.First;
           if currTimer <> nil Then
             for z := 0 to managerTimer.Count do
