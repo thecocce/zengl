@@ -127,7 +127,7 @@ type
 end;
 
 procedure jpg_Load( var pData : Pointer; var W, H : WORD );
-procedure jpg_LoadFromFile( const FileName : AnsiString; var pData : Pointer; var W, H : WORD );
+procedure jpg_LoadFromFile( const FileName : String; var pData : Pointer; var W, H : WORD );
 procedure jpg_LoadFromMemory( const Memory : zglTMemory; var pData : Pointer; var W, H : WORD );
 procedure jpg_FillData;
 
@@ -231,7 +231,7 @@ begin
 end;
 
 initialization
-  zgl_Reg( TEX_FORMAT_EXTENSION, PAnsiChar( 'jpg' ) );
+  zgl_Reg( TEX_FORMAT_EXTENSION, PChar( 'jpg' ) );
   zgl_Reg( TEX_FORMAT_FILE_LOADER, @jpg_LoadFromFile );
   zgl_Reg( TEX_FORMAT_MEM_LOADER,  @jpg_LoadFromMemory );
 

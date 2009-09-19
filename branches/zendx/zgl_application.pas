@@ -59,6 +59,8 @@ var
 
   app_ShowCursor : Boolean;
 
+  app_dt : Double;
+
   app_FPS      : DWORD;
   app_FPSCount : DWORD;
   app_FPSAll   : DWORD;
@@ -112,7 +114,7 @@ end;
 procedure app_MainLoop;
   var
     i, z : Integer;
-    j, dt : Double;
+    j    : Double;
     currTimer : zglPTimer;
     SysInfo : _SYSTEM_INFO;
 begin
@@ -125,7 +127,7 @@ begin
   app_PLoad;
   scr_Flush;
 
-  dt := timer_GetTicks;
+  app_dt := timer_GetTicks;
   timer_Reset;
   timer_Add( @app_CalcFPS, 1000 );
   while app_Work do
@@ -200,11 +202,11 @@ begin
 
       if app_Pause Then
         begin
-          dt := timer_GetTicks;
+          app_dt := timer_GetTicks;
           continue;
         end;
-      app_PUpdate( timer_GetTicks - dt );
-      dt := timer_GetTicks;
+      app_PUpdate( timer_GetTicks - app_dt );
+      app_dt := timer_GetTicks;
       app_Draw;
     end;
 end;
@@ -380,7 +382,7 @@ begin
               if app_Flags and APP_USE_UTF8 > 0 Then
                 key_InputText( AnsiToUtf8( Char( wParam ) ) )
               else
-                key_InputText( AnsiChar( wParam ) );
+                key_InputText( Char( wParam ) );
             end;
         end;
       end;

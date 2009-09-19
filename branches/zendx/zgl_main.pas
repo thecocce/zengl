@@ -29,7 +29,7 @@ uses
   zgl_types;
 
 const
-  cs_ZenGL = 'ZenDX 0.1.38';
+  cs_ZenGL = 'ZenDX 0.1.39';
 
   // zgl_Reg
   SYS_LOAD               = $000001;
@@ -118,7 +118,6 @@ var
   S      : AnsiString;
   t      : array[ 0..MAX_PATH - 1 ] of AnsiChar;
 begin
-  app_GetSysDirs := TRUE;
   wnd_INST := GetModuleHandle( nil );
   GetMem( FL, 65535 );
   GetMem( FP, 65535 );
@@ -132,6 +131,7 @@ begin
   GetEnvironmentVariableA( 'APPDATA', t, MAX_PATH );
   app_UsrHomeDir := t;
   app_UsrHomeDir := app_UsrHomeDir + '\';
+  app_GetSysDirs := TRUE;
 end;
 
 procedure zgl_Init;
@@ -274,7 +274,7 @@ begin
     TEX_FORMAT_EXTENSION:
       begin
         SetLength( managerTexture.Formats, managerTexture.Count.Formats + 1 );
-        managerTexture.Formats[ managerTexture.Count.Formats ].Extension := u_StrUp( AnsiString( PAnsiChar( UserData ) ) );
+        managerTexture.Formats[ managerTexture.Count.Formats ].Extension := u_StrUp( String( PChar( UserData ) ) );
       end;
     TEX_FORMAT_FILE_LOADER:
       begin
@@ -289,7 +289,7 @@ begin
     SND_FORMAT_EXTENSION:
       begin
         SetLength( managerSound.Formats, managerSound.Count.Formats + 1 );
-        managerSound.Formats[ managerSound.Count.Formats ].Extension := u_StrUp( AnsiString( PAnsiChar( UserData ) ) );
+        managerSound.Formats[ managerSound.Count.Formats ].Extension := u_StrUp( String( PChar( UserData ) ) );
         managerSound.Formats[ managerSound.Count.Formats ].Decoder   := nil;
       end;
     SND_FORMAT_FILE_LOADER:
@@ -395,7 +395,13 @@ begin
     end;
 
   if What and APP_USE_UTF8 > 0 Then
-    font_GetCID := font_GetUTF8ID;
+    begin
+      if SizeOf( Char ) = 1 Then
+        font_GetCID := font_GetUTF8ID
+      else
+        if SizeOf( Char ) = 2 Then
+          font_GetCID := font_GetUTF32ID;
+    end;
 
   if What and SND_CAN_PLAY > 0 Then
     sndCanPlay := TRUE;
@@ -444,5 +450,9 @@ begin
   if What and SND_CAN_PLAY_FILE > 0 Then
     sndCanPlayFile := FALSE;
 end;
+
+initialization
+  if SizeOf( Char ) = 2 Then
+    font_GetCID := font_GetUTF32ID;
 
 end.
