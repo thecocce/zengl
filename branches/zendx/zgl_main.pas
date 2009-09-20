@@ -186,6 +186,7 @@ end;
 
 procedure zgl_Destroy;
   var
+    i : Integer;
     p : Pointer;
 begin
   scr_Destroy;
@@ -225,7 +226,8 @@ begin
       snd_Del( zglPSound( p ) );
     end;
 
-  snd_StopFile;
+  for i := 1 to SND_MAX do
+    snd_StopFile( i );
   snd_Free;
 
   if app_WorkTime <> 0 Then
@@ -360,7 +362,7 @@ begin
     MANAGER_TIMER:   Result := Ptr( @managerTimer );
     MANAGER_TEXTURE: Result := Ptr( @managerTexture );
     MANAGER_FONT:    Result := Ptr( @managerFont );
-    {MANAGER_RTARGET: Result := Ptr( @managerRTarget );}
+    MANAGER_RTARGET: Result := Ptr( @managerRTarget );
     MANAGER_SOUND:   Result := Ptr( @managerSound );
     MANAGER_GUI:     Result := Ptr( @managerGUI );
   end;
@@ -400,7 +402,7 @@ begin
         font_GetCID := font_GetUTF8ID
       else
         if SizeOf( Char ) = 2 Then
-          font_GetCID := font_GetUTF32ID;
+          font_GetCID := font_GetUTF16ID;
     end;
 
   if What and SND_CAN_PLAY > 0 Then
@@ -453,6 +455,6 @@ end;
 
 initialization
   if SizeOf( Char ) = 2 Then
-    font_GetCID := font_GetUTF32ID;
+    font_GetCID := font_GetUTF16ID;
 
 end.

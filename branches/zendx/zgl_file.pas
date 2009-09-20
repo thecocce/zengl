@@ -139,7 +139,7 @@ procedure file_Find;
     First : THandle;
     FList : {$IFDEF FPC} WIN32FINDDATAA {$ELSE} WIN32_FIND_DATA {$ENDIF};
 begin
-  First := FindFirstFile( PChar( Directory ), FList );
+  First := FindFirstFile( PChar( Directory + '*' ), FList );
   repeat
     if FindDir Then
       begin
