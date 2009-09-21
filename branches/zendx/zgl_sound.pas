@@ -249,6 +249,7 @@ begin
     log_Add( 'DirectSound: Can''t SetCooperativeLevel' );
 
   log_Add( 'DirectSound: sound system initialized successful' );
+{$ENDIF}
 
 {$IFDEF FPC}
   InitCriticalSection( sfCS );
