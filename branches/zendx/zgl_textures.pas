@@ -498,11 +498,9 @@ begin
   for i := 0 to Width * Height - 1 do
     begin
       P := Ptr( pData ) + i * 4;
-      Gray := Round(
-                       PByte( P + 0 )^ * 0.299 +
-                       PByte( P + 1 )^ * 0.587 +
-                       PByte( P + 2 )^ * 0.114
-                     );
+      Gray := Round( PByte( P + 0 )^ * 0.299 +
+                     PByte( P + 1 )^ * 0.587 +
+                     PByte( P + 2 )^ * 0.114 );
 
       PByte( P + 0 )^ := Gray;
       PByte( P + 1 )^ := Gray;
@@ -632,10 +630,10 @@ begin
         g := ( TransparentColor and $FF00   ) shr 8;
         b := ( TransparentColor and $FF     );
         for i := 0 to Width * Height - 1 do
-      if ( PByte( Ptr( pData ) + 0 + i * 4 )^ = r ) and
-         ( PByte( Ptr( pData ) + 1 + i * 4 )^ = g ) and
-         ( PByte( Ptr( pData ) + 2 + i * 4 )^ = b ) Then Fill;
-    end;
+          if ( PByte( Ptr( pData ) + 0 + i * 4 )^ = r ) and
+             ( PByte( Ptr( pData ) + 1 + i * 4 )^ = g ) and
+             ( PByte( Ptr( pData ) + 2 + i * 4 )^ = b ) Then Fill;
+      end;
 end;
 
 procedure tex_GetData;
