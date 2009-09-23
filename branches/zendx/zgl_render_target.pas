@@ -96,10 +96,13 @@ uses
   zgl_application,
   zgl_screen,
   zgl_sprite_2d,
-  zgl_render_2d;
+  zgl_render_2d,
+  zgl_camera_2d;
 
 var
   lCanDraw : Boolean;
+  lCam2D   : Boolean;
+  lPCam2D  : zglTCamera2D;
   lMode    : Integer;
   {$IFDEF USE_DIRECT3D8}
   lSurface : IDirect3DSurface8;
@@ -254,6 +257,7 @@ end;
 procedure rtarget_Set;
   var
     d : TD3DSurface_Desc;
+    addX : Integer;
     {$IFDEF USE_DIRECT3D8}
     src, dst : IDirect3DSurface8;
     {$ENDIF}
@@ -317,11 +321,23 @@ begin
             {$ENDIF}
           end;
       end;
+      // O_o
+      addX := Byte( ( scr_AddCX > 0 ) and ( Target.rtType <> RT_TYPE_SIMPLE ) );
 
-      case lMode of
-        2: Set2DMode;
-        3: Set3DMode;
-      end;
+      if Target.Flags and RT_FULL_SCREEN > 0 Then
+        glViewport( 0, 0, Target.Surface.Width + addX, Target.Surface.Height )
+      else
+        glViewport( 0, -( ogl_Height - Target.Surface.Height - scr_AddCY - ( scr_SubCY - scr_AddCY ) ),
+                    ogl_Width - scr_AddCX - ( scr_SubCX - scr_AddCX ) + addX, ogl_Height - scr_AddCY - ( scr_SubCY - scr_AddCY ) );
+      //
+      glPopMatrix;
+      glScalef( 1, -1, 1 );
+      glTranslatef( 0, -ogl_Height, 0 );
+      if cam2dApply Then
+        begin
+          lPCam2D := cam2DGlobal^;
+          cam2d_Apply( @lPCam2D );
+        end;
 
       if Target.Flags and RT_CLEAR_SCREEN > 0 then
         d3d_Device.Clear( 0, nil, D3DCLEAR_TARGET, D3DCOLOR_ARGB( 0, 0, 0, 0 ), 1, 0 );
@@ -346,11 +362,15 @@ begin
             end;
         end;
 
+        lCam2D   := cam2dApply;
+        lPCam2D  := cam2DGlobal^;
         ogl_Mode := lMode;
         lRTarget := nil;
         lTexture := nil;
         SetCurrentMode;
         scr_SetViewPort;
+        if lCam2D Then
+          cam2d_Apply( @lPCam2D );
         if not lCanDraw then
           d3d_EndScene;
       end;

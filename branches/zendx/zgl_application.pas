@@ -103,6 +103,7 @@ end;
 procedure app_Draw;
 begin
   if not d3d_BeginScene Then exit;
+  SetCurrentMode;
   scr_Clear;
   app_PDraw;
   scr_Flush;

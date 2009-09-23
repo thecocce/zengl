@@ -257,10 +257,13 @@ procedure glColorMask(red, green, blue, alpha: GLboolean);
 procedure glAlphaFunc(func: GLenum; ref: GLclampf);
 procedure glBlendFunc(sfactor, dfactor: GLenum);
 // Matrix
+procedure glPushMatrix;
+procedure glPopMatrix;
 procedure glMatrixMode(mode: GLenum);
 procedure glLoadIdentity;
 procedure gluPerspective(fovy, aspect, zNear, zFar: GLdouble);
 procedure glFrustum(left, right, bottom, top, zNear, zFar: GLdouble);
+procedure glRotatef(angle, x, y, z: GLfloat);
 procedure glScalef(x, y, z: GLfloat);
 procedure glTranslatef(x, y, z: GLfloat);
 // Vertex
@@ -327,6 +330,9 @@ var
   RenderQuad     : Boolean;
   RenderTextured : Boolean;
   RenderTexID    : Integer;
+  // Matrices
+  popMatrices : array of array[ 0..23 ] of TD3DMatrix;
+  pushCount   : Integer;
   // Textures
   lMagFilter  : LongWord;
   lMinFilter  : LongWord;
@@ -627,6 +633,23 @@ begin
   d3d_Device.SetRenderState( D3DRS_DESTBLEND, dest );
 end;
 
+procedure glPushMatrix;
+begin
+  INC( pushCount );
+  if pushCount > length( popMatrices ) Then
+    SetLength( popMatrices, length( popMatrices ) + 16 );
+
+  popMatrices[ pushCount - 1, DWORD( d3d_MatrixMode ) ] := d3d_Matrices[ DWORD( d3d_MatrixMode ) ];
+end;
+
+procedure glPopMatrix;
+begin
+  if pushCount < 1 Then exit;
+  d3d_Matrices[ DWORD( d3d_MatrixMode ) ] := popMatrices[ pushCount - 1, DWORD( d3d_MatrixMode ) ];
+  d3d_Device.SetTransform( d3d_MatrixMode, d3d_Matrices[ DWORD( d3d_MatrixMode ) ] );
+  DEC( pushCount );
+end;
+
 procedure glMatrixMode;
 begin
   case mode of
@@ -700,6 +723,59 @@ begin
     end;
 end;
 
+procedure glRotatef;
+  var
+    sa, ca : Single;
+    m      : TD3DMatrix;
+  function matrix4f_Mul( const m1, m2 : TD3DMatrix ) : TD3DMatrix;
+  begin
+    Result._11 := m1._11 * m2._11 + m1._12 * m2._21 + m1._13 * m2._31 + m1._14 * m2._41;
+    Result._12 := m1._11 * m2._12 + m1._12 * m2._22 + m1._13 * m2._32 + m1._14 * m2._42;
+    Result._13 := m1._11 * m2._13 + m1._12 * m2._23 + m1._13 * m2._33 + m1._14 * m2._43;
+    Result._14 := m1._11 * m2._14 + m1._12 * m2._24 + m1._13 * m2._34 + m1._14 * m2._44;
+    Result._21 := m1._21 * m2._11 + m1._22 * m2._21 + m1._23 * m2._31 + m1._24 * m2._41;
+    Result._22 := m1._21 * m2._12 + m1._22 * m2._22 + m1._23 * m2._32 + m1._24 * m2._42;
+    Result._23 := m1._21 * m2._13 + m1._22 * m2._23 + m1._23 * m2._33 + m1._24 * m2._43;
+    Result._24 := m1._21 * m2._14 + m1._22 * m2._24 + m1._23 * m2._34 + m1._24 * m2._44;
+    Result._31 := m1._31 * m2._11 + m1._32 * m2._21 + m1._33 * m2._31 + m1._34 * m2._41;
+    Result._32 := m1._31 * m2._12 + m1._32 * m2._22 + m1._33 * m2._32 + m1._34 * m2._42;
+    Result._33 := m1._31 * m2._13 + m1._32 * m2._23 + m1._33 * m2._33 + m1._34 * m2._43;
+    Result._34 := m1._31 * m2._14 + m1._32 * m2._24 + m1._33 * m2._34 + m1._34 * m2._44;
+    Result._41 := m1._41 * m2._11 + m1._42 * m2._21 + m1._43 * m2._31 + m1._44 * m2._41;
+    Result._42 := m1._41 * m2._12 + m1._42 * m2._22 + m1._43 * m2._32 + m1._44 * m2._42;
+    Result._43 := m1._41 * m2._13 + m1._42 * m2._23 + m1._43 * m2._33 + m1._44 * m2._43;
+    Result._44 := m1._41 * m2._14 + m1._42 * m2._24 + m1._43 * m2._34 + m1._44 * m2._44;
+  end;
+begin
+  sa := sin( angle * deg2rad );
+  ca := cos( angle * deg2rad );
+
+  with m do
+    begin
+      _11 := ca + ( 1 - ca ) * x * x;
+      _12 := ( 1 - ca ) * x * z + z * sa;
+      _13 := ( 1 - ca ) * x * z - y * sa;
+      _14 := 0;
+
+      _21 := ( 1 - ca ) * x * y - z * sa;
+      _22 := ca + ( 1 - ca ) * y * y;
+      _23 := ( 1 - ca ) * y * z + x * sa;
+      _24 := 0;
+
+      _31 := ( 1 - ca ) * x * z + y * sa;
+      _32 := ( 1 - ca ) * y * z - x * sa;
+      _33 := ca + ( 1 - ca ) * z * z;
+      _34 := 0;
+
+      _41 := 0;
+      _42 := 0;
+      _43 := 0;
+      _44 := 1;
+    end;
+  d3d_Matrices[ DWORD( d3d_MatrixMode ) ] := matrix4f_Mul( m, d3d_Matrices[ DWORD( d3d_MatrixMode ) ] );
+  d3d_Device.SetTransform( d3d_MatrixMode, d3d_Matrices[ DWORD( d3d_MatrixMode ) ] );
+end;
+
 procedure glScalef;
 begin
   with d3d_Matrices[ DWORD( d3d_MatrixMode ) ] do
@@ -726,10 +802,10 @@ procedure glTranslatef;
 begin
   with d3d_Matrices[ DWORD( d3d_MatrixMode ) ] do
     begin
-      _41 := _41 + x;
-      _42 := _42 + y;
-      _43 := _43 + z;
-      _44 := _44;
+      _41 := _11 * x + _21 * y + _31 * z + _41;
+      _42 := _12 * x + _22 * y + _32 * z + _42;
+      _43 := _13 * x + _23 * y + _33 * z + _43;
+      _44 := _14 * x + _24 * y + _34 * z + _44;
     end;
   d3d_Device.SetTransform( d3d_MatrixMode, d3d_Matrices[ DWORD( d3d_MatrixMode ) ] );
 end;

@@ -599,37 +599,24 @@ end;
 
 procedure Set2DMode;
 begin
+  if cam2dApply Then cam2d_Apply( nil );
   if ogl_Mode <> 1 Then ogl_Mode := 2;
 
   glDisable( GL_DEPTH_TEST );
   glMatrixMode( GL_PROJECTION );
   glLoadIdentity;
-  if ogl_Mode = 2 Then
-    begin
-      if app_Flags and CORRECT_RESOLUTION > 0 Then
-        glOrtho( 0, ogl_Width - scr_AddCX * 2 / scr_ResCX, ogl_Height - scr_AddCY * 2 / scr_ResCY, 0, -1, 1 )
-      else
-        glOrtho( 0, wnd_Width, wnd_Height, 0, -1, 1 );
-    end else
-      glOrtho( 0, lRTarget.Surface.Width, lRTarget.Surface.Height, 0, -1, 1 );
+  if app_Flags and CORRECT_RESOLUTION > 0 Then
+    glOrtho( 0, ogl_Width - scr_AddCX * 2 / scr_ResCX, ogl_Height - scr_AddCY * 2 / scr_ResCY, 0, -1, 1 )
+  else
+    glOrtho( 0, wnd_Width, wnd_Height, 0, -1, 1 );
   glMatrixMode( GL_MODELVIEW );
   glLoadIdentity;
-
- if ogl_Mode = 1 Then
-    begin
-      if lRTarget.Flags and RT_FULL_SCREEN > 0 Then
-        glScalef( lRTarget.Surface.Width / ogl_Width, -lRTarget.Surface.Height / ogl_Height, 1 )
-      else
-        glScalef( 1, -1, 1 );
-      glTranslatef( 0, lRTarget.Surface.Height, 0 );
-      glViewPort( 0, 0, lRTarget.Surface.Width, lRTarget.Surface.Height );
-    end;
-
   scr_SetViewPort;
 end;
 
 procedure Set3DMode;
 begin
+  if cam2dApply Then cam2d_Apply( nil );
   if ogl_Mode <> 1 Then ogl_Mode := 3;
   ogl_FOVY := FOVY;
 
@@ -641,17 +628,6 @@ begin
   gluPerspective( ogl_FOVY, ogl_Width / ogl_Height, ogl_zNear, ogl_zFar );
   glMatrixMode( GL_MODELVIEW );
   glLoadIdentity;
-
-  if ogl_Mode = 1 Then
-    begin
-      if lRTarget.Flags and RT_FULL_SCREEN > 0 Then
-        glScalef( lRTarget.Surface.Width / ogl_Width, -lRTarget.Surface.Height / ogl_Height, 1 )
-      else
-        glScalef( 1, -1, 1 );
-      glTranslatef( 0, lRTarget.Surface.Height, 0 );
-      glViewPort( 0, 0, lRTarget.Surface.Width, lRTarget.Surface.Height );
-    end;
-
   scr_SetViewPort;
 end;
 
