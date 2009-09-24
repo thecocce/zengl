@@ -256,8 +256,9 @@ end;
 
 procedure rtarget_Set;
   var
-    d : TD3DSurface_Desc;
-    addX : Integer;
+    d      : TD3DSurface_Desc;
+    sw, sh : Integer;
+    tw, th : Integer;
     {$IFDEF USE_DIRECT3D8}
     src, dst : IDirect3DSurface8;
     {$ENDIF}
@@ -321,18 +322,21 @@ begin
             {$ENDIF}
           end;
       end;
-      // O_o
-      addX := Byte( ( scr_AddCX > 0 ) and ( Target.rtType <> RT_TYPE_SIMPLE ) );
-
+      if cam2dApply Then
+        glPopMatrix;
+      sw := ( ogl_Width - scr_SubCX );
+      sh := ( ogl_Height - scr_SubCY );
+      tw := Round( Target.Surface.Width / Target.Surface.U );
+      th := Round( Target.Surface.Height / Target.Surface.V );
       if Target.Flags and RT_FULL_SCREEN > 0 Then
-        glViewport( 0, 0, Target.Surface.Width + addX, Target.Surface.Height )
-      else
-        glViewport( 0, -( ogl_Height - Target.Surface.Height - scr_AddCY - ( scr_SubCY - scr_AddCY ) ),
-                    ogl_Width - scr_AddCX - ( scr_SubCX - scr_AddCX ) + addX, ogl_Height - scr_AddCY - ( scr_SubCY - scr_AddCY ) );
-      //
-      glPopMatrix;
-      glScalef( 1, -1, 1 );
-      glTranslatef( 0, -ogl_Height, 0 );
+        begin
+          glScalef( sw / tw, - ( sh - ( sh - Target.Surface.Height ) ) / th, 1 );
+          glTranslatef( 0, -Target.Surface.Height - ( sh - Target.Surface.Height ), 0 );
+        end else
+          begin
+            glScalef( sw / tw, - sh / th, 1 );
+            glTranslatef( 0, -Target.Surface.Height, 0 );
+          end;
       if cam2dApply Then
         begin
           lPCam2D := cam2DGlobal^;
