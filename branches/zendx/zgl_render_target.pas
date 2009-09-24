@@ -257,7 +257,6 @@ end;
 procedure rtarget_Set;
   var
     d      : TD3DSurface_Desc;
-    addX   : Integer;
     sw, sh : Integer;
     tw, th : Integer;
     {$IFDEF USE_DIRECT3D8}
@@ -326,8 +325,6 @@ begin
       if cam2dApply Then
         glPopMatrix;
 
-      // O_o
-      addX := Byte( scr_AddCX > 0 );
       sw := ( ogl_Width - scr_SubCX );
       sh := ( ogl_Height - scr_SubCY );
       tw := Round( Target.Surface.Width / Target.Surface.U );
@@ -336,11 +333,11 @@ begin
       if Target.Flags and RT_FULL_SCREEN > 0 Then
         begin
           glTranslatef( 0, -Target.Surface.Height - ( sh - Target.Surface.Height ), 0 );
-          glViewPort( 0, 0, Target.Surface.Width + addX, Target.Surface.Height );
+          glViewPort( 0, 0, Target.Surface.Width, Target.Surface.Height );
         end else
           begin
             glTranslatef( 0, -Target.Surface.Height, 0 );
-            glViewPort( 0, 0, ogl_Width - scr_SubCX + addX, ogl_Height - scr_SubCY );
+            glViewPort( 0, 0, ogl_Width - scr_SubCX, ogl_Height - scr_SubCY );
           end;
       if cam2dApply Then
         begin
