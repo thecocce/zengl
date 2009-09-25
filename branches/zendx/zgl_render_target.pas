@@ -89,6 +89,8 @@ procedure rtarget_Restore( const Target : zglPTexture );
 var
   managerRTarget : zglTRenderTargetManager;
   lRTarget  : zglPRenderTarget;
+  rtWidth  : Integer;
+  rtHeight : Integer;
 
 implementation
 uses
@@ -256,9 +258,7 @@ end;
 
 procedure rtarget_Set;
   var
-    d      : TD3DSurface_Desc;
-    sw, sh : Integer;
-    tw, th : Integer;
+    d : TD3DSurface_Desc;
     {$IFDEF USE_DIRECT3D8}
     src, dst : IDirect3DSurface8;
     {$ENDIF}
@@ -325,20 +325,30 @@ begin
       if cam2dApply Then
         glPopMatrix;
 
-      sw := ( ogl_Width - scr_SubCX );
-      sh := ( ogl_Height - scr_SubCY );
-      tw := Round( Target.Surface.Width / Target.Surface.U );
-      th := Round( Target.Surface.Height / Target.Surface.V );
-      glScalef( 1, -1, 1 );
       if Target.Flags and RT_FULL_SCREEN > 0 Then
         begin
-          glTranslatef( 0, -Target.Surface.Height - ( sh - Target.Surface.Height ), 0 );
-          glViewPort( 0, 0, Target.Surface.Width, Target.Surface.Height );
+          if app_Flags and CORRECT_RESOLUTION > 0 Then
+            begin
+              rtWidth  := scr_ResW;
+              rtHeight := scr_ResH;
+            end else
+              begin
+                rtWidth  := ogl_Width;
+                rtHeight := ogl_Height;
+              end;
         end else
           begin
-            glTranslatef( 0, -Target.Surface.Height, 0 );
-            glViewPort( 0, 0, ogl_Width - scr_SubCX, ogl_Height - scr_SubCY );
+            rtWidth  := Target.Surface.Width;
+            rtHeight := Target.Surface.Height;
           end;
+      case lMode of
+        2: Set2DMode;
+        3: Set3DMode;
+      end;
+
+      glScalef( 1, -1, 1 );
+      glTranslatef( 0, -rtHeight, 0 );
+      glViewport( 0, 0, Target.Surface.Width, Target.Surface.Height );
       if cam2dApply Then
         begin
           lPCam2D := cam2DGlobal^;
