@@ -767,10 +767,7 @@ begin
 
   Result := snd_GetStreamID;
   if Result = -1 Then
-    begin
-      log_Add( 'Error: Too many streams!' );
-      exit;
-    end;
+    exit;
 
   if Assigned( sfStream[ Result ]._Decoder ) Then
     begin
@@ -858,6 +855,9 @@ begin
 
   sfArray[ ID ] := FALSE;
 
+  TerminateThread( ThreadID[ ID ], 0 );
+  CloseHandle( Thread[ ID ] );
+
 {$IFDEF USE_OPENAL}
   alSourceStop( sfSource[ ID ] );
   alSourceRewind( sfSource[ ID ] );
@@ -865,8 +865,6 @@ begin
 {$ELSE}
   sfBuffer[ ID ].Stop;
 {$ENDIF}
-  TerminateThread( ThreadID[ ID ], 0 );
-  CloseHandle( Thread[ ID ] );
 end;
 
 function snd_ProcFile;
