@@ -378,7 +378,7 @@ begin
             end;
         end;
         if lRTarget.Flags and RT_SAVE_CONTENT > 0 Then
-          rtarget_Save( lRTarget );
+          rtarget_Save( lRTarget.Surface );
 
         lCam2D   := cam2dApply;
         lPCam2D  := cam2DGlobal^;

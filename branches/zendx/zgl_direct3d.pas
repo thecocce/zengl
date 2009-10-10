@@ -37,7 +37,6 @@ uses
 function  d3d_Create : Boolean;
 procedure d3d_Destroy;
 procedure d3d_ClearGarbage;
-procedure d3d_SaveRT;
 function  d3d_Restore : Boolean;
 procedure d3d_ResetState;
 {$IFDEF USE_DIRECT3D8}
