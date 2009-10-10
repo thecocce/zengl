@@ -342,23 +342,6 @@ begin
     end;
 end;
 
-procedure d3d_SaveRT;
-  var
-    h : HRESULT;
-    t : zglPTexture;
-    d : TD3DSurface_Desc;
-begin
-  d3d_Cleared := FALSE;
-  t := managerTexture.First.Next;
-  while Assigned( t ) do
-    begin
-      d3d_texArray[ t.ID ].Texture.GetLevelDesc( 0, d );
-      if d.Pool = D3DPOOL_DEFAULT Then
-        rtarget_Save( t );
-      t := t.Next;
-    end;
-end;
-
 function d3d_Restore;
   var
     r   : zglPRenderTarget;
@@ -375,9 +358,6 @@ begin
       r.Handle.Depth := nil;
       r := r.Next;
     end;
-  log_Add('d3d_Restore');
-  if scr_Changing Then
-    d3d_SaveRT;
   t := managerTexture.First.Next;
   while Assigned( t ) do
     begin

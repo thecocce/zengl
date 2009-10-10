@@ -40,10 +40,9 @@ const
   RT_TYPE_SIMPLE  = 0;
   RT_TYPE_FBO     = 1;
   RT_TYPE_PBUFFER = 2;
-  RT_FULL_SCREEN  = $01;
-  RT_CLEAR_SCREEN = $02;
-
-  TEX_RESTORE     = $200000;
+  RT_FULL_SCREEN  = 1;
+  RT_CLEAR_SCREEN = 2;
+  RT_SAVE_CONTENT = 3;
 
 type
   zglPD3DTarget = ^zglTD3DTarget;
@@ -171,6 +170,7 @@ procedure rtarget_Restore;
     dst : IDirect3DSurface9;
     {$ENDIF}
 begin
+  if not Assigned( d3d_resArray[ Target.ID ] ) Then exit;
   {$IFDEF USE_DIRECT3D8}
   d3d_texArray[ Target.ID ].Texture.GetSurfaceLevel( 0, dst );
   d3d_resArray[ Target.ID ].GetSurfaceLevel( 0, src );
@@ -377,6 +377,8 @@ begin
               dst := nil;
             end;
         end;
+        if lRTarget.Flags and RT_SAVE_CONTENT > 0 Then
+          rtarget_Save( lRTarget );
 
         lCam2D   := cam2dApply;
         lPCam2D  := cam2DGlobal^;
