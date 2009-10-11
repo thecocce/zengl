@@ -311,7 +311,6 @@ begin
     begin
       alGenSources( 1, @sfSource[ i ] );
       alGenBuffers( sfBufCount, @sfBuffers[ i ] );
-      sfCanUse[ i ] := 100;
     end;
 
   while TRUE do
@@ -347,6 +346,9 @@ begin
 
   log_Add( 'DirectSound: sound system initialized successful' );
 {$ENDIF}
+
+  for i := 1 to SND_MAX do
+    sfCanUse[ i ] := 100;
 
 {$IFDEF FPC}
   InitCriticalSection( sfCS );
@@ -1044,8 +1046,9 @@ end;
 
 procedure snd_PauseFile;
 begin
-  if ( not sfStream[ ID ]._Played ) or
-     ( not Assigned( sfStream[ ID ]._Decoder ) ) or
+  if ( not Assigned( sfStream[ ID ]._Decoder ) ) or
+     ( not sfStream[ ID ]._Played ) or
+     ( sfStream[ ID ]._Paused ) or
      ( not sndInitialized ) Then exit;
 
   sfStream[ ID ]._Paused := TRUE;
@@ -1060,8 +1063,8 @@ end;
 
 procedure snd_StopFile;
 begin
-  if ( not sfStream[ ID ]._Played ) or
-     ( not Assigned( sfStream[ ID ]._Decoder ) ) or
+  if ( not Assigned( sfStream[ ID ]._Decoder ) ) or
+     ( not sfStream[ ID ]._Played ) or
      ( not sndInitialized ) Then exit;
 
   sfStream[ ID ]._Played := FALSE;
@@ -1075,6 +1078,7 @@ end;
 procedure snd_ResumeFile;
 begin
   if ( not Assigned( sfStream[ ID ]._Decoder ) ) or
+     ( not sfStream[ ID ]._Played ) or
      ( not sfStream[ ID ]._Paused ) or
      ( not sndInitialized ) Then exit;
 
