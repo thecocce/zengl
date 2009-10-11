@@ -290,6 +290,7 @@ function ov_open_callbacks(datasource: pointer; var vf: OggVorbis_File; initial:
 function ov_info(var vf: OggVorbis_File; link: cint): pvorbis_info; cdecl; external;
 function ov_read(var vf: OggVorbis_File; buffer: pointer; length: cint; bigendianp: cbool; word: cint; sgned: cbool; bitstream: pcint): clong; cdecl; external;
 function ov_pcm_seek(var vf: OggVorbis_File; pos: cint64): cint; cdecl; external;
+function ov_pcm_total(var vf: OggVorbis_File; i: cint): ogg_int64_t; cdecl; external;
 {$ENDIF}
 
 var
@@ -311,6 +312,7 @@ var
   ov_info           : function(var vf: OggVorbis_File; link: cint): pvorbis_info; cdecl;
   ov_read           : function(var vf: OggVorbis_File; buffer: pointer; length: cint; bigendianp: cbool; word: cint; sgned: cbool; bitstream: pcint): clong; cdecl;
   ov_pcm_seek       : function(var vf: OggVorbis_File; pos: cint64): cint; cdecl;
+  ov_pcm_total      : function(var vf: OggVorbis_File; i: cint): ogg_int64_t; cdecl;
 {$ENDIF}
 
 implementation
@@ -359,6 +361,7 @@ begin
       ov_info           := dlsym( vorbisfile_Library, 'ov_info' );
       ov_read           := dlsym( vorbisfile_Library, 'ov_read' );
       ov_pcm_seek       := dlsym( vorbisfile_Library, 'ov_pcm_seek' );
+      ov_pcm_total      := dlsym( vorbisfile_Library, 'ov_pcm_total' );
 
       log_Add( 'Ogg: Successful initialized'  );
       oggInit := TRUE;
@@ -390,8 +393,9 @@ begin
       if ov_open_callbacks( @Stream._File, vf, nil, 0, vc ) >= 0 Then
         begin
           vi                := ov_info( vf, -1 );
-          Stream.Rate       := vi.rate;
+          Stream.Frequency  := vi.rate;
           Stream.Channels   := vi.channels;
+          Stream.Length     := ov_pcm_total( vf, -1 ) / vi.rate * 1000;
           Stream.BufferSize := 64 * 1024;
           zgl_GetMem( Pointer( Stream.Buffer ), Stream.BufferSize );
           Result := TRUE;
@@ -408,9 +412,7 @@ begin
 
   BytesRead := 0;
   repeat
-    Result := ov_read( zglTOggStream( Stream._Data^ ).vf, Pointer( Ptr( Buffer ) + BytesRead ), Count - BytesRead, FALSE, 2, TRUE, nil );
-
-    if Result = -3  Then break;
+    Result := ov_read( zglTOggStream( Stream._Data^ ).vf, Pointer( Ptr( Buffer ) + BytesRead ), Count - BytesRead, BIG_ENDIAN, 2, TRUE, nil );
     BytesRead := BytesRead + Result;
   until ( Result = 0 ) or ( BytesRead = Count );
 
@@ -450,9 +452,7 @@ procedure ogg_Load;
   begin
     BytesRead := 0;
     repeat
-      Result := ov_read( _vf, Pointer( Ptr( Buffer ) + BytesRead ), Count - BytesRead, FALSE, 2, TRUE, nil );
-
-      if Result = -3  Then break;
+      Result := ov_read( _vf, Pointer( Ptr( Buffer ) + BytesRead ), Count - BytesRead, BIG_ENDIAN, 2, TRUE, nil );
       BytesRead := BytesRead + Result;
     until ( Result = 0 ) or ( BytesRead = Count );
 
@@ -488,7 +488,6 @@ begin
 
       size := 0;
       zgl_GetMem( Buffer, 64 * 1024 );
-      // Т.к. ov_pcm_total почему-то возвращает бред, приходится извращаться :)
       repeat
         BytesRead := DecoderRead( Buffer, 64 * 1024, _End );
         INC( size, BytesRead );
@@ -496,19 +495,13 @@ begin
       _vi := nil;
       ov_clear( _vf );
 
-      zgl_GetMem( Data, size );
-      ov_open_callbacks( nil, _vf, oggMemory.Memory, oggMemory.Size, _vc );
-      size := 0;
-      repeat
-        BytesRead := DecoderRead( Buffer, 64 * 1024, _End );
-        INC( size, BytesRead );
-        if BytesRead > 0 Then
-          Move( Buffer^, Pointer( Ptr( Data ) + size - BytesRead )^, BytesRead );
-      until _End;
-      Freemem( Buffer );
-
-      _vi := nil;
-      ov_clear( _vf );
+      if ov_open_callbacks( nil, _vf, oggMemory.Memory, oggMemory.Size, _vc ) >= 0 Then
+        begin
+          GetMem( Data, size );
+          DecoderRead( Data, size, _End );
+          _vi := nil;
+          ov_clear( _vf );
+        end;
     end;
   mem_Free( oggMemory );
 end;
