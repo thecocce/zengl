@@ -412,7 +412,7 @@ begin
 
   BytesRead := 0;
   repeat
-    Result := ov_read( zglTOggStream( Stream._Data^ ).vf, Pointer( Ptr( Buffer ) + BytesRead ), Count - BytesRead, BIG_ENDIAN, 2, TRUE, nil );
+    Result := ov_read( zglTOggStream( Stream._Data^ ).vf, Pointer( Ptr( Buffer ) + BytesRead ), Count - BytesRead, FALSE, 2, TRUE, nil );
     BytesRead := BytesRead + Result;
   until ( Result = 0 ) or ( BytesRead = Count );
 
@@ -452,7 +452,7 @@ procedure ogg_Load;
   begin
     BytesRead := 0;
     repeat
-      Result := ov_read( _vf, Pointer( Ptr( Buffer ) + BytesRead ), Count - BytesRead, BIG_ENDIAN, 2, TRUE, nil );
+      Result := ov_read( _vf, Pointer( Ptr( Buffer ) + BytesRead ), Count - BytesRead, FALSE, 2, TRUE, nil );
       BytesRead := BytesRead + Result;
     until ( Result = 0 ) or ( BytesRead = Count );
 
