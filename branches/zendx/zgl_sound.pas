@@ -56,16 +56,16 @@ type
 
 {$IFDEF USE_OPENAL}
   zglTSound = record
-    Buffer       : DWORD;
-    sCount       : DWORD;
-    Source       : array of DWORD;
+    Buffer     : DWORD;
+    sCount     : DWORD;
+    Source     : array of DWORD;
 
-    Data         : Pointer;
-    Size         : Integer;
-    Length       : Double;
-    Frequency    : Integer;
+    Data       : Pointer;
+    Size       : Integer;
+    Length     : Double;
+    Frequency  : Integer;
 
-    Prev, Next   : zglPSound;
+    Prev, Next : zglPSound;
 end;
 {$ELSE}
   zglTSound = record
@@ -145,8 +145,8 @@ function  snd_GetStreamID : Integer;
 function  snd_PlayFile( const FileName : String; const Loop : Boolean = FALSE ) : Integer;
 procedure snd_PauseFile( const ID : Integer );
 procedure snd_StopFile( const ID : Integer );
-function  snd_ProcFile( data : Pointer ) : {$IFDEF WIN32} PInteger; stdcall; {$ELSE} LongInt; register; {$ENDIF}
 procedure snd_ResumeFile( const ID : Integer );
+function  snd_ProcFile( data : Pointer ) : {$IFDEF WIN32} PInteger; stdcall; {$ELSE} LongInt; register; {$ENDIF}
 
 var
   managerSound : zglTSoundManager;
@@ -212,8 +212,13 @@ begin
     if GetStatusPlaying( sfSource[ i ] ) = 1 Then
       begin
         sfCanUse[ i ] := 0;
-        sfStream[ i ]._Complete := timer_GetTicks - sfStream[ i ]._LastTime + sfStream[ i ]._Complete;
-        sfStream[ i ]._LastTime := timer_GetTicks;
+        if timer_GetTicks - sfStream[ i ]._LastTime >= 10 Then
+          begin
+            sfStream[ i ]._Complete := timer_GetTicks - sfStream[ i ]._LastTime + sfStream[ i ]._Complete;
+            if sfStream[ i ]._Complete > sfStream[ i ].Length Then
+              sfStream[ i ]._Complete := sfStream[ i ].Length;
+            sfStream[ i ]._LastTime := timer_GetTicks;
+          end;
       end else
         begin
           if sfCanUse[ i ] < 100 Then
@@ -1041,6 +1046,7 @@ begin
   sfStream[ Result ]._Played   := TRUE;
   sfStream[ Result ]._Paused   := FALSE;
   sfStream[ Result ]._Complete := 0;
+  sfStream[ Result ]._LastTime := timer_GetTicks;
   Thread[ Result ] := CreateThread( nil, 0, @snd_ProcFile, Pointer( Result ), 0, ThreadID[ Result ] );
 end;
 
@@ -1094,12 +1100,12 @@ end;
 
 function snd_ProcFile;
   var
-    ID : Integer;
+    ID   : Integer;
     _End : Boolean;
+    BytesRead : Integer;
   {$IFDEF USE_OPENAL}
     processed : LongInt;
     buffer    : LongWord;
-    BytesRead : Integer;
   {$ELSE}
     Block1, Block2 : Pointer;
     b1Size, b2Size : DWORD;
@@ -1150,12 +1156,17 @@ begin
       if sfSource[ ID ].Lock( sfLastPos[ ID ], FillSize, Block1, b1Size, Block2, b2Size, 0 ) <> DS_OK Then break;
       sfLastPos[ ID ] := Position;
 
-      sfStream[ ID ]._Decoder.Read( sfStream[ ID ], Block1, b1Size, _End );
+      BytesRead := sfStream[ ID ]._Decoder.Read( sfStream[ ID ], Block1, b1Size, _End );
       if ( b2Size <> 0 ) and ( not _End ) Then
-        sfStream[ ID ]._Decoder.Read( sfStream[ ID ], Block2, b2Size, _End );
+        BytesRead := sfStream[ ID ]._Decoder.Read( sfStream[ ID ], Block2, b2Size, _End );
 
       sfSource[ ID ].Unlock( Block1, b1Size, Block2, b2Size );
       {$ENDIF}
+      if sfStream[ ID ]._Complete >= sfStream[ ID ].Length Then
+        begin
+          sfStream[ ID ]._Complete := 0;
+          sfStream[ ID ]._LastTime := timer_GetTicks;
+        end;
       if _End then
         begin
           if sfStream[ ID ].Loop Then
@@ -1163,15 +1174,21 @@ begin
               sfStream[ ID ]._Decoder.Loop( sfStream[ ID ] );
             end else
               begin
+                while sfStream[ ID ]._Complete < sfStream[ ID ].Length do
+                  begin
+                    sfStream[ ID ]._Complete := timer_GetTicks - sfStream[ ID ]._LastTime + sfStream[ ID ]._Complete;
+                    sfStream[ ID ]._LastTime := timer_GetTicks;
+                    u_Sleep( 10 );
+                  end;
+                if sfStream[ ID ]._Complete > sfStream[ ID ].Length Then
+                  sfStream[ ID ]._Complete := sfStream[ ID ].Length;
                 sfStream[ ID ]._Played := FALSE;
-                break;
               end;
         end;
     end;
   if not app_Work Then exit;
-{$IFDEF USE_OPENAL}
-  alSourceQueueBuffers( sfSource[ ID ], 1, @buffer );
-{$ELSE}
+
+{$IFNDEF USE_OPENAL}
   sfSource[ ID ].Stop;
 {$ENDIF}
 end;

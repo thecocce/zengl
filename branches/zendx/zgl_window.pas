@@ -186,7 +186,7 @@ end;
 
 procedure wnd_SetCaption;
 begin
-  wnd_Caption := NewCaption;
+  wnd_Caption := NewCaption + #0;
 
   if wnd_Handle <> 0 Then
     SetWindowText( wnd_Handle, PChar( wnd_Caption ) );
