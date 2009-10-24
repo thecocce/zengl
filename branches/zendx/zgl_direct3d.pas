@@ -316,9 +316,9 @@ end;
 
 procedure d3d_Destroy;
 begin
-  d3d_Device._Release;
+  //d3d_Device._Release;
   d3d_Device := nil;
-  d3d._Release;
+  //d3d._Release;
   d3d        := nil;
 
   d3d_texCount := 0;

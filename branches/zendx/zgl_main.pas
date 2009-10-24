@@ -146,7 +146,7 @@ begin
   if not scr_Create Then exit;
 
   app_Initialized := TRUE;
-  if ( wnd_Width >= zgl_Get( DESKTOP_WIDTH ) ) and ( wnd_Height >= zgl_Get( DESKTOP_HEIGHT ) ) Then
+  if wnd_Height >= zgl_Get( DESKTOP_HEIGHT ) Then
     wnd_FullScreen := TRUE;
 
   if not wnd_Create( wnd_Width, wnd_Height ) Then exit;
@@ -235,7 +235,7 @@ begin
   if app_WorkTime <> 0 Then
     log_Add( 'Average FPS: ' + u_IntToStr( Round( app_FPSAll / app_WorkTime ) ) );
 
-  //gl_Destroy;
+  d3d_Destroy;
   if not app_InitToHandle Then wnd_Destroy;
 
   app_PExit;
