@@ -64,6 +64,9 @@ type
     radius : Single;
 end;
 
+function min( a, b : Single ) : Single; {$IFDEF USE_INLINE} inline; {$ENDIF}
+function max( a, b : Single ) : Single; {$IFDEF USE_INLINE} inline; {$ENDIF}
+
 procedure InitCosSinTables;
 function  m_Cos( Angle : Integer ) : Single;
 function  m_Sin( Angle : Integer ) : Single;
@@ -100,6 +103,16 @@ begin
   Result := abs( ArcTan( dy / dx ) * ( 180 / pi ) );
 end;
 
+function min;
+begin
+  if a > b Then Result := b else Result := a;
+end;
+
+function max;
+begin
+  if a > b Then Result := a else Result := b;
+end;
+
 procedure InitCosSinTables;
   var
     i         : Integer;
@@ -115,15 +128,21 @@ end;
 
 function m_Cos;
 begin
-  while Angle > 360 do Angle := Angle - 360;
-  while Angle < 0   do Angle := Angle + 360;
+  if Angle > 360 Then
+    DEC( Angle, ( Angle div 360 ) * 360 )
+  else
+    if Angle < 0 Then
+      INC( Angle, ( abs( Angle ) div 360 + 1 ) * 360 );
   Result := CosTable[ Angle ];
 end;
 
 function m_Sin;
 begin
-  while Angle > 360 do Angle := Angle - 360;
-  while Angle < 0   do Angle := Angle + 360;
+  if Angle > 360 Then
+    DEC( Angle, ( Angle div 360 ) * 360 )
+  else
+    if Angle < 0 Then
+      INC( Angle, ( abs( Angle ) div 360 + 1 ) * 360 );
   Result := SinTable[ Angle ];
 end;
 
