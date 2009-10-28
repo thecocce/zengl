@@ -131,7 +131,7 @@ begin
 
       if ( Flags and TEXT_FX_LENGTH > 0 ) and ( s > textLength ) Then
         begin
-          if s > 0 Then
+          if s > 1 Then
             begin
               if Assigned( textLCoord ) Then
                 begin

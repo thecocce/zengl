@@ -315,14 +315,17 @@ begin
 end;
 
 procedure d3d_Destroy;
+  var
+    i : Integer;
 begin
+  for i := 0 to d3d_texCount - 1 do
+    d3d_texArray[ i ].Texture := nil;
+  SetLength( d3d_texArray, 0 );
+
   //d3d_Device._Release;
   d3d_Device := nil;
   //d3d._Release;
   d3d        := nil;
-
-  d3d_texCount := 0;
-  SetLength( d3d_texArray, 0 );
 end;
 
 procedure d3d_ClearGarbage;

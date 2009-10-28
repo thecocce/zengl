@@ -249,6 +249,7 @@ begin
   if Assigned( Target.Next ) Then
     Target.Next.Prev := Target.Prev;
 
+  Target.Handle.Depth := nil;
   FreeMemory( Target.Handle );
   FreeMemory( Target );
   DEC( managerRTarget.Count );

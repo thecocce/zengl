@@ -235,10 +235,10 @@ begin
   if app_WorkTime <> 0 Then
     log_Add( 'Average FPS: ' + u_IntToStr( Round( app_FPSAll / app_WorkTime ) ) );
 
-  d3d_Destroy;
   if not app_InitToHandle Then wnd_Destroy;
 
   app_PExit;
+  d3d_Destroy;
   log_Add( 'End' );
   log_Close;
 end;
