@@ -238,7 +238,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)/"/>
-      <OtherUnitFiles Value="Direct3D/"/>
+      <OtherUnitFiles Value="Direct3D/;PasJPEG/"/>
       <UnitOutputDirectory Value="tmp"/>
     </SearchPaths>
     <Parsing>

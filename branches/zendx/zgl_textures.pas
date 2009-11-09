@@ -116,6 +116,7 @@ implementation
 uses
   zgl_main,
   zgl_screen,
+  zgl_render_2d,
   zgl_file,
   zgl_log,
   zgl_utils;
@@ -629,6 +630,12 @@ end;
 
 procedure tex_GetData;
 begin
+  if b2d_Started Then
+    begin
+      batch2d_Flush;
+      b2d_New := TRUE;
+    end;
+
   pSize := 4;
   GetMem( pData, Round( Texture.Width / Texture.U ) * Round( Texture.Height / Texture.V ) * pSize );
 

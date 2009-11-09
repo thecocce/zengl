@@ -26,10 +26,43 @@ unit zgl_textures_jpg;
 interface
 
 uses
+  {$IFDEF USE_PASJPEG}
+  jmorecfg,
+  jpeglib,
+  jerror,
+  jdeferr,
+  jdapimin,
+  jdapistd,
+  jdmarker,
+  jdmaster,
+  {$ELSE}
   Windows,
+  {$ENDIF}
 
   zgl_memory;
 
+{$IFDEF USE_PASJPEG}
+const
+  INPUT_BUF_SIZE = 4096;
+
+type
+  zglPJPGDecoder = ^zglTJPGDecoder;
+  zglTJPGDecoder = record
+    mgr    : jpeg_source_mgr;
+    field  : JOCTET_FIELD_PTR;
+end;
+
+type
+  zglPJPGData = ^zglTJPGData;
+  zglTJPGData = record
+    Buffer    : JSAMPARRAY;
+    Data      : array of Byte;
+    Width     : WORD;
+    Height    : WORD;
+    sWidth    : JDIMENSION; // Scanline width
+    Grayscale : Boolean;
+end;
+{$ELSE}
 type
   OLE_HANDLE = LongWord;
   OLE_XPOS_HIMETRIC  = Longint;
@@ -125,6 +158,7 @@ type
     Width     : WORD;
     Height    : WORD;
 end;
+{$ENDIF}
 
 procedure jpg_Load( var pData : Pointer; var W, H : WORD );
 procedure jpg_LoadFromFile( const FileName : String; var pData : Pointer; var W, H : WORD );
@@ -139,14 +173,145 @@ uses
 
 var
   jpgMem     : zglTMemory;
+  {$IFDEF USE_PASJPEG}
+  jpgDecoder : zglPJPGDecoder;
+  jpgCInfo   : jpeg_decompress_struct;
   jpgData    : zglTJPGData;
+  {$ELSE}
+  jpgData    : zglTJPGData;
+  {$ENDIF}
+
+{$IFDEF USE_PASJPEG}
+procedure jpeg_output_message( cinfo : j_common_ptr ); register;
+  var
+    str : String;
+begin
+  cInfo.err.format_message( cinfo, str );
+  log_Add( 'JPEG - ' + str );
+end;
+
+function jpeg_error( var err : jpeg_error_mgr ) : jpeg_error_mgr_ptr; register;
+begin
+  jpeg_std_error( err );
+  err.output_message := jpeg_output_message;
+  Result := @err;
+end;
+
+procedure Decoder_Init( cinfo : j_decompress_ptr ); register;
+begin
+end;
+
+procedure Decoder_Term( cinfo : j_decompress_ptr ); register;
+begin
+end;
+
+function Decoder_FillInputData( cinfo : j_decompress_ptr ) : Boolean; register;
+  var
+    Decoder   : zglPJPGDecoder;
+    BytesRead : Integer;
+begin
+  Decoder := zglPJPGDecoder( cinfo.src );
+  BytesRead := mem_Read( jpgMem, Decoder.field^, INPUT_BUF_SIZE );
+  if BytesRead <= 0 Then
+    begin
+      WARNMS( j_common_ptr( cinfo ), JWRN_JPEG_EOF );
+
+      Decoder.field[ 0 ] := JOCTET( $FF );
+      Decoder.field[ 1 ] := JOCTET( JPEG_EOI );
+      BytesRead := 2;
+    end;
+
+  Decoder.mgr.next_input_byte := JOCTETptr( Decoder.field );
+  Decoder.mgr.bytes_in_buffer := BytesRead;
+  Result := TRUE;
+end;
+
+procedure Decoder_SkipInputData( cinfo : j_decompress_ptr; BytesToSkip : Long ); register;
+  var
+    Decoder : zglPJPGDecoder;
+begin
+  Decoder := zglPJPGDecoder( cInfo.src );
+  if BytesToSkip > 0 Then
+    begin
+      while BytesToSkip > Decoder.mgr.bytes_in_buffer do
+        begin
+          DEC( BytesToSkip, Decoder.mgr.bytes_in_buffer );
+          Decoder_FillInputData( cInfo );
+        end;
+      INC( Decoder.mgr.next_input_byte, size_t( BytesToSkip ) );
+      DEC( Decoder.mgr.bytes_in_buffer, size_t( BytesToSkip ) );
+    end;
+end;
+{$ENDIF}
 
 procedure jpg_Load;
   label _exit;
+  {$IFDEF USE_PASJPEG}
+  var
+    jerr : jpeg_error_mgr;
+  {$ELSE}
   var
     m : Pointer;
     g : HGLOBAL;
+  {$ENDIF}
 begin
+{$IFDEF USE_PASJPEG}
+  jpgCInfo.err := jpeg_error( jerr );
+  jpeg_create_decompress( @jpgCInfo );
+
+  if not Assigned( jpgCInfo.src ) Then
+    begin
+      jpgCInfo.src := jpeg_source_mgr_ptr( jpgCInfo.mem.alloc_small( j_common_ptr( @jpgCInfo ), JPOOL_PERMANENT, SizeOf( zglTJPGDecoder ) ) );
+      jpgDecoder := zglPJPGDecoder( jpgCInfo.src );
+      jpgDecoder.field := JOCTET_FIELD_PTR( jpgCInfo.Mem.Alloc_small( j_common_ptr( @jpgCInfo ), JPOOL_PERMANENT, INPUT_BUF_SIZE * SizeOf( JOCTET ) ) );
+    end;
+
+  jpgDecoder                       := zglPJPGDecoder( jpgCInfo.src );
+  jpgDecoder.mgr.init_source       := Decoder_Init;
+  jpgDecoder.mgr.fill_input_buffer := Decoder_FillInputData;
+  jpgDecoder.mgr.skip_input_data   := Decoder_SkipInputData;
+  jpgDecoder.mgr.term_source       := Decoder_Term;
+  jpgDecoder.mgr.resync_to_restart := jpeg_resync_to_restart;
+  jpgDecoder.mgr.bytes_in_buffer   := 0;
+  jpgDecoder.mgr.next_input_byte   := nil;
+
+  jpgCInfo.dither_mode         := JDITHER_NONE;
+  jpgCInfo.dct_method          := JDCT_FASTEST;
+  jpgCInfo.two_pass_quantize   := FALSE;
+  jpgCInfo.do_fancy_upsampling := FALSE;
+  jpgCInfo.do_block_smoothing  := FALSE;
+
+  jpeg_read_header( @jpgCInfo, TRUE );
+
+  jpeg_calc_output_dimensions( @jpgCInfo );
+  jpgData.sWidth := jpgCInfo.output_width * jpgCInfo.output_Components;
+  SetLength( jpgData.Data, jpgCInfo.output_width * jpgCInfo.output_height * 4 );
+  jpgData.Width  := jpgCInfo.output_width;
+  jpgData.Height := jpgCInfo.output_height;
+
+  if jpgCInfo.out_color_space = JCS_GRAYSCALE Then
+    jpgData.Grayscale := TRUE
+  else
+    if jpgCInfo.out_color_space = JCS_RGB Then
+      if jpgCInfo.quantize_colors Then
+        jpgData.Grayscale := TRUE
+      else
+        jpgData.Grayscale := FALSE
+    else
+      begin
+        log_Add( 'JPG - Unsupported ColorType' );
+        goto _exit;
+      end;
+  jpgData.buffer := jpgCInfo.mem.alloc_sarray( j_common_ptr( @jpgCInfo ), JPOOL_IMAGE, jpgData.sWidth, 1 );
+
+  jpeg_start_decompress( @jpgCInfo );
+
+  while jpgCInfo.Output_Scanline < jpgCInfo.Output_Height do
+    begin
+      jpeg_read_scanlines( @jpgCInfo, jpgData.buffer, 1 );
+      jpg_FillData;
+    end;
+{$ELSE}
   g := 0;
   try
     g := GlobalAlloc( GMEM_FIXED, jpgMem.Size );
@@ -158,6 +323,7 @@ begin
   finally
     if g <> 0 Then GlobalFree( g );
   end;
+{$ENDIF}
 
   zgl_GetMem( pData, jpgData.Width * jpgData.Height * 4 );
   Move( Pointer( jpgData.Data )^, pData^, jpgData.Width * jpgData.Height * 4 );
@@ -166,9 +332,15 @@ begin
 
 _exit:
   begin
+  {$IFDEF USE_PASJPEG}
+    SetLength( jpgData.Data, 0 );
+    jpeg_finish_decompress ( @jpgCInfo );
+    jpeg_destroy_decompress( @jpgCInfo );
+  {$ELSE}
     SetLength( jpgData.Data, 0 );
     jpgData.Buffer := nil;
     jpgData.Stream := nil;
+  {$ENDIF}
     mem_Free( jpgMem );
   end;
 end;
@@ -189,6 +361,11 @@ begin
 end;
 
 procedure jpg_FillData;
+  {$IFDEF USE_PASJPEG}
+  var
+    i, j  : JDIMENSION;
+    color : JSAMPLE_PTR;
+  {$ELSE}
   var
     bi   : BITMAPINFO;
     bmp  : HBITMAP;
@@ -197,7 +374,34 @@ procedure jpg_FillData;
     W, H : Longint;
     i    : Integer;
     t    : Byte;
+  {$ENDIF}
 begin
+{$IFDEF USE_PASJPEG}
+  color := JSAMPLE_PTR( jpgData.Buffer[ 0 ] );
+  if not jpgData.Grayscale Then
+    begin
+     for i := 0 to jpgData.Width - 1 do
+        begin
+          j := i * 4 + ( jpgData.Height - jpgCInfo.Output_Scanline ) * jpgData.Width * 4;
+          jpgData.Data[ j + 0 ] := PByte( Ptr( color ) + i * 3 + 0 )^;
+          jpgData.Data[ j + 1 ] := PByte( Ptr( color ) + i * 3 + 1 )^;
+          jpgData.Data[ j + 2 ] := PByte( Ptr( color ) + i * 3 + 2 )^;
+          jpgData.Data[ j + 3 ] := 255;
+        end;
+    end else
+      begin
+        for i := 0 to jpgData.Width - 1 do
+          begin
+            j := i * 4 + ( jpgData.Height - jpgCInfo.Output_Scanline ) * jpgData.Width * 4;
+            jpgData.Data[ j + 0 ] := color^;
+            jpgData.Data[ j + 1 ] := color^;
+            jpgData.Data[ j + 2 ] := color^;
+            jpgData.Data[ j + 3 ] := 255;
+
+            INC( color );
+          end;
+      end;
+{$ELSE}
   DC := CreateCompatibleDC( GetDC( 0 ) );
   jpgData.Buffer.get_Width ( W );
   jpgData.Buffer.get_Height( H );
@@ -228,6 +432,7 @@ begin
 
   DeleteObject( bmp );
   DeleteDC    ( DC );
+{$ENDIF}
 end;
 
 initialization

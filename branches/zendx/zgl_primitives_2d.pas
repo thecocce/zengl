@@ -98,7 +98,7 @@ begin
             _y2 := Y2 + 0.5;
           end;
 
-  if ( not b2d_Started ) or batch2d_Check( GL_LINES, FX, nil ) Then
+  if ( not b2d_Started ) or batch2d_Check( GL_LINES, FX_BLEND or FX, nil ) Then
     begin
       if FX and PR2D_SMOOTH > 0 Then
         begin
@@ -133,7 +133,7 @@ procedure pr2d_Rect;
 begin
  if FX and PR2D_FILL > 0 Then
    begin
-      if ( not b2d_Started ) or batch2d_Check( GL_QUADS, FX, nil ) Then
+      if ( not b2d_Started ) or batch2d_Check( GL_QUADS, FX_BLEND or FX, nil ) Then
         begin
           glEnable( GL_BLEND );
           glBegin( GL_QUADS );
@@ -156,7 +156,7 @@ begin
         end;
    end else
     begin
-      if ( not b2d_Started ) or batch2d_Check( GL_LINES, FX_BLEND, nil ) Then
+      if ( not b2d_Started ) or batch2d_Check( GL_LINES, FX_BLEND or FX, nil ) Then
         begin
           glEnable( GL_BLEND );
           glBegin( GL_LINES );
@@ -200,7 +200,7 @@ begin
 
   if FX and PR2D_FILL = 0 Then
     begin
-      if ( not b2d_Started ) or batch2d_Check( GL_LINES, FX, nil ) Then
+      if ( not b2d_Started ) or batch2d_Check( GL_LINES, FX_BLEND or FX, nil ) Then
         begin
           if FX and PR2D_SMOOTH > 0 Then
             begin
@@ -232,7 +232,7 @@ begin
         end;
     end else
       begin
-        if ( not b2d_Started ) or batch2d_Check( GL_TRIANGLES, FX, nil ) Then
+        if ( not b2d_Started ) or batch2d_Check( GL_TRIANGLES, FX_BLEND or FX, nil ) Then
           begin
             if FX and PR2D_SMOOTH > 0 Then
               begin
@@ -278,7 +278,7 @@ begin
 
   if FX and PR2D_FILL = 0 Then
     begin
-      if ( not b2d_Started ) or batch2d_Check( GL_LINES, FX, nil ) Then
+      if ( not b2d_Started ) or batch2d_Check( GL_LINES, FX_BLEND or FX, nil ) Then
         begin
           if FX and PR2D_SMOOTH > 0 Then
             begin
@@ -310,7 +310,7 @@ begin
         end;
     end else
       begin
-        if ( not b2d_Started ) or batch2d_Check( GL_TRIANGLES, FX, nil ) Then
+        if ( not b2d_Started ) or batch2d_Check( GL_TRIANGLES, FX_BLEND or FX, nil ) Then
           begin
             if FX and PR2D_SMOOTH > 0 Then
               begin
@@ -370,14 +370,6 @@ begin
         begin
           glEnable( GL_TEXTURE_2D );
           glBindTexture( GL_TEXTURE_2D, Texture.ID );
-
-          if FX and FX2D_COLORSET > 0 Then
-            begin
-              glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_ARB );
-              glTexEnvi( GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB,  GL_REPLACE );
-              glTexEnvi( GL_TEXTURE_ENV, GL_SOURCE0_RGB_ARB,  GL_PRIMARY_COLOR_ARB );
-            end else
-              glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
         end;
 
       glBegin( Mode );
