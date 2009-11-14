@@ -439,7 +439,7 @@ begin
   if Assigned( Event.Widget.child ) Then
     iShift := zglTScrollBarDesc( Event.Widget.child[ 0 ].desc^ ).Position div ih
   else
-      iShift := 0;
+    iShift := 0;
 
   with Event^, zglTListBoxDesc( Widget.desc^ ) do
     begin
@@ -509,7 +509,7 @@ begin
             if ( mouse_button = M_BLEFT ) and ( mouse_X > X + W - H + 2 ) Then
               begin
                 Widget.modal := not Widget.modal;
-              DropedDown := not DropedDown;
+                DropedDown   := not DropedDown;
               end;
           end;
       end;

@@ -120,7 +120,7 @@ end;
 
 procedure gui_Draw;
   var
-    i : Integer;
+    i     : Integer;
     Event : zglPEvent;
     p     : Pointer;
 begin

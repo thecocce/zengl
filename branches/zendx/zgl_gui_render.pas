@@ -285,7 +285,7 @@ end;
 
 procedure gui_DrawComboBox;
   var
-    i, ShiftY : Integer;
+    i, ShiftY  : Integer;
     tw, ty, th : Single;
     r          : zglTRect;
 begin

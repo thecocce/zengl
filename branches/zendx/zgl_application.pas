@@ -33,6 +33,7 @@ uses
 
 procedure zero;
 procedure zerou( dt : Double );
+procedure zeroa( activate : Boolean );
 
 procedure app_MainLoop;
 function  app_ProcessMessages( hWnd : HWND; Msg : UINT; wParam : WPARAM; lParam : LPARAM ) : LRESULT; stdcall;
@@ -52,11 +53,11 @@ var
   app_UsrHomeDir   : AnsiString;
 
   // call-back
-  app_PLoad   : procedure = zero;
-  app_PDraw   : procedure = zero;
-  app_PExit   : procedure = zero;
-  app_PUpdate : procedure( dt : Double ) = zerou;
-
+  app_PLoad     : procedure = zero;
+  app_PDraw     : procedure = zero;
+  app_PExit     : procedure = zero;
+  app_PUpdate   : procedure( dt : Double ) = zerou;
+  app_PActivate : procedure( activate : Boolean ) = zeroa;
   app_ShowCursor : Boolean;
 
   app_dt : Double;
@@ -86,6 +87,9 @@ procedure zero;
 begin
 end;
 procedure zerou;
+begin
+end;
+procedure zeroa;
 begin
 end;
 
@@ -228,12 +232,16 @@ begin
         if app_Focus Then
           begin
             app_Pause := FALSE;
+            app_PActivate( TRUE );
             FillChar( keysDown[ 0 ], 256, 0 );
             key_ClearState;
             FillChar( mouseDown[ 0 ], 3, 0 );
             mouse_ClearState;
           end else
-            if app_AutoPause Then app_Pause := TRUE;
+            begin
+              if app_AutoPause Then app_Pause := TRUE;
+              app_PActivate( FALSE );
+            end;
       end;
     WM_NCHITTEST:
       begin
@@ -262,6 +270,8 @@ begin
             mouseClick[ M_BLEFT ] := TRUE;
             mouseCanClick[ M_BLEFT ] := FALSE;
           end;
+        if Msg = WM_LBUTTONDBLCLK Then
+          mouseDblClick[ M_BLEFT ] := TRUE;
       end;
     WM_MBUTTONDOWN, WM_MBUTTONDBLCLK:
       begin
@@ -271,6 +281,8 @@ begin
             mouseClick[ M_BMIDLE ] := TRUE;
             mouseCanClick[ M_BMIDLE ] := FALSE;
           end;
+        if Msg = WM_MBUTTONDBLCLK Then
+          mouseDblClick[ M_BMIDLE ] := TRUE;
       end;
     WM_RBUTTONDOWN, WM_RBUTTONDBLCLK:
       begin
@@ -280,6 +292,8 @@ begin
             mouseClick[ M_BRIGHT ] := TRUE;
             mouseCanClick[ M_BRIGHT ] := FALSE;
           end;
+        if Msg = WM_RBUTTONDBLCLK Then
+          mouseDblClick[ M_BRIGHT ] := TRUE;
       end;
     WM_LBUTTONUP:
       begin
