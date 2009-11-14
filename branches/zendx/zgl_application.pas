@@ -102,6 +102,7 @@ begin
       TranslateMessage( Mess );
       DispatchMessage( Mess );
     end;
+  getcurpos := TRUE;
 end;
 
 procedure app_Draw;

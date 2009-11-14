@@ -56,7 +56,8 @@ var
   mouseCanClick : array[ 0..2 ] of Boolean;
   mouseWheel    : array[ 0..1 ] of Boolean;
   mouseLock     : Boolean;
-  cursorpos     : TPoint;
+  cursorpos : TPoint;
+  getcurpos : Boolean;
 
 implementation
 uses
@@ -65,7 +66,11 @@ uses
 
 function mouse_X;
 begin
-  GetCursorPos( cursorpos );
+  if getcurpos Then
+    begin
+      getcurpos := FALSE;
+      GetCursorPos( cursorpos );
+    end;
   if wnd_FullScreen Then
     Result := cursorpos.X
   else
@@ -75,7 +80,11 @@ end;
 
 function mouse_Y;
 begin
-  GetCursorPos( cursorpos );
+  if getcurpos Then
+    begin
+      getcurpos := FALSE;
+      GetCursorPos( cursorpos );
+    end;
   if wnd_FullScreen Then
     Result := cursorpos.Y
   else
