@@ -58,6 +58,7 @@ procedure file_Close( var FileHandle : zglTFile );
 procedure file_Find( const Directory : String; var List : zglTFileList; const FindDir : Boolean );
 procedure file_GetName( const FileName : String; var Result : String );
 procedure file_GetExtension( const FileName : String; var Result : String );
+procedure file_GetDirectory( const FileName : String; var Result : String );
 procedure file_SetPath( const Path : String );
 
 var
@@ -153,7 +154,7 @@ begin
   until not FindNextFile( First, FList );
 end;
 
-procedure GetStr( const Str : String; var Result : String; const d : Char );
+procedure GetStr( const Str : String; var Result : String; const d : Char; const b : Boolean );
   var
     i, pos, l : Integer;
 begin
@@ -165,23 +166,35 @@ begin
         pos := i;
         break;
       end;
-  Result := copy( Str, l - ( l - pos ) + 1, ( l - pos ) );
+  if b Then
+    Result := copy( Str, 1, pos )
+  else
+    Result := copy( Str, l - ( l - pos ) + 1, ( l - pos ) );
 end;
 
 procedure file_GetName;
   var
     tmp : String;
 begin
-  GetStr( FileName, Result, '/' );
+  GetStr( FileName, Result, '/', FALSE );
   if Result = '' Then
-    GetStr( FileName, Result, '\' );
-  GetStr( Result, tmp, '.' );
+    GetStr( FileName, Result, '\', FALSE );
+  GetStr( Result, tmp, '.', FALSE );
   Result := copy( Result, 1, length( Result ) - length( tmp ) - 1 );
 end;
 
 procedure file_GetExtension;
 begin
-  GetStr( FileName, Result, '.' );
+  GetStr( FileName, Result, '.', FALSE );
+end;
+
+procedure file_GetDirectory;
+  var
+    tmp : String;
+begin
+  GetStr( FileName, Result, '/', TRUE );
+  if Result = '' Then
+    GetStr( FileName, Result, '\', TRUE );
 end;
 
 procedure file_SetPath;

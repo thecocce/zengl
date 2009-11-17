@@ -77,9 +77,8 @@ uses
   zgl_keyboard,
   zgl_mouse,
   zgl_timers,
+  {$IFDEF USE_SOUND}
   zgl_sound,
-  {$IFDEF USE_OPENAL}
-  zgl_sound_openal,
   {$ENDIF}
   zgl_utils;
 
@@ -138,7 +137,9 @@ begin
   while app_Work do
     begin
       OSProcess;
+      {$IFDEF USE_SOUND}
       snd_MainLoop;
+      {$ENDIF}
 
       CanKillTimers := FALSE;
       if not app_Pause Then
