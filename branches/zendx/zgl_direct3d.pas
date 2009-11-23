@@ -190,6 +190,33 @@ begin
       if not wnd_FullScreen Then exit;
     end;
 
+  FillChar( d3d_ParamsW, SizeOf( TD3DPresentParameters ), 0 );
+  with d3d_ParamsW do
+    begin
+      BackBufferWidth  := wnd_Width;
+      BackBufferHeight := wnd_Height;
+      BackBufferFormat := d3d_Mode.Format;
+      BackBufferCount  := 1;
+      MultiSampleType  := D3DMULTISAMPLE_NONE;
+      hDeviceWindow    := wnd_Handle;
+      Windowed         := TRUE;
+      {$IFDEF USE_DIRECT3D8}
+      if scr_VSync Then
+        SwapEffect := D3DSWAPEFFECT_COPY_VSYNC
+      else
+        SwapEffect := D3DSWAPEFFECT_COPY;
+      {$ENDIF}
+      {$IFDEF USE_DIRECT3D9}
+      SwapEffect := D3DSWAPEFFECT_COPY;
+      if scr_VSync Then
+        PresentationInterval := D3DPRESENT_INTERVAL_ONE
+      else
+        PresentationInterval := D3DPRESENT_INTERVAL_IMMEDIATE;
+      {$ENDIF}
+      EnableAutoDepthStencil := TRUE;
+      AutoDepthStencilFormat := D3DFMT_D16;
+    end;
+
   // FullScreen
   {$IFDEF USE_DIRECT3D8}
   modeCount := d3d.GetAdapterModeCount( D3DADAPTER_DEFAULT );
@@ -219,33 +246,6 @@ begin
       u_Warning( 'Cannot set fullscreen mode' );
       wnd_FullScreen := FALSE;
       exit;
-    end;
-
-  FillChar( d3d_ParamsW, SizeOf( TD3DPresentParameters ), 0 );
-  with d3d_ParamsW do
-    begin
-      BackBufferWidth  := wnd_Width;
-      BackBufferHeight := wnd_Height;
-      BackBufferFormat := d3d_Mode.Format;
-      BackBufferCount  := 1;
-      MultiSampleType  := D3DMULTISAMPLE_NONE;
-      hDeviceWindow    := wnd_Handle;
-      Windowed         := TRUE;
-      {$IFDEF USE_DIRECT3D8}
-      if scr_VSync Then
-        SwapEffect := D3DSWAPEFFECT_COPY_VSYNC
-      else
-        SwapEffect := D3DSWAPEFFECT_COPY;
-      {$ENDIF}
-      {$IFDEF USE_DIRECT3D9}
-      SwapEffect := D3DSWAPEFFECT_COPY;
-      if scr_VSync Then
-        PresentationInterval := D3DPRESENT_INTERVAL_ONE
-      else
-        PresentationInterval := D3DPRESENT_INTERVAL_IMMEDIATE;
-      {$ENDIF}
-      EnableAutoDepthStencil := TRUE;
-      AutoDepthStencilFormat := D3DFMT_D16;
     end;
 
   FillChar( d3d_ParamsF, SizeOf( TD3DPresentParameters ), 0 );
