@@ -124,6 +124,7 @@ exports
   ini_ReadKeyBool          name prefix + 'ini_ReadKeyBool',
   ini_WriteKeyStr          name prefix + 'ini_WriteKeyStr',
   ini_WriteKeyInt          name prefix + 'ini_WriteKeyInt',
+  ini_WriteKeyFloat        name prefix + 'ini_WriteKeyFloat',
   ini_WriteKeyBool         name prefix + 'ini_WriteKeyBool',
 
   // Timers

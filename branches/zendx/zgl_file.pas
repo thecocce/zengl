@@ -62,7 +62,7 @@ procedure file_GetDirectory( const FileName : String; var Result : String );
 procedure file_SetPath( const Path : String );
 
 var
-  filePath : String;
+  filePath : String = '';
 
 implementation
 uses
