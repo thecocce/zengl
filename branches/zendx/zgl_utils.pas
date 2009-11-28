@@ -35,6 +35,7 @@ const
 
 function u_IntToStr( const Value : Integer ) : String;
 function u_StrToInt( const Value : String ) : Integer;
+function u_StrToFloat( const Value : String ) : Single;
 function u_BoolToStr( const Value : Boolean ) : String;
 function u_StrToBool( const Value : String ) : Boolean;
 
@@ -75,6 +76,15 @@ function u_StrToInt;
     E : Integer;
 begin
   Val( String( Value ), Result, E );
+end;
+
+function u_StrToFloat;
+  var
+    E : Integer;
+begin
+  Val( String( Value ), Result, E );
+  if E <> 0 Then
+    Result := 0;
 end;
 
 function u_BoolToStr;

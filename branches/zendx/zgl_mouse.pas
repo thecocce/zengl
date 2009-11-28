@@ -104,7 +104,11 @@ end;
 
 function mouse_Down;
 begin
-  Result := mouseDown[ Button ];
+  case Button of
+    M_BLEFT:  Result := GetAsyncKeyState( VK_LBUTTON ) <> 0;
+    M_BMIDLE: Result := GetAsyncKeyState( VK_MBUTTON ) <> 0;
+    M_BRIGHT: Result := GetAsyncKeyState( VK_RBUTTON ) <> 0;
+  end;
 end;
 
 function mouse_Up;
