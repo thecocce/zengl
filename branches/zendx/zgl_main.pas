@@ -422,9 +422,11 @@ begin
     begin
       if SizeOf( Char ) = 1 Then
         font_GetCID := font_GetUTF8ID
+      {$IFNDEF FPC}
       else
         if SizeOf( Char ) = 2 Then
           font_GetCID := font_GetUTF16ID;
+      {$ENDIF}
     end;
 
   {$IFDEF USE_SOUND}

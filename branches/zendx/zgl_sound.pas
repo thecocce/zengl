@@ -205,7 +205,10 @@ end;
 
 procedure snd_MainLoop;
   var
-    i, z : Integer;
+    i : Integer;
+    {$IFDEF USE_OPENAL}
+    z : Integer;
+    {$ENDIF}
 begin
   if not sndInitialized Then exit;
 
@@ -547,11 +550,13 @@ end;
 
 function snd_Play;
   var
-    i, j : Integer;
+    i : Integer;
     {$IFNDEF USE_OPENAL}
     DSERROR : HRESULT;
     Status  : DWORD;
     Vol     : Single;
+    {$ELSE}
+    j       : Integer;
     {$ENDIF}
 begin
   Result := -1;
@@ -1141,8 +1146,8 @@ function snd_ProcFile;
   var
     ID   : Integer;
     _End : Boolean;
-    BytesRead : Integer;
   {$IFDEF USE_OPENAL}
+    BytesRead : Integer;
     processed : LongInt;
     buffer    : LongWord;
   {$ELSE}
@@ -1152,6 +1157,7 @@ function snd_ProcFile;
     FillSize       : DWORD;
   {$ENDIF}
 begin
+  Result := 0;
   ID := DWORD( data );
 
   {$IFDEF USE_OPENAL}
@@ -1195,9 +1201,9 @@ begin
       if sfSource[ ID ].Lock( sfLastPos[ ID ], FillSize, Block1, b1Size, Block2, b2Size, 0 ) <> DS_OK Then break;
       sfLastPos[ ID ] := Position;
 
-      BytesRead := sfStream[ ID ]._Decoder.Read( sfStream[ ID ], Block1, b1Size, _End );
+      sfStream[ ID ]._Decoder.Read( sfStream[ ID ], Block1, b1Size, _End );
       if ( b2Size <> 0 ) and ( not _End ) Then
-        BytesRead := sfStream[ ID ]._Decoder.Read( sfStream[ ID ], Block2, b2Size, _End );
+        sfStream[ ID ]._Decoder.Read( sfStream[ ID ], Block2, b2Size, _End );
 
       sfSource[ ID ].Unlock( Block1, b1Size, Block2, b2Size );
       {$ENDIF}
@@ -1225,10 +1231,15 @@ begin
               end;
         end;
     end;
-  if not app_Work Then exit;
+  if not app_Work Then
+    {$IFDEF FPC} EndThread( 0 ); {$ELSE} exit; {$ENDIF}
 
 {$IFNDEF USE_OPENAL}
   sfSource[ ID ].Stop;
+{$ENDIF}
+
+{$IFDEF FPC}
+  EndThread( 0 );
 {$ENDIF}
 end;
 

@@ -532,8 +532,6 @@ end;
 function d3d_BeginScene;
   var
     hr : HRESULT;
-    t  : zglPTexture;
-    fmt : TD3DFormat;
 begin
   if d3d_CanDraw Then
     begin

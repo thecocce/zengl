@@ -111,11 +111,9 @@ var
   {$IFDEF USE_DIRECT3D9}
   lSurface : IDirect3DSurface9;
   {$ENDIF}
-  lTexture : zglPTexture;
 
 procedure rtarget_Save;
   var
-    i : Integer;
     s, d : TD3DSurface_Desc;
     {$IFDEF USE_DIRECT3D8}
     src, dst : IDirect3DSurface8;
@@ -189,8 +187,7 @@ end;
 
 function rtarget_Add;
 var
-  fmt    : TD3DFormat;
-  Handle : zglPTexture;
+  fmt : TD3DFormat;
 begin
   Result := @managerRTarget.First;
   while Assigned( Result.Next ) do
@@ -260,12 +257,6 @@ end;
 procedure rtarget_Set;
   var
     d : TD3DSurface_Desc;
-    {$IFDEF USE_DIRECT3D8}
-    src, dst : IDirect3DSurface8;
-    {$ENDIF}
-    {$IFDEF USE_DIRECT3D9}
-    src, dst : IDirect3DSurface9;
-    {$ENDIF}
 begin
   batch2d_Flush;
 
@@ -310,14 +301,12 @@ begin
             d3d_Device.GetRenderTarget( d3d_Surface );
             d3d_Device.GetDepthStencilSurface( d3d_Stencil );
             d3d_texArray[ Target.Surface.ID ].Texture.GetSurfaceLevel( 0, lSurface );
-            lTexture := Target.Surface;
             d3d_Device.SetRenderTarget( lSurface, Target.Handle.Depth );
             {$ENDIF}
             {$IFDEF USE_DIRECT3D9}
             d3d_Device.GetDepthStencilSurface( d3d_Stencil );
             d3d_Device.GetRenderTarget( 0, d3d_Surface );
             d3d_texArray[ Target.Surface.ID ].Texture.GetSurfaceLevel( 0, lSurface );
-            lTexture := Target.Surface;
             d3d_Device.SetRenderTarget( 0, lSurface );
             d3d_Device.SetDepthStencilSurface( Target.Handle.Depth );
             {$ENDIF}
@@ -373,9 +362,6 @@ begin
               lSurface    := nil;
               d3d_Surface := nil;
               d3d_Stencil := nil;
-
-              src := nil;
-              dst := nil;
             end;
         end;
         if lRTarget.Flags and RT_SAVE_CONTENT > 0 Then
@@ -385,7 +371,6 @@ begin
         lPCam2D  := cam2DGlobal^;
         ogl_Mode := lMode;
         lRTarget := nil;
-        lTexture := nil;
         SetCurrentMode;
         scr_SetViewPort;
         if lCam2D Then
