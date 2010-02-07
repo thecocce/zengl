@@ -70,9 +70,9 @@ uses
   zgl_types;
 
 const
-  libogg        = 'ogg.dll';
-  libvorbis     = 'vorbis.dll';
-  libvorbisfile = 'vorbisfile.dll';
+  libogg        = 'libogg.dll';
+  libvorbis     = 'libvorbis.dll';
+  libvorbisfile = 'libvorbisfile.dll';
 
 {***********************************************************************}
 {                       POSIX TYPE DEFINITIONS                          }
