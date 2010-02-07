@@ -50,6 +50,8 @@ var
   cam2dSin      : Single;
   cam2dGlobal   : zglPCamera2D = nil;
   constCamera2D : zglTCamera2D = ( X: 0; Y: 0; Angle: 0; Zoom: ( X: 1; Y: 1 ) );
+  cam2dSX       : Integer = 0;
+  cam2dSY       : Integer = 0;
 
 implementation
 uses
