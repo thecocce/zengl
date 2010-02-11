@@ -588,7 +588,7 @@ begin
   if ogl_Mode = 2 Then
     begin
       if app_Flags and CORRECT_RESOLUTION > 0 Then
-        glOrtho( 0, ogl_Width - scr_AddCX * 2 / scr_ResCX, ogl_Height - scr_AddCY * 2 / scr_ResCY, 0, -1, 1 )
+        glOrtho( 0, Round( ogl_Width - scr_AddCX * 2 / scr_ResCX ), Round( ogl_Height - scr_AddCY * 2 / scr_ResCY ), 0, -1, 1 )
       else
         glOrtho( 0, wnd_Width, wnd_Height, 0, -1, 1 );
     end else
