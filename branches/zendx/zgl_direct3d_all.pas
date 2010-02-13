@@ -566,7 +566,7 @@ end;
 
 procedure glColor4ubv;
 begin
-  bColor := PDWORD( v )^;
+  bColor := D3DCOLOR_ARGB( PByte( v + 3 )^, PByte( v + 0 )^, PByte( v + 1 )^, PByte( v + 2 )^ );
 end;
 
 procedure glColor4f;
