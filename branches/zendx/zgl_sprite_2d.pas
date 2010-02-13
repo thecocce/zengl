@@ -155,7 +155,7 @@ begin
             Quad[ 3 ].Y := Y + H + FX2D_VY4;
           end;
 
-  if ( not b2d_Started ) or batch2d_Check( GL_QUADS, FX, Texture ) Then
+  if ( not b2d_Started ) or batch2d_Check( GL_TRIANGLES, FX, Texture ) Then
     begin
       if FX and FX_BLEND > 0 Then
         glEnable( GL_BLEND )
@@ -164,7 +164,7 @@ begin
       glEnable( GL_TEXTURE_2D );
       glBindTexture( GL_TEXTURE_2D, Texture.ID );
 
-      glBegin( GL_QUADS );
+      glBegin( GL_TRIANGLES );
     end;
 
   if FX and FX_COLOR > 0 Then
@@ -174,21 +174,29 @@ begin
 
   if FX and FX2D_VCA > 0 Then
     begin
-      glColor4ub  ( FX2D_VR1, FX2D_VG1, FX2D_VB1, FX2D_VA1 );
+      glColor4ubv( @FX2D_VCA1[ 0 ] );
       glTexCoord2f( FU, Texture^.V - FV );
       gl_Vertex2fv( @Quad[ 0 ] );
 
-      glColor4ub  ( FX2D_VR2, FX2D_VG2, FX2D_VB2, FX2D_VA2 );
+      glColor4ubv( @FX2D_VCA2[ 0 ] );
       glTexCoord2f( Texture^.U - FU, Texture^.V - FV );
       gl_Vertex2fv( @Quad[ 1 ] );
 
-      glColor4ub  ( FX2D_VR3, FX2D_VG3, FX2D_VB3, FX2D_VA3 );
+      glColor4ubv( @FX2D_VCA3[ 0 ] );
       glTexCoord2f( Texture^.U - FU, FV );
       gl_Vertex2fv( @Quad[ 2 ] );
 
-      glColor4ub  ( FX2D_VR4, FX2D_VG4, FX2D_VB4, FX2D_VA4 );
+      glColor4ubv( @FX2D_VCA3[ 0 ] );
+      glTexCoord2f( Texture^.U - FU, FV );
+      gl_Vertex2fv( @Quad[ 2 ] );
+
+      glColor4ubv( @FX2D_VCA4[ 0 ] );
       glTexCoord2f( FU, FV );
       gl_Vertex2fv( @Quad[ 3 ] );
+
+      glColor4ubv( @FX2D_VCA1[ 0 ] );
+      glTexCoord2f( FU, Texture^.V - FV );
+      gl_Vertex2fv( @Quad[ 0 ] );
     end else
       begin
         glTexCoord2f( FU, Texture^.V - FV );
@@ -200,8 +208,14 @@ begin
         glTexCoord2f( Texture^.U - FU, FV );
         gl_Vertex2fv( @Quad[ 2 ] );
 
+        glTexCoord2f( Texture^.U - FU, FV );
+        gl_Vertex2fv( @Quad[ 2 ] );
+
         glTexCoord2f( FU, FV );
         gl_Vertex2fv( @Quad[ 3 ] );
+
+        glTexCoord2f( FU, Texture^.V - FV );
+        gl_Vertex2fv( @Quad[ 0 ] );
       end;
 
   if not b2d_Started Then
@@ -323,7 +337,7 @@ begin
             Quad[ 3 ].Y := Y + H + FX2D_VY4;
           end;
 
-  if ( not b2d_Started ) or batch2d_Check( GL_QUADS, FX, Texture ) Then
+  if ( not b2d_Started ) or batch2d_Check( GL_TRIANGLES, FX, Texture ) Then
     begin
       if FX and FX_BLEND > 0 Then
         glEnable( GL_BLEND )
@@ -332,7 +346,7 @@ begin
       glEnable( GL_TEXTURE_2D );
       glBindTexture( GL_TEXTURE_2D, Texture^.ID );
 
-      glBegin( GL_QUADS );
+      glBegin( GL_TRIANGLES );
     end;
 
   if FX and FX_COLOR > 0 Then
@@ -342,21 +356,29 @@ begin
 
   if FX and FX2D_VCA > 0 Then
     begin
-      glColor4ub  ( FX2D_VR1, FX2D_VG1, FX2D_VB1, FX2D_VA1 );
+      glColor4ubv( @FX2D_VCA1[ 0 ] );
       glTexCoord2f( tX - SU + tU, tY - tV );
       gl_Vertex2fv( @Quad[ 0 ] );
 
-      glColor4ub  ( FX2D_VR2, FX2D_VG2, FX2D_VB2, FX2D_VA2 );
+      glColor4ubv( @FX2D_VCA2[ 0 ] );
       glTexCoord2f( tX - tU, tY - tV );
       gl_Vertex2fv( @Quad[ 1 ] );
 
-      glColor4ub  ( FX2D_VR3, FX2D_VG3, FX2D_VB3, FX2D_VA3 );
+      glColor4ubv( @FX2D_VCA3[ 0 ] );
       glTexCoord2f( tX - tU, tY - SV + tV );
       gl_Vertex2fv( @Quad[ 2 ] );
 
-      glColor4ub  ( FX2D_VR4, FX2D_VG4, FX2D_VB4, FX2D_VA4 );
+      glColor4ubv( @FX2D_VCA3[ 0 ] );
+      glTexCoord2f( tX - tU, tY - SV + tV );
+      gl_Vertex2fv( @Quad[ 2 ] );
+
+      glColor4ubv( @FX2D_VCA4[ 0 ] );
       glTexCoord2f( tX - SU + tU, tY - SV + tV );
       gl_Vertex2fv( @Quad[ 3 ] );
+
+      glColor4ubv( @FX2D_VCA1[ 0 ] );
+      glTexCoord2f( tX - SU + tU, tY - tV );
+      gl_Vertex2fv( @Quad[ 0 ] );
     end else
       begin
         glTexCoord2f( tX - SU + tU, tY - tV );
@@ -368,8 +390,14 @@ begin
         glTexCoord2f( tX - tU, tY - SV + tV );
         gl_Vertex2fv( @Quad[ 2 ] );
 
+        glTexCoord2f( tX - tU, tY - SV + tV );
+        gl_Vertex2fv( @Quad[ 2 ] );
+
         glTexCoord2f( tX - SU + tU, tY - SV + tV );
         gl_Vertex2fv( @Quad[ 3 ] );
+
+        glTexCoord2f( tX - SU + tU, tY - tV );
+        gl_Vertex2fv( @Quad[ 0 ] );
       end;
 
   if not b2d_Started Then
@@ -487,7 +515,7 @@ begin
             Quad[ 3 ].Y := Y + H + FX2D_VY4;
           end;
 
-  if ( not b2d_Started ) or batch2d_Check( GL_QUADS, FX, Texture ) Then
+  if ( not b2d_Started ) or batch2d_Check( GL_TRIANGLES, FX, Texture ) Then
     begin
       if FX and FX_BLEND > 0 Then
         glEnable( GL_BLEND )
@@ -496,7 +524,7 @@ begin
       glEnable( GL_TEXTURE_2D );
       glBindTexture( GL_TEXTURE_2D, Texture^.ID );
 
-      glBegin( GL_QUADS );
+      glBegin( GL_TRIANGLES );
     end;
 
   if FX and FX_COLOR > 0 Then
@@ -506,21 +534,29 @@ begin
 
   if FX and FX2D_VCA > 0 Then
     begin
-      glColor4ub  ( FX2D_VR1, FX2D_VG1, FX2D_VB1, FX2D_VA1 );
+      glColor4ubv( @FX2D_VCA1[ 0 ] );
       glTexCoord2f( tX + tU, tY + tV );
       gl_Vertex2fv( @Quad[ 0 ] );
 
-      glColor4ub  ( FX2D_VR2, FX2D_VG2, FX2D_VB2, FX2D_VA2 );
+      glColor4ubv( @FX2D_VCA2[ 0 ] );
       glTexCoord2f( tW - tU, tY + tV );
       gl_Vertex2fv( @Quad[ 1 ] );
 
-      glColor4ub  ( FX2D_VR3, FX2D_VG3, FX2D_VB3, FX2D_VA3 );
+      glColor4ubv( @FX2D_VCA3[ 0 ] );
       glTexCoord2f( tW - tU, tH - tV );
       gl_Vertex2fv( @Quad[ 2 ] );
 
-      glColor4ub  ( FX2D_VR4, FX2D_VG4, FX2D_VB4, FX2D_VA4 );
+      glColor4ubv( @FX2D_VCA3[ 0 ] );
+      glTexCoord2f( tW - tU, tH - tV );
+      gl_Vertex2fv( @Quad[ 2 ] );
+
+      glColor4ubv( @FX2D_VCA4[ 0 ] );
       glTexCoord2f( tX + tU, tH - tV );
       gl_Vertex2fv( @Quad[ 3 ] );
+
+      glColor4ubv( @FX2D_VCA1[ 0 ] );
+      glTexCoord2f( tX + tU, tY + tV );
+      gl_Vertex2fv( @Quad[ 0 ] );
     end else
       begin
         glTexCoord2f( tX + tU, tY + tV );
@@ -532,8 +568,14 @@ begin
         glTexCoord2f( tW - tU, tH - tV );
         gl_Vertex2fv( @Quad[ 2 ] );
 
+        glTexCoord2f( tW - tU, tH - tV );
+        gl_Vertex2fv( @Quad[ 2 ] );
+
         glTexCoord2f( tX + tU, tH - tV );
         gl_Vertex2fv( @Quad[ 3 ] );
+
+        glTexCoord2f( tX + tU, tY + tV );
+        gl_Vertex2fv( @Quad[ 0 ] );
       end;
 
   if not b2d_Started Then
@@ -609,7 +651,7 @@ begin
   if bI >= Tiles.Count.X Then bI := Tiles.Count.X - 1;
   if bJ >= Tiles.Count.Y Then bJ := Tiles.Count.Y - 1;
 
-  if ( not b2d_Started ) or batch2d_Check( GL_QUADS, FX, Texture ) Then
+  if ( not b2d_Started ) or batch2d_Check( GL_TRIANGLES, FX, Texture ) Then
     begin
       if FX and FX_BLEND > 0 Then
         glEnable( GL_BLEND )
@@ -618,7 +660,7 @@ begin
       glEnable( GL_TEXTURE_2D );
       glBindTexture( GL_TEXTURE_2D, Texture^.ID );
 
-      glBegin( GL_QUADS );
+      glBegin( GL_TRIANGLES );
     end;
 
   if FX and FX_COLOR > 0 Then
@@ -657,8 +699,14 @@ begin
         glTexCoord2f( tX - tU, tY - SV + tV );
         gl_Vertex2f( x + i * w + w, y + j * h + h );
 
+        glTexCoord2f( tX - tU, tY - SV + tV );
+        gl_Vertex2f( x + i * w + w, y + j * h + h );
+
         glTexCoord2f( tX - SU + tU, tY - SV + tV );
         gl_Vertex2f( x + i * w, y + j * h + h );
+
+        glTexCoord2f( tX - SU + tU, tY - tV );
+        gl_Vertex2f( x + i * w, y + j * h );
       end;
 
   if not b2d_Started Then

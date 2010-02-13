@@ -250,9 +250,10 @@ procedure glViewport(x, y: GLint; width, height: GLsizei);
 procedure glOrtho(left, right, bottom, top, zNear, zFar: GLdouble);
 procedure glScissor(x, y: GLint; width, height: GLsizei);
 // Color
-procedure glColor4ub(red, green, blue, alpha: GLubyte);
-procedure glColor4f(red, green, blue, alpha: GLfloat);
-procedure glColorMask(red, green, blue, alpha: GLboolean);
+procedure glColor4ub(red, green, blue, alpha: GLubyte); {$IFDEF USE_INLINE} inline; {$ENDIF}
+procedure glColor4ubv(v: PGLubyte); {$IFDEF USE_INLINE} inline; {$ENDIF}
+procedure glColor4f(red, green, blue, alpha: GLfloat); {$IFDEF USE_INLINE} inline; {$ENDIF}
+procedure glColorMask(red, green, blue, alpha: GLboolean); {$IFDEF USE_INLINE} inline; {$ENDIF}
 // Alpha
 procedure glAlphaFunc(func: GLenum; ref: GLclampf);
 procedure glBlendFunc(sfactor, dfactor: GLenum);
@@ -327,7 +328,7 @@ uses
 
 var
   RenderMode     : TD3DPrimitiveType;
-  RenderQuad     : Boolean;
+  {RenderQuad     : Boolean;}
   RenderTextured : Boolean;
   RenderTexID    : Integer;
   // Matrices
@@ -339,8 +340,8 @@ var
   lMipFilter  : LongWord;
   lWrap       : LongWord;
   // Buffers
-  newTriangle  : Boolean;
-  newTriangleC : Integer;
+  {newTriangle  : Boolean;
+  newTriangleC : Integer;}
   bColor       : TD3DColor;
   bTVertices   : array of TXYZCTVertex; // Textured
   bTVCount     : Integer;
@@ -367,25 +368,30 @@ end;
 
 procedure glBegin;
 begin
+  bTVCount := 0;
+  bPVCount := 0;
+  {RenderQuad := FALSE;
+  newTriangle := FALSE;
+  newTriangleC := 0;}
+
   case Mode of
     GL_POINTS: RenderMode := D3DPT_POINTLIST;
     GL_LINES: RenderMode := D3DPT_LINELIST;
     GL_TRIANGLES: RenderMode := D3DPT_TRIANGLELIST;
     GL_TRIANGLE_STRIP: RenderMode := D3DPT_TRIANGLESTRIP;
-    GL_QUADS:
+    {GL_QUADS:
       begin
         RenderQuad := TRUE;
         RenderMode := D3DPT_TRIANGLELIST;
-      end;
+      end;}
   end;
 end;
 
 procedure glEnd;
-  label _end;
   var
     Count : Integer;
 begin
-  if RenderQuad Then
+  {if RenderQuad Then
     begin
       if RenderTextured Then
       begin
@@ -398,14 +404,14 @@ begin
           if bPVCount + 1 > length( bPVertices ) Then SetLength( bPVertices, bPVCount + 1 );
           bPVertices[ bPVCount - 1 ] := bPVertices[ 0 ];
         end;
-    end;
+    end;}
 
   if RenderTextured Then
     Count := bTVCount
   else
     Count := bPVCount;
 
-  if Count = 0 Then goto _end;
+  if Count = 0 Then exit;
 
   case RenderMode of
     D3DPT_POINTLIST:;
@@ -437,13 +443,6 @@ begin
         d3d_Device.DrawPrimitiveUP( RenderMode, Count, bPVertices[ 0 ], s_D3DFVF_XYZC );
       end;
   {$ENDIF}
-
-_end:
-  bTVCount := 0;
-  bPVCount := 0;
-  RenderQuad := FALSE;
-  newTriangle := FALSE;
-  newTriangleC := 0;
 end;
 
 procedure glEnable;
@@ -563,6 +562,11 @@ end;
 procedure glColor4ub;
 begin
   bColor := D3DCOLOR_ARGB( alpha, red, green, blue );
+end;
+
+procedure glColor4ubv;
+begin
+  bColor := PDWORD( v )^;
 end;
 
 procedure glColor4f;
@@ -818,7 +822,7 @@ begin
       bTVertices[ bTVCount - 1 ].c := bColor;
       bTVertices[ bTVCount - 1 ].x := x;
       bTVertices[ bTVCount - 1 ].y := y;
-      if RenderQuad Then
+      {if RenderQuad Then
         begin
           if newTriangle Then
             begin
@@ -834,7 +838,7 @@ begin
               if bTVCount + 1 > length( bTVertices ) Then SetLength( bTVertices, bTVCount + 1 );
               bTVertices[ bTVCount - 1 ] := bTVertices[ bTVCount - 6 ];
             end;
-        end;
+        end;}
     end else
       begin
         if bPVCount + 1 > length( bPVertices ) Then SetLength( bPVertices, bPVCount + 1 );
@@ -843,7 +847,7 @@ begin
         bPVertices[ bPVCount ].x := x;
         bPVertices[ bPVCount ].y := y;
         INC( bPVCount );
-        if RenderQuad Then
+        {if RenderQuad Then
           begin
             INC( newTriangleC );
             if newTriangleC = 3 Then newTriangle := TRUE;
@@ -861,7 +865,7 @@ begin
                 if bPVCount + 1 > length( bPVertices ) Then SetLength( bPVertices, bPVCount + 1 );
                 bPVertices[ bPVCount - 1 ] := bPVertices[ bPVCount - 6 ];
               end;
-          end;
+          end;}
       end;
 end;
 
@@ -873,7 +877,7 @@ begin
       bTVertices[ bTVCount - 1 ].c := bColor;
       bTVertices[ bTVCount - 1 ].x := zglPPoint2D( v ).X;
       bTVertices[ bTVCount - 1 ].y := zglPPoint2D( v ).Y;
-      if RenderQuad Then
+      {if RenderQuad Then
         begin
           if newTriangle Then
             begin
@@ -889,7 +893,7 @@ begin
               if bTVCount + 1 > length( bTVertices ) Then SetLength( bTVertices, bTVCount + 1 );
               bTVertices[ bTVCount - 1 ] := bTVertices[ bTVCount - 6 ];
             end;
-        end;
+        end;}
     end else
       begin
         if bPVCount + 1 > length( bPVertices ) Then SetLength( bPVertices, bPVCount + 1 );
@@ -898,7 +902,7 @@ begin
         bPVertices[ bPVCount ].x := zglPPoint2D( v ).X;
         bPVertices[ bPVCount ].y := zglPPoint2D( v ).Y;
         INC( bPVCount );
-        if RenderQuad Then
+        {if RenderQuad Then
           begin
             INC( newTriangleC );
             if newTriangleC = 3 Then newTriangle := TRUE;
@@ -916,7 +920,7 @@ begin
                 if bPVCount + 1 > length( bPVertices ) Then SetLength( bPVertices, bPVCount + 1 );
                 bPVertices[ bPVCount - 1 ] := bPVertices[ bPVCount - 6 ];
               end;
-          end;
+          end;}
       end;
 end;
 
@@ -1315,10 +1319,10 @@ begin
   bTVertices[ bTVCount ].u := s;
   bTVertices[ bTVCount ].v := t;
   INC( bTVCount );
-  INC( newTriangleC );
+  {INC( newTriangleC );
 
   if newTriangleC = 3 then
-    newTriangle := TRUE;
+    newTriangle := TRUE;}
 end;
 
 procedure glTexCoord2fv;
@@ -1327,10 +1331,10 @@ begin
   bTVertices[ bTVCount ].u := zglPPoint2D( v ).X;
   bTVertices[ bTVCount ].v := zglPPoint2D( v ).Y;
   INC( bTVCount );
-  INC( newTriangleC );
+  {INC( newTriangleC );
 
   if newTriangleC = 3 then
-    newTriangle := TRUE;
+    newTriangle := TRUE;}
 end;
 
 end.

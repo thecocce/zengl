@@ -106,7 +106,7 @@ begin
     begin
       wnd_X     := 0;
       wnd_Y     := 0;
-      wnd_Style := WS_POPUP or WS_VISIBLE;
+      wnd_Style := WS_POPUP or WS_VISIBLE or WS_SYSMENU;
     end else
       wnd_Style := WS_CAPTION or WS_MINIMIZEBOX or WS_SYSMENU or WS_VISIBLE;
   wnd_Handle := CreateWindowEx( WS_EX_APPWINDOW or WS_EX_TOPMOST * Byte( wnd_FullScreen ),
@@ -169,7 +169,7 @@ begin
     FullScreen := FALSE;
 
   if FullScreen Then
-    wnd_Style := WS_VISIBLE
+    wnd_Style := WS_POPUP or WS_VISIBLE or WS_SYSMENU
   else
     wnd_Style := WS_CAPTION or WS_MINIMIZEBOX or WS_SYSMENU or WS_VISIBLE;
 
