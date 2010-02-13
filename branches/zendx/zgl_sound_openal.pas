@@ -34,6 +34,7 @@ const
   AL_NONE                                   = 0;
   AL_FALSE                                  = 0;
   AL_TRUE                                   = 1;
+  AL_NO_ERROR                               = 0;
 
   //Sound samples: format specifier.
   AL_FORMAT_MONO8                           =$1100;
@@ -79,6 +80,7 @@ var
   oal_Library : LongWord;
 
   alcGetString           : function(device: PALCdevice; param: LongInt): PAnsiChar; cdecl;
+  alcGetError            : function(device: PALCdevice): LongInt; cdecl;
   // Device
   alcOpenDevice          : function(const devicename: PAnsiChar): PALCdevice; cdecl;
   alcCloseDevice         : function(device: PALCdevice): Boolean; cdecl;
@@ -133,6 +135,7 @@ begin
   if oal_Library <> LIB_ERROR Then
     begin
       alcGetString           := dlsym( oal_Library, 'alcGetString' );
+      alcGetError            := dlsym( oal_Library, 'alcGetError' );
       alcOpenDevice          := dlsym( oal_Library, 'alcOpenDevice' );
       alcCloseDevice         := dlsym( oal_Library, 'alcCloseDevice' );
       alcCreateContext       := dlsym( oal_Library, 'alcCreateContext' );
