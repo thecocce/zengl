@@ -35,7 +35,9 @@ procedure zero;
 procedure zerou( dt : Double );
 procedure zeroa( activate : Boolean );
 
+procedure app_Init;
 procedure app_MainLoop;
+procedure app_ProcessOS;
 function  app_ProcessMessages( hWnd : HWND; Msg : UINT; wParam : WPARAM; lParam : LPARAM ) : LRESULT; stdcall;
 procedure app_CalcFPS;
 
@@ -53,6 +55,8 @@ var
   app_UsrHomeDir   : AnsiString;
 
   // call-back
+  app_PInit     : procedure = app_Init;
+  app_PLoop     : procedure = app_MainLoop;
   app_PLoad     : procedure = zero;
   app_PDraw     : procedure = zero;
   app_PExit     : procedure = zero;
@@ -82,26 +86,9 @@ uses
   {$ENDIF}
   zgl_utils;
 
-procedure zero;
-begin
-end;
-procedure zerou;
-begin
-end;
-procedure zeroa;
-begin
-end;
-
-procedure OSProcess;
-  var
-    Mess : tagMsg;
-begin
-  while PeekMessage( Mess, 0{wnd_Handle}, 0, 0, PM_REMOVE ) do
-    begin
-      TranslateMessage( Mess );
-      DispatchMessage( Mess );
-    end;
-end;
+procedure zero;  begin end;
+procedure zerou; begin end;
+procedure zeroa; begin end;
 
 procedure app_Draw;
 begin
@@ -115,17 +102,26 @@ begin
     INC( app_FPSCount );
 end;
 
-procedure app_MainLoop;
-  var
-    i, z : Integer;
-    j    : Double;
-    currTimer : zglPTimer;
-    SysInfo : _SYSTEM_INFO;
+procedure app_CalcFPS;
 begin
+  app_FPS      := app_FPSCount;
+  app_FPSAll   := app_FPSAll + app_FPSCount;
+  app_FPSCount := 0;
+  INC( app_WorkTime );
+end;
+
+procedure app_Init;
+  {$IFDEF WIN32}
+  var
+    SysInfo : _SYSTEM_INFO;
+  {$ENDIF}
+begin
+  {$IFDEF WIN32}
   // Багнутое MS-поделко требует патча :)
   // Вешаем все на одно ядро
   GetSystemInfo( SysInfo );
   SetProcessAffinityMask( GetCurrentProcess, SysInfo.dwActiveProcessorMask );
+  {$ENDIF}
 
   scr_Clear;
   app_PLoad;
@@ -134,60 +130,56 @@ begin
   app_dt := timer_GetTicks;
   timer_Reset;
   timer_Add( @app_CalcFPS, 1000 );
+end;
+
+procedure app_MainLoop;
+  var
+    t : Double;
+begin
   while app_Work do
     begin
-      OSProcess;
+      app_ProcessOS;
       {$IFDEF USE_SOUND}
       snd_MainLoop;
       {$ENDIF}
 
-      CanKillTimers := FALSE;
-      if not app_Pause Then
+      {$IFDEF LINUX}
+      // При переходе в полноэкранный режим происходит чего-то странное, и в событиях не значится получение фокуса 8)
+      if wnd_FullScreen Then
         begin
-          if not d3d_BeginScene Then continue;
-
-          currTimer := @managerTimer.First;
-          if currTimer <> nil Then
-            for z := 0 to managerTimer.Count do
-              begin
-                if currTimer^.Active then
-                  begin
-                    j := timer_GetTicks;
-                    while j >= currTimer^.LastTick + currTimer^.Interval do
-                      begin
-                        currTimer^.LastTick := currTimer^.LastTick + currTimer^.Interval;
-                        currTimer^.OnTimer;
-                        if j < timer_GetTicks - currTimer^.Interval Then
-                          break
-                        else
-                          j := timer_GetTicks;
-                      end;
-                  end else currTimer^.LastTick := timer_GetTicks;
-
-                currTimer := currTimer^.Next;
-              end;
-        end else
-          begin
-            timer_Reset;
-            u_Sleep( 10 );
-          end;
-
-      CanKillTimers := TRUE;
-      for i := 1 to TimersToKill do
-        timer_Del( aTimersToKill[ i ] );
-      TimersToKill  := 0;
+          app_Focus := TRUE;
+          app_Pause := FALSE;
+        end;
+      {$ENDIF}
 
       if app_Pause Then
         begin
+          timer_Reset;
           app_dt := timer_GetTicks;
+          u_Sleep( 10 );
           continue;
-        end;
+        end else
+          if d3d_BeginScene Then
+            timer_MainLoop;
+          else
+            continue;
 
-      j := timer_GetTicks;
+      t := timer_GetTicks;
       app_PUpdate( timer_GetTicks - app_dt );
-      app_dt := j;
+      app_dt := t;
 
       app_Draw;
+    end;
+end;
+
+procedure app_ProcessOS;
+  var
+    Mess : tagMsg;
+begin
+  while PeekMessage( Mess, 0{wnd_Handle}, 0, 0, PM_REMOVE ) do
+    begin
+      TranslateMessage( Mess );
+      DispatchMessage( Mess );
     end;
 end;
 
@@ -376,14 +368,6 @@ begin
   else
     Result := DefWindowProc( hWnd, Msg, wParam, lParam );
   end;
-end;
-
-procedure app_CalcFPS;
-begin
-  app_FPS      := app_FPSCount;
-  app_FPSAll   := app_FPSAll + app_FPSCount;
-  app_FPSCount := 0;
-  INC( app_WorkTime );
 end;
 
 initialization

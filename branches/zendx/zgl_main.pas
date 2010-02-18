@@ -32,11 +32,13 @@ const
   cs_ZenGL = 'ZenDX 0.1.41';
 
   // zgl_Reg
-  SYS_LOAD               = $000001;
-  SYS_DRAW               = $000002;
-  SYS_UPDATE             = $000003;
-  SYS_EXIT               = $000004;
-  SYS_ACTIVATE           = $000005;
+  SYS_APP_INIT           = $000001;
+  SYS_APP_LOOP           = $000002;
+  SYS_LOAD               = $000003;
+  SYS_DRAW               = $000004;
+  SYS_UPDATE             = $000005;
+  SYS_EXIT               = $000006;
+  SYS_ACTIVATE           = $000007;
   TEX_FORMAT_EXTENSION   = $000010;
   TEX_FORMAT_FILE_LOADER = $000011;
   TEX_FORMAT_MEM_LOADER  = $000012;
@@ -160,7 +162,8 @@ begin
   Set2DMode;
   wnd_ShowCursor( app_ShowCursor );
 
-  app_MainLoop;
+  app_PInit;
+  app_PLoop;
   zgl_Destroy;
 end;
 
@@ -183,7 +186,8 @@ begin
   Set2DMode;
   wnd_ShowCursor( app_ShowCursor );
 
-  app_MainLoop;
+  app_PInit;
+  app_PLoop;
   zgl_Destroy;
 end;
 
@@ -257,6 +261,16 @@ procedure zgl_Reg;
 begin
   case What of
     // Callback
+    SYS_APP_INIT:
+      begin
+        app_PInit := UserData;
+        if not Assigned( UserData ) Then app_PInit := app_Init;
+      end;
+    SYS_APP_LOOP:
+      begin
+        app_PLoop := UserData;
+        if not Assigned( UserData ) Then app_PLoop := app_MainLoop;
+      end;
     SYS_LOAD:
       begin
         app_PLoad := UserData;
@@ -424,8 +438,7 @@ begin
         font_GetCID := font_GetUTF8ID
       {$IFNDEF FPC}
       else
-        if SizeOf( Char ) = 2 Then
-          font_GetCID := font_GetUTF16ID;
+        font_GetCID := font_GetUTF16ID;
       {$ENDIF}
     end;
 
