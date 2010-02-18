@@ -160,7 +160,7 @@ begin
           continue;
         end else
           if d3d_BeginScene Then
-            timer_MainLoop;
+            timer_MainLoop
           else
             continue;
 
