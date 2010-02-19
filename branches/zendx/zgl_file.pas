@@ -177,7 +177,7 @@ procedure file_GetName;
     tmp : String;
 begin
   GetStr( FileName, Result, '/', FALSE );
-  if Result = '' Then
+  if Result = FileName Then
     GetStr( FileName, Result, '\', FALSE );
   GetStr( Result, tmp, '.', FALSE );
   Result := copy( Result, 1, length( Result ) - length( tmp ) - 1 );
