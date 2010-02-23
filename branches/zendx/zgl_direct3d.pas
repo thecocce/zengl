@@ -36,7 +36,6 @@ uses
 
 function  d3d_Create : Boolean;
 procedure d3d_Destroy;
-procedure d3d_ClearGarbage;
 function  d3d_Restore : Boolean;
 procedure d3d_ResetState;
 {$IFDEF USE_DIRECT3D8}
@@ -89,7 +88,6 @@ var
   d3d_ParamsF  : TD3DPresentParameters;
 
   d3d_CanDraw : Boolean;
-  d3d_Cleared : Boolean = TRUE;
 
   ogl_zDepth     : Byte;
   ogl_Stencil    : Byte;
@@ -328,22 +326,6 @@ begin
   d3d        := nil;
 end;
 
-procedure d3d_ClearGarbage;
-  var
-    t : zglPTexture;
-    d : TD3DSurface_Desc;
-begin
-  d3d_Cleared := TRUE;
-  t := managerTexture.First.Next;
-  while Assigned( t ) do
-    begin
-      d3d_texArray[ t.ID ].Texture.GetLevelDesc( 0, d );
-      if d.Pool = D3DPOOL_DEFAULT Then
-        d3d_resArray[ t.ID ] := nil;
-      t := t.Next;
-    end;
-end;
-
 function d3d_Restore;
   var
     r   : zglPRenderTarget;
@@ -562,10 +544,7 @@ begin
   end;
 
   if d3d_Device.BeginScene <> D3D_OK Then exit;
-
   d3d_CanDraw := TRUE;
-  if not d3d_Cleared Then
-    d3d_ClearGarbage;
 
   Result := TRUE;
 end;

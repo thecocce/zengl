@@ -143,15 +143,6 @@ begin
       snd_MainLoop;
       {$ENDIF}
 
-      {$IFDEF LINUX}
-      // При переходе в полноэкранный режим происходит чего-то странное, и в событиях не значится получение фокуса 8)
-      if wnd_FullScreen Then
-        begin
-          app_Focus := TRUE;
-          app_Pause := FALSE;
-        end;
-      {$ENDIF}
-
       if app_Pause Then
         begin
           timer_Reset;
