@@ -21,6 +21,12 @@
 }
 unit zgl_main;
 
+{$IFDEF FPC}
+  {$IF FPC_FULlVERSION = 20400}
+  DIRECT3D_VERSION_OF_ZENGL_DID_NOT_WORK_CORRECT_WITH_FPC_2_4_0
+  {$IFEND}
+{$ENDIF}
+
 {$I zgl_config.cfg}
 
 interface
