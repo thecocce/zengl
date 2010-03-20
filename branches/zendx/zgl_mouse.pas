@@ -94,11 +94,13 @@ end;
 
 function mouse_DX;
 begin
+  getcurpos := TRUE;
   Result := mouse_X() - wnd_Width div 2;
 end;
 
 function mouse_DY;
 begin
+  getcurpos := TRUE;
   Result := mouse_Y() - wnd_Height div 2;
 end;
 
@@ -143,7 +145,10 @@ end;
 
 procedure mouse_Lock;
 begin
-  SetCursorPos( wnd_X + wnd_BrdSizeX + wnd_Width div 2, wnd_Y + wnd_BrdSizeY + wnd_CpnSize + wnd_Height div 2 );
+  if wnd_FullScreen Then
+    SetCursorPos( wnd_Width div 2, wnd_Height div 2 )
+  else
+    SetCursorPos( wnd_X + wnd_BrdSizeX + wnd_Width div 2, wnd_Y + wnd_BrdSizeY + wnd_CpnSize + wnd_Height div 2 );
 end;
 
 end.
