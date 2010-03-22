@@ -47,12 +47,12 @@ const
 procedure file_Open( var FileHandle : zglTFile; const FileName : String; const Mode : Byte );
 function  file_MakeDir( const Directory : String ) : Boolean;
 function  file_Exists( const FileName : String ) : Boolean;
-function  file_Seek( const FileHandle : zglTFile; const Offset, Mode : DWORD ) : DWORD;
-function  file_GetPos( const FileHandle : zglTFile ) : DWORD;
-function  file_Read( const FileHandle : zglTFile; var buffer; const count : DWORD ) : DWORD;
-function  file_Write( const FileHandle : zglTFile; const buffer; const count : DWORD ) : DWORD;
-procedure file_Trunc( const FileHandle : zglTFile; const count : DWORD );
-function  file_GetSize( const FileHandle : zglTFile ) : DWORD;
+function  file_Seek( const FileHandle : zglTFile; const Offset, Mode : LongWord ) : LongWord;
+function  file_GetPos( const FileHandle : zglTFile ) : LongWord;
+function  file_Read( const FileHandle : zglTFile; var Buffer; const Bytes : LongWord ) : LongWord;
+function  file_Write( const FileHandle : zglTFile; const Buffer; const Bytes : LongWord ) : LongWord;
+procedure file_Trunc( const FileHandle : zglTFile; const Bytes : LongWord );
+function  file_GetSize( const FileHandle : zglTFile ) : LongWord;
 procedure file_Flush( const FileHandle : zglTFile );
 procedure file_Close( var FileHandle : zglTFile );
 procedure file_Find( const Directory : String; var List : zglTFileList; const FindDir : Boolean );
@@ -61,12 +61,10 @@ procedure file_GetExtension( const FileName : String; var Result : String );
 procedure file_GetDirectory( const FileName : String; var Result : String );
 procedure file_SetPath( const Path : String );
 
+implementation
+
 var
   filePath : String = '';
-
-implementation
-uses
-  zgl_utils;
 
 procedure file_Open;
 begin
@@ -84,12 +82,12 @@ end;
 
 function file_Exists;
   var
-    FileHandle : zglTFile;
+    fileHandle : zglTFile;
 begin
-  file_Open( FileHandle, filePath + FileName, FOM_OPENR );
-  Result := FileHandle <> INVALID_HANDLE_VALUE;
+  file_Open( fileHandle, filePath + FileName, FOM_OPENR );
+  Result := fileHandle <> INVALID_HANDLE_VALUE;
   if Result Then
-    file_Close( FileHandle );
+    file_Close( fileHandle );
 end;
 
 function file_Seek;
@@ -108,12 +106,12 @@ end;
 
 function file_Read;
 begin
-  ReadFile( FileHandle, buffer, count, Result, nil );
+  ReadFile( FileHandle, Buffer, Bytes, Result, nil );
 end;
 
 function file_Write;
 begin
-  WriteFile( FileHandle, buffer, count, Result, nil );
+  WriteFile( FileHandle, Buffer, Bytes, Result, nil );
 end;
 
 procedure file_Trunc;

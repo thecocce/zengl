@@ -31,21 +31,21 @@ type
   zglPTimer = ^zglTTimer;
   zglTTimer = record
     Active     : Boolean;
-    Interval   : DWORD;
+    Interval   : LongWord;
     LastTick   : Double;
     OnTimer    : procedure;
 
-    Prev, Next : zglPTimer;
+    prev, next : zglPTimer;
 end;
 
 type
   zglPTimerManager = ^zglTTimerManager;
   zglTTimerManager = record
-    Count : DWORD;
+    Count : LongWord;
     First : zglTTimer;
 end;
 
-function  timer_Add( const OnTimer : Pointer; const Interval : DWORD ) : zglPTimer;
+function  timer_Add( const OnTimer : Pointer; const Interval : LongWord ) : zglPTimer;
 procedure timer_Del( var Timer : zglPTimer );
 
 procedure timer_MainLoop;
@@ -54,11 +54,11 @@ procedure timer_Reset;
 
 var
   managerTimer  : zglTTimerManager;
-  CanKillTimers : Boolean = TRUE;
-  TimersToKill  : WORD = 0;
+  canKillTimers : Boolean = TRUE;
+  timersToKill  : Word = 0;
   aTimersToKill : array[ 0..1023 ] of zglPTimer;
-  Frequency : int64;
-  Freq      : Single;
+  frequency : int64;
+  freq      : Single;
   t_start   : Double;
 
 implementation
@@ -69,17 +69,17 @@ uses
 function timer_Add;
 begin
   Result := @managerTimer.First;
-  while Assigned( Result.Next ) do
-    Result := Result.Next;
+  while Assigned( Result.next ) do
+    Result := Result.next;
 
-  zgl_GetMem( Pointer( Result.Next ), SizeOf( zglTTimer ) );
-  Result.Next.Active   := TRUE;
-  Result.Next.Interval := Interval;
-  Result.Next.OnTimer  := OnTimer;
-  Result.Next.LastTick := timer_GetTicks;
-  Result.Next.Prev     := Result;
-  Result.Next.Next     := nil;
-  Result := Result.Next;
+  zgl_GetMem( Pointer( Result.next ), SizeOf( zglTTimer ) );
+  Result.next.Active   := TRUE;
+  Result.next.Interval := Interval;
+  Result.next.OnTimer  := OnTimer;
+  Result.next.LastTick := timer_GetTicks();
+  Result.next.prev     := Result;
+  Result.next.next     := nil;
+  Result := Result.next;
   INC( managerTimer.Count );
 end;
 
@@ -87,22 +87,22 @@ procedure timer_Del;
 begin
   if not Assigned( Timer ) Then exit;
 
-  if not CanKillTimers Then
+  if not canKillTimers Then
     begin
-      INC( TimersToKill );
-      aTimersToKill[ TimersToKill ] := Timer;
+      INC( timersToKill );
+      aTimersToKill[ timersToKill ] := Timer;
       Timer := nil;
       exit;
     end;
 
   if Assigned( Timer.Prev ) Then
-    Timer.Prev.Next := Timer.Next;
-  if Assigned( Timer.Next ) Then
-    Timer.Next.Prev := Timer.Prev;
+    Timer.prev.next := Timer.next;
+  if Assigned( Timer.next ) Then
+    Timer.next.prev := Timer.prev;
   FreeMemory( Timer );
-  DEC( managerTimer.Count );
-
   Timer := nil;
+
+  DEC( managerTimer.Count );
 end;
 
 procedure timer_MainLoop;
@@ -111,59 +111,59 @@ procedure timer_MainLoop;
     t     : Double;
     timer : zglPTimer;
 begin
-  CanKillTimers := FALSE;
+  canKillTimers := FALSE;
 
   timer := @managerTimer.First;
   if timer <> nil Then
     for i := 0 to managerTimer.Count do
       begin
-        if timer^.Active then
+        if timer.Active then
           begin
-            t := timer_GetTicks;
-            while t >= timer^.LastTick + timer^.Interval do
+            t := timer_GetTicks();
+            while t >= timer.LastTick + timer.Interval do
               begin
-                timer^.LastTick := timer^.LastTick + timer^.Interval;
-                timer^.OnTimer;
-                if t < timer_GetTicks - timer^.Interval Then
+                timer.LastTick := timer.LastTick + timer.Interval;
+                timer.OnTimer();
+                if t < timer_GetTicks() - timer.Interval Then
                   break
                 else
-                  t := timer_GetTicks;
+                  t := timer_GetTicks();
               end;
-          end else timer^.LastTick := timer_GetTicks;
+          end else timer.LastTick := timer_GetTicks();
 
-        timer := timer^.Next;
+        timer := timer.next;
       end;
 
-  CanKillTimers := TRUE;
-  for i := 1 to TimersToKill do
+  canKillTimers := TRUE;
+  for i := 1 to timersToKill do
     timer_Del( aTimersToKill[ i ] );
-  TimersToKill  := 0;
+  timersToKill  := 0;
 end;
 
 function timer_GetTicks;
   var
-    T : int64;
+    t : int64;
 begin
-  QueryPerformanceCounter( T );
-  Result := 1000 * T * Freq - t_start;
+  QueryPerformanceCounter( t );
+  Result := 1000 * T * freq - t_start;
 end;
 
 procedure timer_Reset;
   var
     currTimer : zglPTimer;
 begin
-  app_dt := timer_GetTicks;
+  app_dt := timer_GetTicks();
   currTimer := @managerTimer.First;
   while Assigned( currTimer ) do
     begin
-      currTimer.LastTick := timer_GetTicks;
-      currTimer := currTimer.Next;
+      currTimer.LastTick := timer_GetTicks();
+      currTimer := currTimer.next;
     end;
 end;
 
 initialization
-  QueryPerformanceFrequency( Frequency );
-  Freq := 1 / Frequency;
-  t_start := timer_GetTicks;
+  QueryPerformanceFrequency( frequency );
+  freq := 1 / frequency;
+  t_start := timer_GetTicks();
 
 end.

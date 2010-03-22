@@ -330,5 +330,4 @@ exports
   ;
 
 begin
-  wnd_INST := hInstance;
 end.

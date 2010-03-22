@@ -25,7 +25,6 @@ unit zgl_text;
 
 interface
 uses
-  zgl_types,
   zgl_font,
   zgl_math_2d;
 
@@ -43,16 +42,13 @@ const
 type
   zglTTextWord = record
     X, Y, W : Integer;
-    ShiftX  : Integer;
-    LF      : Boolean;
-    LFShift : Integer;
-    str     : String;
+    Str     : String;
 end;
 
-procedure text_Draw( const Font : zglPFont; X, Y : Single; const Text : String; const Flags : DWORD = 0 );
-procedure text_DrawEx( const Font : zglPFont; X, Y, Scale, Step : Single; const Text : String; const Alpha : Byte = 255; const Color : DWORD = $FFFFFF; const Flags : DWORD = 0 );
-procedure text_DrawInRect( const Font : zglPFont; const Rect : zglTRect; const Text : String; const Flags : DWORD = 0 );
-procedure text_DrawInRectEx( const Font : zglPFont; const Rect : zglTRect; const Scale, Step : Single; const Text : String; const Alpha : Byte = 0; const Color : DWORD = $FFFFFF; const Flags : DWORD = 0 );
+procedure text_Draw( const Font : zglPFont; X, Y : Single; const Text : String; const Flags : LongWord = 0 );
+procedure text_DrawEx( const Font : zglPFont; X, Y, Scale, Step : Single; const Text : String; const Alpha : Byte = 255; const Color : LongWord = $FFFFFF; const Flags : LongWord = 0 );
+procedure text_DrawInRect( const Font : zglPFont; const Rect : zglTRect; const Text : String; const Flags : LongWord = 0 );
+procedure text_DrawInRectEx( const Font : zglPFont; const Rect : zglTRect; const Scale, Step : Single; const Text : String; const Alpha : Byte = 0; const Color : LongWord = $FFFFFF; const Flags : LongWord = 0 );
 function  text_GetWidth( const Font : zglPFont; const Text : String; const Step : Single = 0.0 ) : Single;
 procedure textFx_SetLength( const Length : Integer; const LastCoord : zglPPoint2D = nil; const LastCharDesc : zglPCharDesc = nil );
 
@@ -72,13 +68,14 @@ var
   textLength    : Integer;
   textLCoord    : zglPPoint2D;
   textLCharDesc : zglPCharDesc;
+  textWords     : array of zglTTextWord;
 
 procedure text_Draw;
   var
-    i, c, s : Integer;
-    CharDesc : zglPCharDesc;
-    Quad     : array[ 0..3 ] of zglTPoint2D;
-    sx : Single;
+    i, c, s  : Integer;
+    charDesc : zglPCharDesc;
+    quad     : array[ 0..3 ] of zglTPoint2D;
+    sx       : Single;
     lastPage : Integer;
 begin
   if ( Text = '' ) or ( not Assigned( Font ) ) Then exit;
@@ -99,8 +96,8 @@ begin
     if Flags and TEXT_VALIGN_BOTTOM > 0 Then
       Y := Y - Font.MaxHeight * textScale;
 
-  FillChar( Quad[ 0 ], SizeOf( Quad[ 0 ] ) * 3, 0 );
-  CharDesc := nil;
+  FillChar( quad[ 0 ], SizeOf( quad[ 0 ] ) * 3, 0 );
+  charDesc := nil;
   lastPage := -1;
   c := font_GetCID( Text, 1, @i );
   s := 1;
@@ -137,26 +134,26 @@ begin
             begin
               if Assigned( textLCoord ) Then
                 begin
-                  textLCoord.X := Quad[ 0 ].X + Font.Padding[ 0 ] * textScale;
-                  textLCoord.Y := Quad[ 0 ].Y + Font.Padding[ 1 ] * textScale;
+                  textLCoord.X := quad[ 0 ].X + Font.Padding[ 0 ] * textScale;
+                  textLCoord.Y := quad[ 0 ].Y + Font.Padding[ 1 ] * textScale;
                 end;
               if Assigned( textLCharDesc ) Then
-                textLCharDesc^ := CharDesc^;
+                textLCharDesc^ := charDesc^;
             end;
           break;
         end;
       INC( s );
 
-      CharDesc := Font.CharDesc[ c ];
-      if not Assigned( CharDesc ) Then continue;
+      charDesc := Font.CharDesc[ c ];
+      if not Assigned( charDesc ) Then continue;
 
-      if lastPage <> CharDesc.Page Then
+      if lastPage <> charDesc.Page Then
         begin
           lastPage := Font.CharDesc[ c ].Page;
 
           if ( not b2d_Started ) Then
             begin
-              glEnd;
+              glEnd();
 
               glBindTexture( GL_TEXTURE_2D, Font.Pages[ CharDesc.Page ].ID );
               glBegin( GL_TRIANGLES );
@@ -171,59 +168,59 @@ begin
                 end;
         end;
 
-      Quad[ 0 ].X := X + ( CharDesc.ShiftX - Font.Padding[ 0 ] ) * textScale;
-      Quad[ 0 ].Y := Y + ( CharDesc.ShiftY + ( Font.MaxHeight - CharDesc.Height ) - Font.Padding[ 1 ] ) * textScale;
-      Quad[ 1 ].X := X + ( CharDesc.ShiftX + Font.CharDesc[ c ].Width + Font.Padding[ 2 ] ) * textScale;
-      Quad[ 1 ].Y := Y + ( CharDesc.ShiftY + ( Font.MaxHeight - CharDesc.Height ) - Font.Padding[ 1 ] ) * textScale;
-      Quad[ 2 ].X := X + ( CharDesc.ShiftX + CharDesc.Width ) * textScale + Font.Padding[ 2 ];
-      Quad[ 2 ].Y := Y + ( CharDesc.ShiftY + CharDesc.Height + ( Font.MaxHeight - CharDesc.Height ) + Font.Padding[ 3 ] ) * textScale;
-      Quad[ 3 ].X := X + ( CharDesc.ShiftX - Font.Padding[ 0 ] ) * textScale;
-      Quad[ 3 ].Y := Y + ( CharDesc.ShiftY + CharDesc.Height + ( Font.MaxHeight - CharDesc.Height ) + Font.Padding[ 3 ] ) * textScale;
+      quad[ 0 ].X := X + ( charDesc.ShiftX - Font.Padding[ 0 ] ) * textScale;
+      quad[ 0 ].Y := Y + ( charDesc.ShiftY + ( Font.MaxHeight - CharDesc.Height ) - Font.Padding[ 1 ] ) * textScale;
+      quad[ 1 ].X := X + ( charDesc.ShiftX + Font.CharDesc[ c ].Width + Font.Padding[ 2 ] ) * textScale;
+      quad[ 1 ].Y := Y + ( charDesc.ShiftY + ( Font.MaxHeight - CharDesc.Height ) - Font.Padding[ 1 ] ) * textScale;
+      quad[ 2 ].X := X + ( charDesc.ShiftX + charDesc.Width ) * textScale + Font.Padding[ 2 ];
+      quad[ 2 ].Y := Y + ( charDesc.ShiftY + charDesc.Height + ( Font.MaxHeight - CharDesc.Height ) + Font.Padding[ 3 ] ) * textScale;
+      quad[ 3 ].X := X + ( charDesc.ShiftX - Font.Padding[ 0 ] ) * textScale;
+      quad[ 3 ].Y := Y + ( charDesc.ShiftY + charDesc.Height + ( Font.MaxHeight - CharDesc.Height ) + Font.Padding[ 3 ] ) * textScale;
 
       if Flags and TEXT_FX_VCA > 0 Then
         begin
           glColor4ubv( @FX2D_VCA1[ 0 ] );
-          glTexCoord2fv( @CharDesc.TexCoords[ 0 ] );
-          gl_Vertex2fv( @Quad[ 0 ] );
+          glTexCoord2fv( @charDesc.TexCoords[ 0 ] );
+          gl_Vertex2fv( @quad[ 0 ] );
 
           glColor4ubv( @FX2D_VCA2[ 0 ] );
-          glTexCoord2fv( @CharDesc.TexCoords[ 1 ] );
-          gl_Vertex2fv( @Quad[ 1 ] );
+          glTexCoord2fv( @charDesc.TexCoords[ 1 ] );
+          gl_Vertex2fv( @quad[ 1 ] );
 
           glColor4ubv( @FX2D_VCA3[ 0 ] );
-          glTexCoord2fv( @CharDesc.TexCoords[ 2 ] );
-          gl_Vertex2fv( @Quad[ 2 ] );
+          glTexCoord2fv( @charDesc.TexCoords[ 2 ] );
+          gl_Vertex2fv( @quad[ 2 ] );
 
           glColor4ubv( @FX2D_VCA3[ 0 ] );
-          glTexCoord2fv( @CharDesc.TexCoords[ 2 ] );
-          gl_Vertex2fv( @Quad[ 2 ] );
+          glTexCoord2fv( @charDesc.TexCoords[ 2 ] );
+          gl_Vertex2fv( @quad[ 2 ] );
 
           glColor4ubv( @FX2D_VCA4[ 0 ] );
-          glTexCoord2fv( @CharDesc.TexCoords[ 3 ] );
-          gl_Vertex2fv( @Quad[ 3 ] );
+          glTexCoord2fv( @charDesc.TexCoords[ 3 ] );
+          gl_Vertex2fv( @quad[ 3 ] );
 
           glColor4ubv( @FX2D_VCA1[ 0 ] );
-          glTexCoord2fv( @CharDesc.TexCoords[ 0 ] );
-          gl_Vertex2fv( @Quad[ 0 ] );
+          glTexCoord2fv( @charDesc.TexCoords[ 0 ] );
+          gl_Vertex2fv( @quad[ 0 ] );
         end else
           begin
-            glTexCoord2fv( @CharDesc.TexCoords[ 0 ] );
-            gl_Vertex2fv( @Quad[ 0 ] );
+            glTexCoord2fv( @charDesc.TexCoords[ 0 ] );
+            gl_Vertex2fv( @quad[ 0 ] );
 
-            glTexCoord2fv( @CharDesc.TexCoords[ 1 ] );
-            gl_Vertex2fv( @Quad[ 1 ] );
+            glTexCoord2fv( @charDesc.TexCoords[ 1 ] );
+            gl_Vertex2fv( @quad[ 1 ] );
 
-            glTexCoord2fv( @CharDesc.TexCoords[ 2 ] );
-            gl_Vertex2fv( @Quad[ 2 ] );
+            glTexCoord2fv( @charDesc.TexCoords[ 2 ] );
+            gl_Vertex2fv( @quad[ 2 ] );
 
-            glTexCoord2fv( @CharDesc.TexCoords[ 2 ] );
-            gl_Vertex2fv( @Quad[ 2 ] );
+            glTexCoord2fv( @charDesc.TexCoords[ 2 ] );
+            gl_Vertex2fv( @quad[ 2 ] );
 
-            glTexCoord2fv( @CharDesc.TexCoords[ 3 ] );
-            gl_Vertex2fv( @Quad[ 3 ] );
+            glTexCoord2fv( @charDesc.TexCoords[ 3 ] );
+            gl_Vertex2fv( @quad[ 3 ] );
 
-            glTexCoord2fv( @CharDesc.TexCoords[ 0 ] );
-            gl_Vertex2fv( @Quad[ 0 ] );
+            glTexCoord2fv( @charDesc.TexCoords[ 0 ] );
+            gl_Vertex2fv( @quad[ 0 ] );
           end;
 
       X := X + ( Font.CharDesc[ c ].ShiftP + textStep ) * textScale;
@@ -231,7 +228,7 @@ begin
 
   if not b2d_Started Then
     begin
-      glEnd;
+      glEnd();
 
       glDisable( GL_TEXTURE_2D );
       glDisable( GL_BLEND );
@@ -255,160 +252,149 @@ begin
   textStep      := 0;
 end;
 
-// TODO:
-// - Переписать весь этот говнокод
 procedure text_DrawInRect;
   var
-    i, j, b, l : Integer;
-    X, Y, W, H : Integer;
+    x, y, sX   : Integer;
+    b, i, imax : Integer;
+    c, lc      : LongWord;
+    curWord, j : Integer;
+    newLine    : Integer;
+    lineWidth  : Integer;
     SpaceShift : Integer;
-    WordsArray : array of zglTTextWord;
     WordsCount : Integer;
-    LineFeed   : Boolean;
+    LinesCount : Integer;
     NewFlags   : Integer;
+    startWord  : Boolean;
+    newWord    : Boolean;
+    lineEnd    : Boolean;
+    lineFeed   : Boolean;
 begin
   if ( Text = '' ) or ( not Assigned( Font ) ) Then exit;
-  if ( Rect.W <= ogl_CropX ) or ( Rect.H <= ogl_CropY ) or
-     ( Rect.X + Rect.W <= ogl_CropX ) or ( Rect.Y + Rect.H <= ogl_CropY ) or
-     ( Rect.X > ogl_CropW ) or ( Rect.Y > ogl_CropH ) Then exit;
 
-  SpaceShift := Round( ( text_GetWidth( Font, ' ' ) + textStep ) * textScale );
-
-  X := Round( Rect.X ) + 1;
-  Y := Round( Rect.Y ) + 1;
-  W := Round( Rect.W );
-  H := Round( Rect.H );
-
+  i          := 1;
+  b          := 1;
+  c          := 32;
+  curWord    := 0;
+  newLine    := 0;
+  lineWidth  := 0;
   WordsCount := 0;
-  for i := 1 to length( Text ) do
-    if Text[ i ] = #10 Then
-      INC( WordsCount );
-  WordsCount := WordsCount + u_Words( Text );
-  if WordsCount = 0 Then
+  LinesCount := 0;
+  startWord  := FALSE;
+  newWord    := FALSE;
+  lineEnd    := FALSE;
+  lineFeed   := FALSE;
+  x          := Round( Rect.X ) + 1;
+  y          := Round( Rect.Y ) + 1 - Round( Font.MaxHeight * textScale );
+  SpaceShift := Round( ( text_GetWidth( Font, ' ' ) + textStep ) * textScale );
+  while i <= length( Text ) do
     begin
-      scissor_End;
-      exit;
-    end;
-  SetLength( WordsArray, WordsCount + 1 );
-  WordsArray[ WordsCount ].str := ' ';
-  WordsArray[ WordsCount ].W   := Round( Rect.W + 1 );
+      lc   := c;
+      j    := i;
+      c    := font_GetCID( Text, i, @i );
+      imax := Integer( i > length( Text ) );
 
-  LineFeed := FALSE;
-  l := length( Text );
-  b := 1;
-  W := 0;
-  H := 1;
-  for i := 0 to WordsCount - 1 do
-    for j := b to l do
-      begin
-        LineFeed := Text[ j ] = #10;
-        if ( ( Text[ j ] = ' ' ) and ( j <> 1 ) ) or ( j = l ) or LineFeed Then
-          begin
-            if ( j < l ) and ( Text[ j + 1 ] = #10 ) Then
-              begin
-                INC( W );
-                if length( WordsArray[ i ].str ) > H Then
-                  font_GetCID( WordsArray[ i ].str, H, @H );
-                continue;
-              end;
-            if ( j > 1 ) and ( ( Text[ j - 1 ] = ' ' ) and ( j <> l ) ) Then
-              begin
-                INC( H );
-                continue;
-              end;
-            if ( b = 1 ) and ( WordsCount > 1 ) Then
-              WordsArray[ i ].str := Copy( Text, b, j - b )
-            else
-              WordsArray[ i ].str := Copy( Text, b - 1, j - b + 1 + 1 * Byte( not LineFeed ) - W );
-            font_GetCID( WordsArray[ i ].str, H, @H );
-            WordsArray[ i ].LF      := LineFeed;
-            WordsArray[ i ].LFShift := W + 1;
-            WordsArray[ i ].W       := Round( text_GetWidth( Font, WordsArray[ i ].str, textStep ) * textScale );
-            if length( WordsArray[ i ].str ) > H Then
-              begin
-                W := font_GetCID( WordsArray[ i ].str, H, @H );
-                while not Assigned( Font.CharDesc[ W ] ) do
-                  W := font_GetCID( WordsArray[ i ].str, H, @H );
-                WordsArray[ i ].ShiftX := Font.CharDesc[ W ].ShiftX;
-              end;
-            if LineFeed Then
-              b := j + 2
-            else
-              b := j + 1;
-            LineFeed := FALSE;
-            W := 0;
-            H := 1;
-            break;
-          end;
-      end;
-  WordsArray[ WordsCount - 1 ].LF := TRUE;
-  WordsArray[ 0 ].W := WordsArray[ 0 ].W + SpaceShift;
-
-  l := 0;
-  if Flags and TEXT_HALIGN_JUSTIFY = 0 Then
-    INC( WordsCount );
-  for i := 0 to WordsCount - 1 do
-    begin
-      WordsArray[ i ].X := X;
-      WordsArray[ i ].Y := Y;
-      X := X + WordsArray[ i ].W - SpaceShift;
-      if i > 0 Then
-        LineFeed := WordsArray[ i - 1 ].LF;
-      if ( ( X + SpaceShift >= Rect.X + Rect.W - 1 ) and ( i - l > 0 ) ) or LineFeed Then
+      if ( not startWord ) and ( ( c = 32 ) or ( c <> 10 ) ) Then
         begin
-          X := Round( Rect.X ) - WordsArray[ i ].ShiftX - SpaceShift * Byte( not LineFeed );
-          if i > 0 Then
-            Y := Y + Round( Font.MaxHeight * textScale ) * WordsArray[ i - 1 ].LFShift;
-          WordsArray[ i ].X := X;
-          WordsArray[ i ].Y := Y;
-          X := X + WordsArray[ i ].W - SpaceShift;
+          b := j - 1 * Integer( curWord > 0 ) + Integer( lc = 10 );
+          while lineEnd and ( Text[ b ] = ' ' ) do INC( b );
+          startWord := TRUE;
+          lineEnd   := FALSE;
+          continue;
+        end;
 
-          if ( Flags and TEXT_HALIGN_JUSTIFY > 0 ) and ( i - l > 1 ) and ( not LineFeed ) Then
+      if ( c = 32 ) and ( startWord ) and ( lc <> 10 ) and ( lc <> 32 ) Then
+        begin
+          newWord   := TRUE;
+          startWord := FALSE;
+        end;
+
+      if ( ( c = 10 ) and ( lc <> 10 ) and ( lc <> 32 ) ) or ( imax > 0 ) Then
+        begin
+          newWord   := TRUE;
+          startWord := FALSE;
+          lineFeed  := TRUE;
+        end else
+          if c = 10 Then
             begin
-              W := Round( Rect.X + Rect.W - 1 ) - ( WordsArray[ i - 1 ].X + WordsArray[ i - 1 ].W - SpaceShift );
-              while W > ( i - 1 ) - l do
+              startWord := FALSE;
+              lineFeed  := TRUE;
+            end;
+
+      if newWord Then
+        begin
+          textWords[ curWord ].Str := Copy( Text, b, i - b - ( 1 - imax ) );
+          textWords[ curWord ].W   := Round( text_GetWidth( Font, textWords[ curWord ].Str, textStep ) * textScale );
+          lineWidth                := lineWidth + textWords[ curWord ].W;
+
+          newWord := FALSE;
+          INC( curWord );
+          INC( WordsCount );
+          if ( lineWidth > Rect.W - 2 ) and ( curWord - newLine > 1 ) Then
+            begin
+              lineEnd := TRUE;
+              i := b;
+              while Text[ i ] = ' ' do INC( i );
+              DEC( curWord );
+              DEC( WordsCount );
+            end;
+          if WordsCount > High( textWords ) Then
+            SetLength( textWords, length( textWords ) + 1024 );
+        end;
+
+      if lineFeed or lineEnd Then
+        begin
+          y := y + Round( Font.MaxHeight * textScale );
+          textWords[ newLine ].X := x;
+          textWords[ newLine ].Y := y;
+          for j := newLine + 1 to curWord - 1 do
+            begin
+              textWords[ j ].X := textWords[ j - 1 ].X + textWords[ j - 1 ].W;
+              textWords[ j ].Y := textWords[ newLine ].Y;
+            end;
+
+          if ( Flags and TEXT_HALIGN_JUSTIFY > 0 ) and ( curWord - newLine > 1 ) and ( c <> 10 ) and ( imax = 0 ) Then
+            begin
+              sX := Round( Rect.X + Rect.W - 1 ) - ( textWords[ curWord - 1 ].X + textWords[ curWord - 1 ].W );
+              while sX > ( curWord - 1 ) - newLine do
                 begin
-                  for b := l + 1 to i - 1 do
-                    INC( WordsArray[ b ].X, 1 + ( b - ( l + 1 ) ) );
-                  W := Round( Rect.X + Rect.W - 1 ) - ( WordsArray[ i - 1 ].X + WordsArray[ i - 1 ].W - SpaceShift );
+                  for j := newLine + 1 to curWord - 1 do
+                    INC( textWords[ j ].X, 1 + ( j - ( newLine + 1 ) ) );
+                  sX := Round( Rect.X + Rect.W - 1 ) - ( textWords[ curWord - 1 ].X + textWords[ curWord - 1 ].W );
                 end;
-              WordsArray[ i - 1 ].X := WordsArray[ i - 1 ].X + W;
+              textWords[ curWord - 1 ].X := textWords[ curWord - 1 ].X + sX;
             end else
               if Flags and TEXT_HALIGN_CENTER > 0 Then
                 begin
-                  W := ( Round( Rect.X + Rect.W - 1 ) - ( WordsArray[ i - 1 ].X + WordsArray[ i - 1 ].W - SpaceShift ) ) div 2;
-                  if i = WordsCount - 1 Then
-                    begin
-                      for b := l to i - 1 do
-                        INC( WordsArray[ b ].X, W - SpaceShift div 2 );
-                    end else
-                      for b := l to i - 1 do
-                        INC( WordsArray[ b ].X, W );
+                  sX := ( Round( Rect.X + Rect.W - 1 ) - ( textWords[ curWord - 1 ].X + textWords[ curWord - 1 ].W ) ) div 2;
+                  for j := newLine to curWord do
+                    textWords[ j ].X := textWords[ j ].X + sX;
                 end else
                   if Flags and TEXT_HALIGN_RIGHT > 0 Then
                     begin
-                      W := Round( Rect.X + Rect.W - 1 ) - ( WordsArray[ i - 1 ].X + WordsArray[ i - 1 ].W - SpaceShift * Byte( not WordsArray[ i - 1 ].LF ) );
-                      for b := l to i - 1 do
-                        INC( WordsArray[ b ].X, W );
+                      sX := Round( Rect.X + Rect.W - 1 ) - ( textWords[ curWord - 1 ].X + textWords[ curWord - 1 ].W );
+                      for j := newLine to curWord do
+                        textWords[ j ].X := textWords[ j ].X + sX;
                     end;
-          LineFeed := FALSE;
-          l := i;
+
+          newLine   := curWord;
+          lineWidth := 0;
+          lineFeed  := FALSE;
+          INC( LinesCount );
+          if ( LinesCount + 1 ) * Font.MaxHeight > Rect.H Then break;
         end;
     end;
-  if Flags and TEXT_HALIGN_JUSTIFY = 0 Then
-    DEC( WordsCount );
 
   if Flags and TEXT_VALIGN_CENTER > 0 Then
     begin
-      H := ( Round( Rect.Y + Rect.H - 1 ) - ( WordsArray[ WordsCount - 1 ].Y + Font.MaxHeight ) ) div 2;
+      y := Round( ( Rect.Y + Rect.H - 1 ) - ( textWords[ WordsCount - 1 ].Y + Font.MaxHeight ) ) div 2;
       for i := 0 to WordsCount - 1 do
-        INC( WordsArray[ i ].Y, H );
+        textWords[ i ].Y := textWords[ i ].Y + y;
     end else
       if Flags and TEXT_VALIGN_BOTTOM > 0 Then
         begin
-          H := Round( Rect.Y + Rect.H - 1 ) - ( WordsArray[ WordsCount - 1 ].Y + Font.MaxHeight );
+          y := Round( ( Rect.Y + Rect.H - 1 ) - ( textWords[ WordsCount - 1 ].Y + Font.MaxHeight ) );
           for i := 0 to WordsCount - 1 do
-            INC( WordsArray[ i ].Y, H );
+            textWords[ i ].Y := textWords[ i ].Y + y;
         end;
 
   NewFlags := 0;
@@ -417,21 +403,18 @@ begin
   if Flags and TEXT_FX_LENGTH > 0 Then
     NewFlags := NewFlags or TEXT_FX_LENGTH;
 
-  l := 0;
+  j := 0;
   b := textLength;
   for i := 0 to WordsCount - 1 do
     begin
       if Flags and TEXT_FX_LENGTH > 0 Then
         begin
-          LineFeed := ( i > 0 ) and ( i < WordsCount - 2 ) and ( WordsArray[ i ].Y <> WordsArray[ i - 1 ].Y );
-          textFx_SetLength( b - l, textLCoord, textLCharDesc );
-          if l > b Then continue;
-          l := l + u_Length( WordsArray[ i ].str ) - Byte( not LineFeed );
+          textFx_SetLength( b - j, textLCoord, textLCharDesc );
+          if j > b Then continue;
+          j := j + u_Length( textWords[ i ].Str );
         end;
-      text_Draw( Font, WordsArray[ i ].X, WordsArray[ i ].Y, WordsArray[ i ].str, NewFlags );
+      text_Draw( Font, textWords[ i ].X, textWords[ i ].Y, textWords[ i ].Str, NewFlags );
     end;
-
-  SetLength( WordsArray, 0 );
 end;
 
 procedure text_DrawInRectEx;
@@ -454,7 +437,7 @@ end;
 function text_GetWidth;
   var
     i : Integer;
-    c : DWORD;
+    c : LongWord;
     lResult : Single;
 begin
   lResult := 0;
@@ -482,5 +465,8 @@ begin
   textLCoord    := LastCoord;
   textLCharDesc := LastCharDesc;
 end;
+
+initialization
+  SetLength( textWords, 1024 );
 
 end.

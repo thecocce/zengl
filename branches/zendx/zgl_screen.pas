@@ -41,14 +41,14 @@ procedure scr_Reset;
 procedure scr_Clear;
 procedure scr_Flush;
 
-procedure scr_SetOptions( const Width, Height, BPP, Refresh : WORD; const FullScreen, VSync : Boolean );
-procedure scr_CorrectResolution( const Width, Height : WORD );
+procedure scr_SetOptions( const Width, Height, BPP, Refresh : Word; const FullScreen, VSync : Boolean );
+procedure scr_CorrectResolution( const Width, Height : Word );
 procedure scr_SetViewPort;
 procedure scr_SetVSync( const VSync : Boolean );
 procedure scr_SetFSAA( const FSAA : Byte );
 
 type
-  zglPResolitionList = ^zglTResolutionList;
+  zglPResolutionList = ^zglTResolutionList;
   zglTResolutionList = record
     Count  : Integer;
     Width  : array of Integer;
@@ -80,6 +80,7 @@ var
 
 implementation
 uses
+  zgl_types,
   zgl_main,
   zgl_application,
   zgl_window,
@@ -112,8 +113,8 @@ begin
       dmSize             := SizeOf( DEVMODE );
       dmPelsWidth        := GetSystemMetrics( SM_CXSCREEN );
       dmPelsHeight       := GetSystemMetrics( SM_CYSCREEN );
-      dmBitsPerPel       := GetDisplayColors;
-      dmDisplayFrequency := GetDisplayRefresh;
+      dmBitsPerPel       := GetDisplayColors();
+      dmDisplayFrequency := GetDisplayRefresh();
       dmFields           := DM_PELSWIDTH or DM_PELSHEIGHT or DM_BITSPERPEL or DM_DISPLAYFREQUENCY;
     end;
 end;
@@ -123,7 +124,7 @@ begin
   Result := FALSE;
   scr_Init;
   log_Add( 'Current mode: ' + u_IntToStr( zgl_Get( DESKTOP_WIDTH ) ) + ' x ' + u_IntToStr( zgl_Get( DESKTOP_HEIGHT ) ) );
-  scr_GetResList;
+  scr_GetResList();
   Result := TRUE;
 end;
 
@@ -157,7 +158,7 @@ end;
 
 procedure scr_Destroy;
 begin
-  scr_Reset;
+  scr_Reset();
 end;
 
 procedure scr_Reset;
@@ -167,8 +168,7 @@ end;
 
 procedure scr_Clear;
 begin
-  glClear( GL_COLOR_BUFFER_BIT   * Byte( app_Flags and COLOR_BUFFER_CLEAR > 0 ) or
-           GL_DEPTH_BUFFER_BIT   * Byte( app_Flags and DEPTH_BUFFER_CLEAR > 0 ) or
+  glClear( GL_COLOR_BUFFER_BIT * Byte( app_Flags and COLOR_BUFFER_CLEAR > 0 ) or GL_DEPTH_BUFFER_BIT * Byte( app_Flags and DEPTH_BUFFER_CLEAR > 0 ) or
            GL_STENCIL_BUFFER_BIT * Byte( app_Flags and STENCIL_BUFFER_CLEAR > 0 ) );
 end;
 
@@ -214,7 +214,7 @@ begin
   else
     log_Add( 'Set screen options: ' + u_IntToStr( wnd_Width ) + ' x ' + u_IntToStr( wnd_Height ) + ' x ' + u_IntToStr( scr_BPP ) + 'bpp windowed' );
   if app_Work Then
-    wnd_Update;
+    wnd_Update();
 end;
 
 procedure scr_CorrectResolution;
@@ -251,7 +251,7 @@ begin
   ogl_Height := Round( wnd_Height / scr_ResCY );
   scr_SubCX  := ogl_Width - Width;
   scr_SubCY  := ogl_Height - Height;
-  SetCurrentMode;
+  SetCurrentMode();
 
   cam2dZoomX := cam2dGlobal.Zoom.X;
   cam2dZoomY := cam2dGlobal.Zoom.Y;
@@ -285,7 +285,7 @@ procedure scr_SetVSync;
 begin
   scr_VSync := VSync;
   if wnd_Handle <> 0 Then
-    wnd_Update;
+    wnd_Update();
 end;
 
 procedure scr_SetFSAA;

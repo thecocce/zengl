@@ -45,7 +45,7 @@ var
   app_Initialized  : Boolean;
   app_GetSysDirs   : Boolean;
   app_Work         : Boolean;
-  app_WorkTime     : DWORD;
+  app_WorkTime     : LongWord;
   app_Pause        : Boolean;
   app_AutoPause    : Boolean = TRUE;
   app_Focus        : Boolean = TRUE;
@@ -66,11 +66,11 @@ var
 
   app_dt : Double;
 
-  app_FPS      : DWORD;
-  app_FPSCount : DWORD;
-  app_FPSAll   : DWORD;
+  app_FPS      : LongWord;
+  app_FPSCount : LongWord;
+  app_FPSAll   : LongWord;
 
-  app_Flags : DWORD;
+  app_Flags : LongWord;
 
 implementation
 uses
@@ -111,24 +111,20 @@ begin
 end;
 
 procedure app_Init;
-  {$IFDEF WIN32}
   var
-    SysInfo : _SYSTEM_INFO;
-  {$ENDIF}
+    sysInfo : _SYSTEM_INFO;
 begin
-  {$IFDEF WIN32}
   // Багнутое MS-поделко требует патча :)
   // Вешаем все на одно ядро
-  GetSystemInfo( SysInfo );
-  SetProcessAffinityMask( GetCurrentProcess, SysInfo.dwActiveProcessorMask );
-  {$ENDIF}
+  GetSystemInfo( sysInfo );
+  SetProcessAffinityMask( GetCurrentProcess(), sysInfo.dwActiveProcessorMask );
 
-  scr_Clear;
-  app_PLoad;
-  scr_Flush;
+  scr_Clear();
+  app_PLoad();
+  scr_Flush();
 
-  app_dt := timer_GetTicks;
-  timer_Reset;
+  app_dt := timer_GetTicks();
+  timer_Reset();
   timer_Add( @app_CalcFPS, 1000 );
 end;
 
@@ -138,45 +134,45 @@ procedure app_MainLoop;
 begin
   while app_Work do
     begin
-      app_ProcessOS;
+      app_ProcessOS();
       {$IFDEF USE_SOUND}
-      snd_MainLoop;
+      snd_MainLoop();
       {$ENDIF}
 
       if app_Pause Then
         begin
-          timer_Reset;
-          app_dt := timer_GetTicks;
+          timer_Reset();
+          app_dt := timer_GetTicks();
           u_Sleep( 10 );
           continue;
         end else
           if d3d_BeginScene Then
-            timer_MainLoop
+            timer_MainLoop()
           else
             continue;
 
-      t := timer_GetTicks;
-      app_PUpdate( timer_GetTicks - app_dt );
+      t := timer_GetTicks();
+      app_PUpdate( timer_GetTicks() - app_dt );
       app_dt := t;
 
-      app_Draw;
+      app_Draw();
     end;
 end;
 
 procedure app_ProcessOS;
   var
-    Mess : tagMsg;
+    m : tagMsg;
 begin
-  while PeekMessage( Mess, 0{wnd_Handle}, 0, 0, PM_REMOVE ) do
+  while PeekMessage( m, 0{wnd_Handle}, 0, 0, PM_REMOVE ) do
     begin
-      TranslateMessage( Mess );
-      DispatchMessage( Mess );
+      TranslateMessage( m );
+      DispatchMessage( m );
     end;
 end;
 
 function app_ProcessMessages;
   var
-    Key : DWORD;
+    key : LongWord;
 begin
   Result := 0;
   if ( not app_Work ) and ( Msg <> WM_ACTIVATE ) Then
@@ -190,7 +186,7 @@ begin
 
     WM_PAINT:
       begin
-        app_Draw;
+        app_Draw();
         ValidateRect( wnd_Handle, nil );
       end;
     WM_DISPLAYCHANGE:
@@ -202,11 +198,11 @@ begin
           end;
         if not wnd_FullScreen Then
           begin
-            scr_Init;
+            scr_Init();
             scr_Width  := scr_Desktop.dmPelsWidth;
             scr_Height := scr_Desktop.dmPelsHeight;
             scr_BPP    := scr_Desktop.dmBitsPerPel;
-            wnd_Update;
+            wnd_Update();
           end else
             begin
               scr_Width  := wnd_Width;
@@ -221,9 +217,9 @@ begin
             app_Pause := FALSE;
             app_PActivate( TRUE );
             FillChar( keysDown[ 0 ], 256, 0 );
-            key_ClearState;
+            key_ClearState();
             FillChar( mouseDown[ 0 ], 3, 0 );
-            mouse_ClearState;
+            mouse_ClearState();
           end else
             begin
               if app_AutoPause Then app_Pause := TRUE;
@@ -251,10 +247,10 @@ begin
 
     WM_LBUTTONDOWN, WM_LBUTTONDBLCLK:
       begin
-        mouseDown[ M_BLEFT ]  := TRUE;
+        mouseDown[ M_BLEFT ] := TRUE;
         if mouseCanClick[ M_BLEFT ] Then
           begin
-            mouseClick[ M_BLEFT ] := TRUE;
+            mouseClick[ M_BLEFT ]    := TRUE;
             mouseCanClick[ M_BLEFT ] := FALSE;
           end;
         if Msg = WM_LBUTTONDBLCLK Then
@@ -265,7 +261,7 @@ begin
         mouseDown[ M_BMIDLE ] := TRUE;
         if mouseCanClick[ M_BMIDLE ] Then
           begin
-            mouseClick[ M_BMIDLE ] := TRUE;
+            mouseClick[ M_BMIDLE ]    := TRUE;
             mouseCanClick[ M_BMIDLE ] := FALSE;
           end;
         if Msg = WM_MBUTTONDBLCLK Then
@@ -276,7 +272,7 @@ begin
         mouseDown[ M_BRIGHT ] := TRUE;
         if mouseCanClick[ M_BRIGHT ] Then
           begin
-            mouseClick[ M_BRIGHT ] := TRUE;
+            mouseClick[ M_BRIGHT ]    := TRUE;
             mouseCanClick[ M_BRIGHT ] := FALSE;
           end;
         if Msg = WM_RBUTTONDBLCLK Then
@@ -284,20 +280,20 @@ begin
       end;
     WM_LBUTTONUP:
       begin
-        mouseDown[ M_BLEFT ]  := FALSE;
-        mouseUp  [ M_BLEFT ]  := TRUE;
+        mouseDown[ M_BLEFT ]     := FALSE;
+        mouseUp  [ M_BLEFT ]     := TRUE;
         mouseCanClick[ M_BLEFT ] := TRUE;
       end;
     WM_MBUTTONUP:
       begin
-        mouseDown[ M_BMIDLE ] := FALSE;
-        mouseUp  [ M_BMIDLE ] := TRUE;
+        mouseDown[ M_BMIDLE ]     := FALSE;
+        mouseUp  [ M_BMIDLE ]     := TRUE;
         mouseCanClick[ M_BMIDLE ] := TRUE;
       end;
     WM_RBUTTONUP:
       begin
-        mouseDown[ M_BRIGHT ] := FALSE;
-        mouseUp  [ M_BRIGHT ] := TRUE;
+        mouseDown[ M_BRIGHT ]     := FALSE;
+        mouseUp  [ M_BRIGHT ]     := TRUE;
         mouseCanClick[ M_BRIGHT ] := TRUE;
       end;
     WM_MOUSEWHEEL:
@@ -315,31 +311,30 @@ begin
 
     WM_KEYDOWN, WM_SYSKEYDOWN:
       begin
-        Key := winkey_to_scancode( wParam );
-        keysDown[ Key ] := TRUE;
-        keysUp  [ Key ] := FALSE;
-        keysLast[ KA_DOWN ] := Key;
-        DoKeyPress( Key );
+        key := winkey_to_scancode( wParam );
+        keysDown[ key ]     := TRUE;
+        keysUp  [ key ]     := FALSE;
+        keysLast[ KA_DOWN ] := key;
+        doKeyPress( key );
 
-        Key := SCA( Key );
-        keysDown[ Key ] := TRUE;
-        keysUp  [ Key ] := FALSE;
-        DoKeyPress( Key );
+        key := SCA( key );
+        keysDown[ key ] := TRUE;
+        keysUp  [ key ] := FALSE;
+        doKeyPress( key );
 
-        if Msg = WM_SYSKEYDOWN Then
-          if Key = K_F4 Then
-            app_Work := FALSE;
+        if ( Msg = WM_SYSKEYDOWN ) and ( key = K_F4 ) Then
+          app_Work := FALSE;
       end;
     WM_KEYUP, WM_SYSKEYUP:
       begin
-        Key := winkey_to_scancode( wParam );
-        keysDown[ Key ] := FALSE;
-        keysUp  [ Key ] := TRUE;
-        keysLast[ KA_UP ] := Key;
+        key := winkey_to_scancode( wParam );
+        keysDown[ key ]   := FALSE;
+        keysUp  [ key ]   := TRUE;
+        keysLast[ KA_UP ] := key;
 
-        Key := SCA( Key );
-        keysDown[ Key ] := FALSE;
-        keysUp  [ Key ] := TRUE;
+        key := SCA( key );
+        keysDown[ key ] := FALSE;
+        keysUp  [ key ] := TRUE;
       end;
     WM_CHAR:
       begin

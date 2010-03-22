@@ -307,13 +307,9 @@ begin
   end;
 
   if keysDown[ K_SHIFT ] and
-     ( ScanCode <> K_KP_0 ) and ( ScanCode <> K_KP_1 ) and
-     ( ScanCode <> K_KP_2 ) and ( ScanCode <> K_KP_3 ) and
-     ( ScanCode <> K_KP_4 ) and ( ScanCode <> K_KP_5 ) and
-     ( ScanCode <> K_KP_6 ) and ( ScanCode <> K_KP_7 ) and
-     ( ScanCode <> K_KP_8 ) and ( ScanCode <> K_KP_9 ) and
-     ( ScanCode <> K_KP_DIV ) and ( ScanCode <> K_KP_MUL) and
-     ( ScanCode <> K_KP_SUB ) and ( ScanCode <> K_KP_ADD ) Then
+     ( ScanCode <> K_KP_0 ) and ( ScanCode <> K_KP_1 ) and ( ScanCode <> K_KP_2 ) and ( ScanCode <> K_KP_3 ) and ( ScanCode <> K_KP_4 ) and
+     ( ScanCode <> K_KP_5 ) and ( ScanCode <> K_KP_6 ) and ( ScanCode <> K_KP_7 ) and ( ScanCode <> K_KP_8 ) and ( ScanCode <> K_KP_9 ) and
+     ( ScanCode <> K_KP_DIV ) and ( ScanCode <> K_KP_MUL) and ( ScanCode <> K_KP_SUB ) and ( ScanCode <> K_KP_ADD ) Then
     case Result of
       96: Result := 126; // ~
       45: Result := 95;  // _
@@ -370,7 +366,7 @@ begin
   if ( KeyCode = K_ALT_L ) or ( KeyCode = K_ALT_R ) Then Result := K_ALT;
 end;
 
-procedure DoKeyPress;
+procedure doKeyPress;
 begin
   if keysCanPress[ KeyCode ] Then
     begin

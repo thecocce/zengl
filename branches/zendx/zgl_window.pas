@@ -52,7 +52,7 @@ var
   wnd_INST      : HINST;
   wnd_Class     : TWndClassEx;
   wnd_ClassName : PChar = 'ZenGL';
-  wnd_Style     : DWORD;
+  wnd_Style     : LongWord;
   wnd_CpnSize   : Integer;
   wnd_BrdSizeX  : Integer;
   wnd_BrdSizeY  : Integer;
@@ -109,17 +109,9 @@ begin
       wnd_Style := WS_POPUP or WS_VISIBLE or WS_SYSMENU;
     end else
       wnd_Style := WS_CAPTION or WS_MINIMIZEBOX or WS_SYSMENU or WS_VISIBLE;
-  wnd_Handle := CreateWindowEx( WS_EX_APPWINDOW or WS_EX_TOPMOST * Byte( wnd_FullScreen ),
-                                wnd_ClassName,
-                                PChar( wnd_Caption ),
-                                wnd_Style,
-                                wnd_X, wnd_Y,
+  wnd_Handle := CreateWindowEx( WS_EX_APPWINDOW or WS_EX_TOPMOST * Byte( wnd_FullScreen ), wnd_ClassName, PChar( wnd_Caption ), wnd_Style, wnd_X, wnd_Y,
                                 wnd_Width  + ( wnd_BrdSizeX * 2 ) * Byte( not wnd_FullScreen ),
-                                wnd_Height + ( wnd_BrdSizeY * 2 + wnd_CpnSize ) * Byte( not wnd_FullScreen ),
-                                0,
-                                0,
-                                wnd_INST,
-                                nil );
+                                wnd_Height + ( wnd_BrdSizeY * 2 + wnd_CpnSize ) * Byte( not wnd_FullScreen ), 0, 0, wnd_INST, nil );
 
   if wnd_Handle = 0 Then
     begin
@@ -207,7 +199,7 @@ begin
   if app_Flags and CORRECT_RESOLUTION > 0 Then
     scr_CorrectResolution( scr_ResW, scr_ResH )
   else
-    SetCurrentMode;
+    SetCurrentMode();
 end;
 
 procedure wnd_SetPos;

@@ -23,7 +23,6 @@ unit zgl_render_2d;
 
 interface
 uses
-  zgl_types,
   zgl_direct3d,
   zgl_direct3d_all,
   zgl_textures;
@@ -31,7 +30,7 @@ uses
 procedure batch2d_Begin;
 procedure batch2d_End;
 procedure batch2d_Flush;
-function  batch2d_Check( const Mode, FX : DWORD; const Texture : zglPTexture ) : Boolean;
+function  batch2d_Check( const Mode, FX : LongWord; const Texture : zglPTexture ) : Boolean;
 
 function sprite2d_InScreenSimple( const X, Y, W, H, Angle : Single ) : Boolean;
 function sprite2d_InScreenCamera( const X, Y, W, H, Angle : Single ) : Boolean;
@@ -40,10 +39,10 @@ var
   b2d_Started  : Boolean;
   b2d_New      : Boolean;
   b2d_Batches  : Integer;
-  b2dcur_Mode  : DWORD;
-  b2dcur_FX    : DWORD;
-  b2dcur_Blend : DWORD;
-  b2dcur_Color : DWORD;
+  b2dcur_Mode  : LongWord;
+  b2dcur_FX    : LongWord;
+  b2dcur_Blend : LongWord;
+  b2dcur_Color : LongWord;
   b2dcur_Tex   : zglPTexture;
   b2dcur_Smooth: Integer;
   sprite2d_InScreen : function( const X, Y, W, H, Angle : Single ) : Boolean;
@@ -63,7 +62,7 @@ end;
 
 procedure batch2d_End;
 begin
-  batch2d_Flush;
+  batch2d_Flush();
   b2d_Batches  := 0;
   b2dcur_Mode  := 0;
   b2dcur_FX    := 0;
@@ -79,7 +78,7 @@ begin
     begin
       INC( b2d_Batches );
       b2d_New := TRUE;
-      glEnd;
+      glEnd();
 
       glDisable( GL_TEXTURE_2D );
       glDisable( GL_ALPHA_TEST );
@@ -96,13 +95,11 @@ end;
 
 function batch2d_Check;
 begin
-  if ( Mode <> b2dcur_Mode ) or
-     ( Texture <> b2dcur_Tex ) or
-     ( ( FX and FX_BLEND = 0 ) and ( b2dcur_Blend <> 0 ) ) or
+  if ( Mode <> b2dcur_Mode ) or ( Texture <> b2dcur_Tex ) or ( ( FX and FX_BLEND = 0 ) and ( b2dcur_Blend <> 0 ) ) or
      ( b2dcur_Smooth <> FX and PR2D_SMOOTH ) Then
     begin
       if not b2d_New Then
-        batch2d_Flush;
+        batch2d_Flush();
       b2d_New := TRUE;
     end;
 

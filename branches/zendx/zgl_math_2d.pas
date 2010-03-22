@@ -37,7 +37,7 @@ const
 type
   zglPPoint2D = ^zglTPoint2D;
   zglTPoint2D = record
-    x, y : Single;
+    X, Y : Single;
 end;
 
 type
@@ -54,14 +54,14 @@ end;
 type
   zglPRect = ^zglTRect;
   zglTRect = record
-    x, y, w, h : Single;
+    X, Y, W, H : Single;
 end;
 
 type
   zglPCircle = ^zglTCircle;
   zglTCircle = record
     cX, cY : Single;
-    radius : Single;
+    Radius : Single;
 end;
 
 function min( a, b : Single ) : Single; {$IFDEF USE_INLINE} inline; {$ENDIF}
@@ -80,8 +80,8 @@ procedure tess_AddHole( const Contour : zglPPoints2D; const iLo, iHi : Integer; 
 function  tess_GetData( var TriPoints : zglPPoints2D ) : Integer;
 
 var
-  CosTable : array[ 0..360 ] of Single;
-  SinTable : array[ 0..360 ] of Single;
+  cosTable : array[ 0..360 ] of Single;
+  sinTable : array[ 0..360 ] of Single;
 
 implementation
 uses
@@ -121,8 +121,8 @@ begin
   for i := 0 to 360 do
     begin
       rad_angle := i * ( pi / 180 );
-      CosTable[ i ] := cos( rad_angle );
-      SinTable[ i ] := sin( rad_angle );
+      cosTable[ i ] := cos( rad_angle );
+      sinTable[ i ] := sin( rad_angle );
     end;
 end;
 
@@ -133,7 +133,7 @@ begin
   else
     if Angle < 0 Then
       INC( Angle, ( abs( Angle ) div 360 + 1 ) * 360 );
-  Result := CosTable[ Angle ];
+  Result := cosTable[ Angle ];
 end;
 
 function m_Sin;
@@ -143,12 +143,12 @@ begin
   else
     if Angle < 0 Then
       INC( Angle, ( abs( Angle ) div 360 + 1 ) * 360 );
-  Result := SinTable[ Angle ];
+  Result := sinTable[ Angle ];
 end;
 
 function m_Distance;
 begin
-  Result := Sqrt( sqr( x1 - x2 ) + sqr( y1 - y2 ) );
+  Result := sqrt( sqr( x1 - x2 ) + sqr( y1 - y2 ) );
 end;
 
 function m_FDistance;
@@ -195,14 +195,14 @@ end;
 
 function m_Orientation;
   var
-    Orientation : Single;
+    orientation : Single;
 begin
-  Orientation := ( x2 - x1 ) * ( y - y1 ) - ( x - x1 ) * ( y2 - y1 );
+  orientation := ( x2 - x1 ) * ( y - y1 ) - ( x - x1 ) * ( y2 - y1 );
 
-  if Orientation > 0 Then
+  if orientation > 0 Then
     Result := ORIENTATION_RIGHT
   else
-    if Orientation < 0 Then
+    if orientation < 0 Then
       Result := ORIENTATION_LEFT
     else
       Result := ORIENTATION_ZERO;
@@ -323,8 +323,8 @@ begin
 end;
 
 initialization
-  InitCosSinTables;
-  tess := gluNewTess;
+  InitCosSinTables();
+  tess := gluNewTess();
   gluTessCallBack( tess, GLU_TESS_BEGIN,  @tessBegin    );
   gluTessCallBack( tess, GLU_TESS_VERTEX, @tessVertex2f );
 

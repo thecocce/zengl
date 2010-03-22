@@ -39,7 +39,7 @@ procedure cam2d_Set( const Camera : zglPCamera2D );
 procedure cam2d_Apply( const Camera : zglPCamera2D );
 
 procedure cam2d_Vertex2f( X, Y : Single );
-procedure cam2d_Vertex2fv( v : Pointer );
+procedure cam2d_Vertex2fv( V : Pointer );
 
 var
   cam2dApply    : Boolean;
@@ -80,17 +80,17 @@ end;
 
 procedure cam2d_Apply;
 begin
-  batch2d_Flush;
+  batch2d_Flush();
 
   if cam2dApply Then
-    glPopMatrix;
+    glPopMatrix();
 
   if Assigned( Camera ) Then
     begin
       cam2dApply  := TRUE;
       cam2dGlobal := Camera;
 
-      glPushMatrix;
+      glPushMatrix();
       if ( Camera.Angle <> 0 ) or ( Camera.Zoom.X <> 1 ) or ( Camera.Zoom.Y <> 1 ) Then
         begin
           glTranslatef( ogl_Width / 2 - scr_AddCX / scr_ResCX, ogl_Height / 2 - scr_AddCY / scr_ResCY, 0 );
@@ -114,7 +114,7 @@ end;
 
 procedure cam2d_Vertex2f;
   var
-    Xa, Ya : Single;
+    xa, ya : Single;
 begin
   if cam2dGlobal.Zoom.X = 1 Then
     X := X - cam2dGlobal.X
@@ -134,9 +134,9 @@ begin
           cam2dSin   := Sin( cam2dGlobal.Angle * deg2rad );
           cam2dCos   := Cos( cam2dGlobal.Angle * deg2rad );
         end;
-      Xa := ogl_Width  / 2 + ( X + cam2dSX ) * cam2dCos - ( Y + cam2dSY ) * cam2dSin - scr_AddCX / scr_ResCX;
-      Ya := ogl_Height / 2 + ( X + cam2dSX ) * cam2dSin + ( Y + cam2dSY ) * cam2dCos - scr_AddCY / scr_ResCY;
-      glVertex2f( Xa, Ya );
+      xa := ogl_Width  / 2 + ( X + cam2dSX ) * cam2dCos - ( Y + cam2dSY ) * cam2dSin - scr_AddCX / scr_ResCX;
+      ya := ogl_Height / 2 + ( X + cam2dSX ) * cam2dSin + ( Y + cam2dSY ) * cam2dCos - scr_AddCY / scr_ResCY;
+      glVertex2f( xa, ya );
     end else
       glVertex2f( X, Y );
 end;
@@ -147,14 +147,14 @@ procedure cam2d_Vertex2fv;
     v2a : array[ 0..1 ] of Single;
 begin
   if cam2dGlobal.Zoom.X = 1 Then
-    v2[ 0 ] := PSingle( Ptr( v ) + 0 )^ - cam2dGlobal.X
+    v2[ 0 ] := PSingle( Ptr( V ) + 0 )^ - cam2dGlobal.X
   else
-    v2[ 0 ] := ( PSingle( Ptr( v ) + 0 )^ - cam2dGlobal.X + cam2dSX ) * cam2dGlobal.Zoom.X - cam2dSX;
+    v2[ 0 ] := ( PSingle( Ptr( V ) + 0 )^ - cam2dGlobal.X + cam2dSX ) * cam2dGlobal.Zoom.X - cam2dSX;
 
   if cam2dGlobal.Zoom.Y = 1 Then
-    v2[ 1 ] := PSingle( Ptr( v ) + 4 )^ - cam2dGlobal.Y
+    v2[ 1 ] := PSingle( Ptr( V ) + 4 )^ - cam2dGlobal.Y
   else
-    v2[ 1 ] := ( PSingle( Ptr( v ) + 4 )^ - cam2dGlobal.Y + cam2dSY ) * cam2dGlobal.Zoom.Y - cam2dSY;
+    v2[ 1 ] := ( PSingle( Ptr( V ) + 4 )^ - cam2dGlobal.Y + cam2dSY ) * cam2dGlobal.Zoom.Y - cam2dSY;
 
   if cam2dGlobal.Angle <> 0 Then
     begin

@@ -33,7 +33,7 @@ uses
   zgl_types;
 
 const
-  cs_ZenGL = 'ZenDX 0.1.41';
+  cs_ZenGL = 'ZenDX 0.2 RC1';
 
   // zgl_Reg
   SYS_APP_INIT           = $000001;
@@ -93,15 +93,15 @@ const
   CROP_INVISIBLE        = $008000;
 
 procedure zgl_Init( const FSAA : Byte = 0; const StencilBits : Byte = 0 );
-procedure zgl_InitToHandle( const Handle : DWORD; const FSAA : Byte = 0; const StencilBits : Byte = 0 );
+procedure zgl_InitToHandle( const Handle : LongWord; const FSAA : Byte = 0; const StencilBits : Byte = 0 );
 procedure zgl_Destroy;
 procedure zgl_Exit;
-procedure zgl_Reg( const What : DWORD; const UserData : Pointer );
-function  zgl_Get( const What : DWORD ) : Ptr;
+procedure zgl_Reg( const What : LongWord; const UserData : Pointer );
+function  zgl_Get( const What : LongWord ) : Ptr;
 procedure zgl_GetSysDir;
-procedure zgl_GetMem( var Mem : Pointer; const Size : DWORD );
-procedure zgl_Enable( const What : DWORD );
-procedure zgl_Disable( const What : DWORD );
+procedure zgl_GetMem( var Mem : Pointer; const Size : LongWord );
+procedure zgl_Enable( const What : LongWord );
+procedure zgl_Disable( const What : LongWord );
 
 implementation
 uses
@@ -125,19 +125,19 @@ uses
 
 procedure zgl_GetSysDir;
 var
-  FL, FP : PAnsiChar;
-  S      : AnsiString;
+  fl, fp : PAnsiChar;
+  s      : AnsiString;
   t      : array[ 0..MAX_PATH - 1 ] of AnsiChar;
 begin
   wnd_INST := GetModuleHandle( nil );
-  GetMem( FL, 65535 );
-  GetMem( FP, 65535 );
-  GetModuleFileNameA( wnd_INST, FL, 65535 );
-  GetFullPathNameA( FL, 65535, FP, FL );
-  S := copy( AnsiString( FP ), 1, length( FP ) - length( FL ) );
-  app_WorkDir := PAnsiChar( S );
-  FL := nil;
-  FP := nil;
+  GetMem( fl, 65535 );
+  GetMem( fp, 65535 );
+  GetModuleFileNameA( wnd_INST, fl, 65535 );
+  GetFullPathNameA( fl, 65535, fp, fl );
+  s := copy( AnsiString( fp ), 1, length( fp ) - length( fl ) );
+  app_WorkDir := PAnsiChar( s );
+  fl := nil;
+  fp := nil;
 
   GetEnvironmentVariableA( 'APPDATA', t, MAX_PATH );
   app_UsrHomeDir := t;
@@ -147,52 +147,52 @@ end;
 
 procedure zgl_Init;
 begin
-  zgl_GetSysDir;
-  log_Init;
+  zgl_GetSysDir();
+  log_Init();
 
   ogl_FSAA    := FSAA;
   ogl_Stencil := StencilBits;
-  if not scr_Create Then exit;
+  if not scr_Create() Then exit;
 
   app_Initialized := TRUE;
   if wnd_Height >= zgl_Get( DESKTOP_HEIGHT ) Then
     wnd_FullScreen := TRUE;
 
   if not wnd_Create( wnd_Width, wnd_Height ) Then exit;
-  if not d3d_Create Then exit;
+  if not d3d_Create() Then exit;
   wnd_SetCaption( wnd_Caption );
   app_Work := TRUE;
 
-  Set2DMode;
+  Set2DMode();
   wnd_ShowCursor( app_ShowCursor );
 
-  app_PInit;
-  app_PLoop;
-  zgl_Destroy;
+  app_PInit();
+  app_PLoop();
+  zgl_Destroy();
 end;
 
 procedure zgl_InitToHandle;
 begin
-  zgl_GetSysDir;
-  log_Init;
+  zgl_GetSysDir();
+  log_Init();
 
   ogl_FSAA    := FSAA;
   ogl_Stencil := StencilBits;
 
-  if not scr_Create Then exit;
+  if not scr_Create() Then exit;
   app_InitToHandle := TRUE;
   wnd_Handle := Handle;
   wnd_DC := GetDC( wnd_Handle );
-  if not d3d_Create Then exit;
+  if not d3d_Create() Then exit;
   wnd_SetCaption( wnd_Caption );
   app_Work := TRUE;
 
-  Set2DMode;
+  Set2DMode();
   wnd_ShowCursor( app_ShowCursor );
 
-  app_PInit;
-  app_PLoop;
-  zgl_Destroy;
+  app_PInit();
+  app_PLoop();
+  zgl_Destroy();
 end;
 
 procedure zgl_Destroy;
@@ -200,33 +200,33 @@ procedure zgl_Destroy;
     i : Integer;
     p : Pointer;
 begin
-  scr_Destroy;
+  scr_Destroy();
 
   log_Add( 'Timers to free: ' + u_IntToStr( managerTimer.Count ) );
   while managerTimer.Count > 1 do
     begin
-      p := managerTimer.First.Next;
+      p := managerTimer.First.next;
       timer_Del( zglPTimer( p ) );
     end;
 
   log_Add( 'Render Targets to free: ' + u_IntToStr( managerRTarget.Count ) );
   while managerRTarget.Count > 1 do
     begin
-      p := managerRTarget.First.Next;
+      p := managerRTarget.First.next;
       rtarget_Del( zglPRenderTarget( p ) );
     end;
 
   log_Add( 'Textures to free: ' + u_IntToStr( managerTexture.Count.Items ) );
   while managerTexture.Count.Items > 1 do
     begin
-      p := managerTexture.First.Next;
+      p := managerTexture.First.next;
       tex_Del( zglPTexture( p ) );
     end;
 
   log_Add( 'Fonts to free: ' + u_IntToStr( managerFont.Count ) );
   while managerFont.Count > 1 do
     begin
-      p := managerFont.First.Next;
+      p := managerFont.First.next;
       font_Del( zglPFont( p ) );
     end;
 
@@ -234,7 +234,7 @@ begin
   log_Add( 'Sounds to free: ' + u_IntToStr( managerSound.Count.Items ) );
   while managerSound.Count.Items > 1 do
     begin
-      p := managerSound.First.Next;
+      p := managerSound.First.next;
       snd_Del( zglPSound( p ) );
     end;
 
@@ -246,12 +246,12 @@ begin
   if app_WorkTime <> 0 Then
     log_Add( 'Average FPS: ' + u_IntToStr( Round( app_FPSAll / app_WorkTime ) ) );
 
-  if not app_InitToHandle Then wnd_Destroy;
+  if not app_InitToHandle Then wnd_Destroy();
 
-  app_PExit;
-  d3d_Destroy;
+  app_PExit();
+  d3d_Destroy();
   log_Add( 'End' );
-  log_Close;
+  log_Close();
 end;
 
 procedure zgl_Exit;
@@ -343,13 +343,13 @@ begin
     {$IFDEF USE_GUI}
     WIDGET_TYPE_ID:
       begin
-        if DWORD( UserData ) > length( managerGUI.Types ) Then
+        if LongWord( UserData ) > length( managerGUI.Types ) Then
           begin
             SetLength( managerGUI.Types, length( managerGUI.Types ) + 1 );
-            managerGUI.Types[ length( managerGUI.Types ) - 1 ]._type := DWORD( UserData );
+            managerGUI.Types[ length( managerGUI.Types ) - 1 ]._type := LongWord( UserData );
             widgetTLast := length( managerGUI.Types ) - 1;
           end else
-            widgetTLast := DWORD( UserData );
+            widgetTLast := LongWord( UserData );
       end;
     WIDGET_FILL_DESC:
       begin
@@ -370,10 +370,10 @@ end;
 function zgl_Get;
 begin
   if ( What = APP_DIRECTORY ) or ( What = USR_HOMEDIR ) Then
-    if not app_GetSysDirs Then zgl_GetSysDir;
+    if not app_GetSysDirs Then zgl_GetSysDir();
 
   if ( What = DESKTOP_WIDTH ) or ( What = DESKTOP_HEIGHT ) Then
-    if not scr_Initialized Then scr_Init;
+    if not scr_Initialized Then scr_Init();
 
   case What of
     SYS_FPS: Result := app_FPS;
