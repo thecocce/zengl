@@ -396,15 +396,12 @@ begin
   while Assigned( r ) do
     begin
       {$IFDEF USE_DIRECT3D8}
-      d3d_Device.CreateDepthStencilSurface( Round( r.Surface.Width / r.Surface.U ), Round( r.Surface.Height / r.Surface.V ),
-                                            d3d_Params.AutoDepthStencilFormat,
+      d3d_Device.CreateDepthStencilSurface( Round( r.Surface.Width / r.Surface.U ), Round( r.Surface.Height / r.Surface.V ), d3d_Params.AutoDepthStencilFormat,
                                             D3DMULTISAMPLE_NONE, r.Handle.Depth );
       {$ENDIF}
       {$IFDEF USE_DIRECT3D9}
-      d3d_Device.CreateDepthStencilSurface( Round( r.Surface.Width / r.Surface.U ), Round( r.Surface.Height / r.Surface.V ),
-                                            d3d_Params.AutoDepthStencilFormat,
-                                            D3DMULTISAMPLE_NONE, 0, TRUE,
-                                            r.Handle.Depth, nil );
+      d3d_Device.CreateDepthStencilSurface( Round( r.Surface.Width / r.Surface.U ), Round( r.Surface.Height / r.Surface.V ), d3d_Params.AutoDepthStencilFormat,
+                                            D3DMULTISAMPLE_NONE, 0, TRUE, r.Handle.Depth, nil );
       {$ENDIF}
       r := r.Next;
     end;
@@ -418,13 +415,11 @@ begin
       if not Assigned( d3d_texArray[ t.ID ].Texture ) Then
         begin
           {$IFDEF USE_DIRECT3D8}
-          d3d_Device.CreateTexture( Round( t.Width / t.U ), Round( t.Height / t.V ), 1,
-                                    D3DUSAGE_RENDERTARGET, fmt, D3DPOOL_DEFAULT,
+          d3d_Device.CreateTexture( Round( t.Width / t.U ), Round( t.Height / t.V ), 1, D3DUSAGE_RENDERTARGET, fmt, D3DPOOL_DEFAULT,
                                     d3d_texArray[ t.ID ].Texture );
           {$ENDIF}
           {$IFDEF USE_DIRECT3D9}
-          d3d_Device.CreateTexture( Round( t.Width / t.U ), Round( t.Height / t.V ), 1,
-                                    D3DUSAGE_RENDERTARGET, fmt, D3DPOOL_DEFAULT,
+          d3d_Device.CreateTexture( Round( t.Width / t.U ), Round( t.Height / t.V ), 1, D3DUSAGE_RENDERTARGET, fmt, D3DPOOL_DEFAULT,
                                     d3d_texArray[ t.ID ].Texture, nil );
           {$ENDIF}
           rtarget_Restore( t );

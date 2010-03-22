@@ -75,20 +75,20 @@ type
     R, G, B, A : Byte;
   end;
 
-procedure png_Load( var pData : Pointer; var W, H : WORD );
-procedure png_LoadFromFile( const FileName : String; var pData : Pointer; var W, H : WORD );
-procedure png_LoadFromMemory( const Memory : zglTMemory; var pData : Pointer; var W, H : WORD );
+procedure png_Load( var Data : Pointer; var W, H : Word );
+procedure png_LoadFromFile( const FileName : String; var Data : Pointer; var W, H : Word );
+procedure png_LoadFromMemory( const Memory : zglTMemory; var Data : Pointer; var W, H : Word );
 
-procedure png_ReadIHDR( var pngData : Pointer );
+procedure png_ReadIHDR( var Data : Pointer );
 procedure png_ReadPLTE;
-procedure png_ReadIDAT( var pngData : Pointer );
+procedure png_ReadIDAT( var Data : Pointer );
 procedure png_ReadtRNS;
 
 procedure png_GetPixelInfo;
 
-procedure png_DecodeNonInterlaced( var pngData : Pointer );
+procedure png_DecodeNonInterlaced( var Data : Pointer );
 procedure png_FilterRow;
-function  png_DecodeIDAT( const Buffer : Pointer; const Count : Integer ) : Integer;
+function  png_DecodeIDAT( const Buffer : Pointer; const Bytes : Integer ) : Integer;
 
 implementation
 uses
@@ -112,11 +112,11 @@ var
   pngZData        : Pointer;
 
   pngRowUsed      : Boolean = TRUE;
-  pngRowSize      : DWORD;
+  pngRowSize      : LongWord;
   pngRowBuffer    : array[ Boolean ] of PByteArray;
-  pngOffset       : DWORD;
+  pngOffset       : LongWord;
 
-  pngIDATEnd      : DWORD;
+  pngIDATEnd      : LongWord;
 
 procedure png_Load;
   label _exit;
@@ -150,16 +150,16 @@ begin
     if pngChunk.Name = 'IDAT' Then pngHasIDAT := TRUE;
 
     if pngChunk.Name = 'IHDR' Then
-      png_ReadIHDR( pData )
+      png_ReadIHDR( Data )
     else
       if pngChunk.Name = 'PLTE' Then
-        png_ReadPLTE
+        png_ReadPLTE()
       else
         if pngChunk.Name = 'IDAT' Then
-          png_ReadIDAT( pData )
+          png_ReadIDAT( Data )
         else
           if pngChunk.Name = 'tRNS' Then
-            png_ReadtRNS
+            png_ReadtRNS()
           else
             mem_Seek( pngMem, pngChunk.Size, FSM_CUR );
 
@@ -189,16 +189,16 @@ end;
 procedure png_LoadFromFile;
 begin
   mem_LoadFromFile( pngMem, FileName );
-  png_Load( pData, W, H );
+  png_Load( Data, W, H );
 end;
 
 procedure png_LoadFromMemory;
 begin
-  pngMem.Size     := Memory.Size;
+  pngMem.Size := Memory.Size;
   zgl_GetMem( pngMem.Memory, Memory.Size );
   pngMem.Position := Memory.Position;
   Move( Memory.Memory^, pngMem.Memory^, Memory.Size );
-  png_Load( pData, W, H );
+  png_Load( Data, W, H );
 end;
 
 procedure png_ReadIHDR;
@@ -219,7 +219,7 @@ begin
   mem_Read( pngMem, pngHeader.CompressionMethod, 1 );
   mem_Read( pngMem, pngHeader.FilterMethod, 1 );
   mem_Read( pngMem, pngHeader.InterlaceMethod, 1 );
-  zgl_GetMem( pngData, pngHeader.Width * pngHeader.Height * 4 );
+  zgl_GetMem( Data, pngHeader.Width * pngHeader.Height * 4 );
 
   mem_Seek( pngMem, pngChunk.Size - SizeOf( zglTPNGHeader ), FSM_CUR );
 
@@ -263,7 +263,7 @@ begin
   zgl_GetMem( Pointer( pngRowBuffer[ FALSE ] ), pngRowSize + 1 );
   zgl_GetMem( Pointer( pngRowBuffer[ TRUE ] ), pngRowSize + 1 );
 
-  png_DecodeNonInterlaced( pngData );
+  png_DecodeNonInterlaced( Data );
 
   InflateEnd( pngZStream );
   FreeMem( pngZData, 65535 );
@@ -349,10 +349,10 @@ begin
       ByteData := PByteArray( Src )^[ i div N ];
 
       if pngHeader.BitDepth < 8 Then
-        Begin
+        begin
           ByteData := ( ByteData Shr ( ( 8 - pngHeader.BitDepth ) - ( i mod N ) * pngHeader.BitDepth ) );
           ByteData := ByteData and ( $FF Shr K );
-        End;
+        end;
 
     Byte( Dest^ ) := pngPalette[ ByteData, 0 ]; INC( Dest );
     Byte( Dest^ ) := pngPalette[ ByteData, 1 ]; INC( Dest );
@@ -412,9 +412,9 @@ begin
       png_DecodeIDAT( @pngRowBuffer[ pngRowUsed ][ 0 ], pngRowsize + 1 );
       if pngFail Then exit;
 
-      png_FilterRow;
+      png_FilterRow();
 
-      CopyP( @pngRowBuffer[ pngRowUsed ][ 1 ], Pointer( Ptr( pngData ) + pngHeader.Width * 4 * ( i - 1 ) ) );
+      CopyP( @pngRowBuffer[ pngRowUsed ][ 1 ], Pointer( Ptr( Data ) + pngHeader.Width * 4 * ( i - 1 ) ) );
 
       pngRowUsed := not pngRowUsed;
     end;
@@ -498,7 +498,7 @@ begin
   with pngZStream do
     begin
       next_out  := Buffer;
-      avail_out := Count;
+      avail_out := Bytes;
 
       while avail_out > 0 do
         begin
@@ -528,7 +528,7 @@ begin
 
               if avail_in = 0 Then
                 begin
-                  Result := Count - avail_out;
+                  Result := Bytes - avail_out;
                   exit;
                 end;
 
