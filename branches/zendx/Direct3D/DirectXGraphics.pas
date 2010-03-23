@@ -1315,7 +1315,7 @@ type TD3DMultiSample_Type = TD3DMultiSampleType;
  *            number of bits per Depth channel (but not Stencil channel).
  *)
 
-  function MAKEFOURCC(ch0, ch1, ch2, ch3 : Char) : LongWord;
+  function MAKEFOURCC(ch0, ch1, ch2, ch3 : AnsiChar) : LongWord;
 
 type PD3DFormat = ^TD3DFormat;
      TD3DFormat = {$IFNDEF NOENUMS}({$ELSE}LongWord;{$ENDIF}
@@ -1666,8 +1666,8 @@ const
 type
   PD3DAdapter_Identifier8 = ^TD3DAdapter_Identifier8;
   TD3DAdapter_Identifier8 = packed record
-    Driver      : array [0..MAX_DEVICE_IDENTIFIER_STRING - 1] of Char;
-    Description : array [0..MAX_DEVICE_IDENTIFIER_STRING - 1] of Char;
+    Driver      : array [0..MAX_DEVICE_IDENTIFIER_STRING - 1] of AnsiChar;
+    Description : array [0..MAX_DEVICE_IDENTIFIER_STRING - 1] of AnsiChar;
 
     DriverVersionLowPart : LongWord;     (* Defined for 16 bit driver components *)
     DriverVersionHighPart : LongWord;
@@ -2660,7 +2660,7 @@ begin
   Result := D3DFVF_TEXTUREFORMAT1 shl (CoordIndex * 2 + 16)
 end;
 
-function MAKEFOURCC(ch0, ch1, ch2, ch3 : Char) : LongWord;
+function MAKEFOURCC(ch0, ch1, ch2, ch3 : AnsiChar) : LongWord;
 begin
   Result := Byte(ch0) or (Byte(ch1) shl 8) or (Byte(ch2) shl 16) or (Byte(ch3) shl 24 );
 end;

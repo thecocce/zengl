@@ -42,7 +42,7 @@ const
   RT_TYPE_PBUFFER = 2;
   RT_FULL_SCREEN  = 1;
   RT_CLEAR_SCREEN = 2;
-  RT_SAVE_CONTENT = 3;
+  RT_SAVE_CONTENT = 4;
 
 type
   zglPD3DTarget = ^zglTD3DTarget;

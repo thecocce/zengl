@@ -1180,7 +1180,7 @@ const
   D3DSI_INSTLENGTH_SHIFT  = 24;
   {$EXTERNALSYM D3DSI_INSTLENGTH_SHIFT}
 
-type 
+type
   _D3DSHADER_INSTRUCTION_OPCODE_TYPE = type DWord;
   {$EXTERNALSYM _D3DSHADER_INSTRUCTION_OPCODE_TYPE}
   D3DSHADER_INSTRUCTION_OPCODE_TYPE = _D3DSHADER_INSTRUCTION_OPCODE_TYPE;
@@ -1590,7 +1590,7 @@ type
 const
   D3DVS_ADDRMODE_ABSOLUTE    = 0 shl D3DVS_ADDRESSMODE_SHIFT;
   {$EXTERNALSYM D3DVS_ADDRMODE_ABSOLUTE}
-  D3DVS_ADDRMODE_RELATIVE    = 1 shl D3DVS_ADDRESSMODE_SHIFT; 
+  D3DVS_ADDRMODE_RELATIVE    = 1 shl D3DVS_ADDRESSMODE_SHIFT;
   {$EXTERNALSYM D3DVS_ADDRMODE_RELATIVE}
   D3DVS_ADDRMODE_FORCE_DWORD = $7fffffff;                      // force 32-bit size enum
   {$EXTERNALSYM D3DVS_ADDRMODE_FORCE_DWORD}
@@ -1994,7 +1994,7 @@ type
 //    #define MAKEFOURCC(ch0, ch1, ch2, ch3)                              \
 //                ((DWORD)(BYTE)(ch0) | ((DWORD)(BYTE)(ch1) << 8) |       \
 //                ((DWORD)(BYTE)(ch2) << 16) | ((DWORD)(BYTE)(ch3) << 24 ))
-function MAKEFOURCC(ch0, ch1, ch2, ch3: Char): DWord;
+function MAKEFOURCC(ch0, ch1, ch2, ch3: AnsiChar): DWord;
 {$EXTERNALSYM MAKEFOURCC}
 
 
@@ -2480,9 +2480,9 @@ const
 type
   PD3DAdapterIdentifier9 = ^TD3DAdapterIdentifier9;
   _D3DADAPTER_IDENTIFIER9 = packed record
-    Driver      : array [0..MAX_DEVICE_IDENTIFIER_STRING-1] of Char;
-    Description : array [0..MAX_DEVICE_IDENTIFIER_STRING-1] of Char;
-    DeviceName  : array [0..31] of Char;   { Device name for GDI (ex. \\.\DISPLAY1) }
+    Driver      : array [0..MAX_DEVICE_IDENTIFIER_STRING-1] of AnsiChar;
+    Description : array [0..MAX_DEVICE_IDENTIFIER_STRING-1] of AnsiChar;
+    DeviceName  : array [0..31] of AnsiChar;   { Device name for GDI (ex. \\.\DISPLAY1) }
 
     DriverVersionLowPart        : DWord;   { Defined for 16 bit driver components }
     DriverVersionHighPart       : DWord;
@@ -2609,7 +2609,7 @@ type
 //#ifndef WOW64_ENUM_WORKAROUND
     stats: array [0..D3DRTYPECOUNT-1] of TD3DResourceStats;
 //#else
-//  stats: array[0..7] of TD3DResourceStats; 
+//  stats: array[0..7] of TD3DResourceStats;
 //#endif
   end;
   {$EXTERNALSYM _D3DDEVINFO_RESOURCEMANAGER}
@@ -3450,7 +3450,7 @@ type
   IDirect3DSwapChain9 = interface;
   IDirect3DQuery9 = interface;
 
-  
+
   {$HPPEMIT 'DECLARE_DINTERFACE_TYPE(IDirect3D9);'}
   {$EXTERNALSYM IDirect3D9}
   IDirect3D9 = interface(IUnknown)
@@ -3475,7 +3475,7 @@ type
   {$EXTERNALSYM IDirect3D9Helper}
   IDirect3D9Helper = class
     (*** helper information ***)
-    szVersionString: PWideChar;
+    szVersionString: PWideAnsiChar;
   end;
 
 
@@ -3661,7 +3661,7 @@ type
   {$EXTERNALSYM IDirect3DStateBlock9Helper}
   IDirect3DStateBlock9Helper = class
     (*** helper information ***)
-    CreationCallStack: PWideChar;
+    CreationCallStack: PWideAnsiChar;
   end;
 
 
@@ -3685,7 +3685,7 @@ type
     (*** helper information ***)
     PresentParameters: TD3DPresentParameters;
     DisplayMode: TD3DDisplayMode;
-    CreationCallStack: PWideChar;
+    CreationCallStack: PWideAnsiChar;
   end;
 
 
@@ -3718,7 +3718,7 @@ type
   {$EXTERNALSYM IDirect3DVertexDeclaration9Helper}
   IDirect3DVertexDeclaration9Helper = class
     (*** helper information ***)
-    CreationCallStack: PWideChar;
+    CreationCallStack: PWideAnsiChar;
   end;
 
 
@@ -3736,7 +3736,7 @@ type
   IDirect3DVertexShader9Helper = class
     (*** helper information ***)
     Version: DWORD;
-    CreationCallStack: PWideChar;
+    CreationCallStack: PWideAnsiChar;
   end;
 
 
@@ -3754,7 +3754,7 @@ type
   IDirect3DPixelShader9Helper = class
     (*** helper information ***)
     Version: DWORD;
-    CreationCallStack: PWideChar;
+    CreationCallStack: PWideAnsiChar;
   end;
 
 
@@ -3788,7 +3788,7 @@ type
   {$EXTERNALSYM IDirect3DTexture9Helper}
   IDirect3DTexture9Helper = class
     (*** helper information ***)
-    Name: PWideChar;
+    Name: PWideAnsiChar;
     Width: LongWord;
     Height: LongWord;
     Levels: LongWord;
@@ -3799,7 +3799,7 @@ type
     LOD: DWORD;
     FilterType: TD3DTextureFilterType;
     LockCount: LongWord;
-    CreationCallStack: PWideChar;
+    CreationCallStack: PWideAnsiChar;
   end;
 
 
@@ -3819,7 +3819,7 @@ type
   {$EXTERNALSYM IDirect3DVolumeTexture9Helper}
   IDirect3DVolumeTexture9Helper = class
     (*** helper information ***)
-    Name: PWideChar;
+    Name: PWideAnsiChar;
     Width: LongWord;
     Height: LongWord;
     Depth: LongWord;
@@ -3831,7 +3831,7 @@ type
     LOD: DWORD;
     FilterType: TD3DTextureFilterType;
     LockCount: LongWord;
-    CreationCallStack: PWideChar;
+    CreationCallStack: PWideAnsiChar;
   end;
 
 
@@ -3851,7 +3851,7 @@ type
   {$EXTERNALSYM IDirect3DCubeTexture9Helper}
   IDirect3DCubeTexture9Helper = class
     (*** helper information ***)
-    Name: PWideChar;
+    Name: PWideAnsiChar;
     Width: LongWord;
     Height: LongWord;
     Depth: LongWord;
@@ -3863,7 +3863,7 @@ type
     LOD: DWORD;
     FilterType: TD3DTextureFilterType;
     LockCount: LongWord;
-    CreationCallStack: PWideChar;
+    CreationCallStack: PWideAnsiChar;
   end;
 
 
@@ -3881,14 +3881,14 @@ type
   {$EXTERNALSYM IDirect3DVertexBuffer9Helper}
   IDirect3DVertexBuffer9Helper = class
     (*** helper information ***)
-    Name: PWideChar;
+    Name: PWideAnsiChar;
     Length: LongWord;
     Usage: DWORD;
     FVF: DWORD;
     Pool: TD3DPool;
     Priority: DWORD;
     LockCount: LongWord;
-    CreationCallStack: PWideChar;
+    CreationCallStack: PWideAnsiChar;
   end;
 
 
@@ -3906,14 +3906,14 @@ type
   {$EXTERNALSYM IDirect3DIndexBuffer9Helper}
   IDirect3DIndexBuffer9Helper = class
     (*** helper information ***)
-    Name: PWideChar;
+    Name: PWideAnsiChar;
     Length: LongWord;
     Usage: DWORD;
     Format: TD3DFormat;
     Pool: TD3DPool;
     Priority: DWORD;
     LockCount: LongWord;
-    CreationCallStack: PWideChar;
+    CreationCallStack: PWideAnsiChar;
   end;
 
 
@@ -3934,7 +3934,7 @@ type
   {$EXTERNALSYM IDirect3DSurface9Helper}
   IDirect3DSurface9Helper = class
     (*** helper information ***)
-    Name: PWideChar;
+    Name: PWideAnsiChar;
     Width: LongWord;
     Height: LongWord;
     Usage: DWORD;
@@ -3945,7 +3945,7 @@ type
     Priority: DWORD;
     LockCount: LongWord;
     DCCount: LongWord;
-    CreationCallStack: PWideChar;
+    CreationCallStack: PWideAnsiChar;
   end;
 
 
@@ -3968,7 +3968,7 @@ type
   {$EXTERNALSYM IDirect3DVolume9Helper}
   IDirect3DVolume9Helper = class
     (*** helper information ***)
-    Name: PWideChar;
+    Name: PWideAnsiChar;
     Width: LongWord;
     Height: LongWord;
     Depth: LongWord;
@@ -3976,7 +3976,7 @@ type
     Format: TD3DFormat;
     Pool: TD3DPool;
     LockCount: LongWord;
-    CreationCallStack: PWideChar;
+    CreationCallStack: PWideAnsiChar;
   end;
 
 
@@ -3998,7 +3998,7 @@ type
     (*** helper information ***)
     _Type: TD3DQueryType;
     DataSize: DWORD;
-    CreationCallStack: PWideChar;
+    CreationCallStack: PWideAnsiChar;
   end;
 
 
@@ -4264,13 +4264,13 @@ function Direct3DCreate9(SDKVersion: LongWord): IDirect3D9; stdcall;
  * Stubs for graphics profiling.
  *)
 
-function D3DPERF_BeginEvent(col: TD3DColor; wszName: PWideChar): Integer; stdcall; external Direct3D9dll;
+function D3DPERF_BeginEvent(col: TD3DColor; wszName: PWideAnsiChar): Integer; stdcall; external Direct3D9dll;
 {$EXTERNALSYM D3DPERF_BeginEvent}
 function D3DPERF_EndEvent: Integer; stdcall; external Direct3D9dll;
 {$EXTERNALSYM D3DPERF_EndEvent}
-procedure D3DPERF_SetMarker(col: TD3DColor; wszName: PWideChar); stdcall; external Direct3D9dll;
+procedure D3DPERF_SetMarker(col: TD3DColor; wszName: PWideAnsiChar); stdcall; external Direct3D9dll;
 {$EXTERNALSYM D3DPERF_SetMarker}
-procedure D3DPERF_SetRegion(col: TD3DColor; wszName: PWideChar); stdcall; external Direct3D9dll;
+procedure D3DPERF_SetRegion(col: TD3DColor; wszName: PWideAnsiChar); stdcall; external Direct3D9dll;
 {$EXTERNALSYM D3DPERF_SetRegion}
 function D3DPERF_QueryRepeatFrame: BOOL; stdcall; external Direct3D9dll;
 {$EXTERNALSYM D3DPERF_QueryRepeatFrame}
@@ -4442,7 +4442,7 @@ end;
 //    #define MAKEFOURCC(ch0, ch1, ch2, ch3)                              \
 //                ((DWORD)(BYTE)(ch0) | ((DWORD)(BYTE)(ch1) << 8) |       \
 //                ((DWORD)(BYTE)(ch2) << 16) | ((DWORD)(BYTE)(ch3) << 24 ))
-function MAKEFOURCC(ch0, ch1, ch2, ch3: Char): DWord;
+function MAKEFOURCC(ch0, ch1, ch2, ch3: AnsiChar): DWord;
 begin
   Result:= Byte(ch0) or (Byte(ch1) shl 8) or (Byte(ch2) shl 16) or (Byte(ch3) shl 24 );
 end;
