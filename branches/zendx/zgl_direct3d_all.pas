@@ -530,7 +530,7 @@ end;
 procedure glOrtho;
 begin
   glFrustum( -left - 0.5, -right - 0.5, -bottom - 0.5, -top - 0.5, zNear, zFar );
-  d3d_Device.SetTransform( d3d_MatrixMode, d3d_Matrices[ DWORD( d3d_MatrixMode ) ] );
+  d3d_Device.SetTransform( d3d_MatrixMode, d3d_Matrices[ LongWord( d3d_MatrixMode ) ] );
 end;
 
 procedure glScissor;
@@ -643,14 +643,14 @@ begin
   if pushCount > length( popMatrices ) Then
     SetLength( popMatrices, length( popMatrices ) + 16 );
 
-  popMatrices[ pushCount - 1, DWORD( d3d_MatrixMode ) ] := d3d_Matrices[ DWORD( d3d_MatrixMode ) ];
+  popMatrices[ pushCount - 1, LongWord( d3d_MatrixMode ) ] := d3d_Matrices[ LongWord( d3d_MatrixMode ) ];
 end;
 
 procedure glPopMatrix;
 begin
   if pushCount < 1 Then exit;
-  d3d_Matrices[ DWORD( d3d_MatrixMode ) ] := popMatrices[ pushCount - 1, DWORD( d3d_MatrixMode ) ];
-  d3d_Device.SetTransform( d3d_MatrixMode, d3d_Matrices[ DWORD( d3d_MatrixMode ) ] );
+  d3d_Matrices[ LongWord( d3d_MatrixMode ) ] := popMatrices[ pushCount - 1, LongWord( d3d_MatrixMode ) ];
+  d3d_Device.SetTransform( d3d_MatrixMode, d3d_Matrices[ LongWord( d3d_MatrixMode ) ] );
   DEC( pushCount );
 end;
 
@@ -665,7 +665,7 @@ end;
 
 procedure glLoadIdentity;
 begin
-  with d3d_Matrices[ DWORD( d3d_MatrixMode ) ] do
+  with d3d_Matrices[ LongWord( d3d_MatrixMode ) ] do
     begin
       _11 := 1;
       _12 := 0;
@@ -687,7 +687,7 @@ begin
       _43 := 0;
       _44 := 1;
     end;
-  d3d_Device.SetTransform( d3d_MatrixMode, d3d_Matrices[ DWORD( d3d_MatrixMode ) ] );
+  d3d_Device.SetTransform( d3d_MatrixMode, d3d_Matrices[ LongWord( d3d_MatrixMode ) ] );
 end;
 
 procedure gluPerspective(fovy, aspect, zNear, zFar: GLdouble);
@@ -698,12 +698,12 @@ begin
   xmax := ymax * aspect;
 
   glFrustum( -xmax, xmax, -ymax, ymax, zNear, zFar );
-  d3d_Device.SetTransform( d3d_MatrixMode, d3d_Matrices[ DWORD( d3d_MatrixMode ) ] );
+  d3d_Device.SetTransform( d3d_MatrixMode, d3d_Matrices[ LongWord( d3d_MatrixMode ) ] );
 end;
 
 procedure glFrustum;
 begin
-  with d3d_Matrices[ DWORD( d3d_MatrixMode ) ] do
+  with d3d_Matrices[ LongWord( d3d_MatrixMode ) ] do
     begin
       _11 := ( zNear * 2 ) / ( Right - Left );
       _12 := 0;
@@ -776,13 +776,13 @@ begin
       _43 := 0;
       _44 := 1;
     end;
-  d3d_Matrices[ DWORD( d3d_MatrixMode ) ] := matrix4f_Mul( m, d3d_Matrices[ DWORD( d3d_MatrixMode ) ] );
-  d3d_Device.SetTransform( d3d_MatrixMode, d3d_Matrices[ DWORD( d3d_MatrixMode ) ] );
+  d3d_Matrices[ LongWord( d3d_MatrixMode ) ] := matrix4f_Mul( m, d3d_Matrices[ LongWord( d3d_MatrixMode ) ] );
+  d3d_Device.SetTransform( d3d_MatrixMode, d3d_Matrices[ LongWord( d3d_MatrixMode ) ] );
 end;
 
 procedure glScalef;
 begin
-  with d3d_Matrices[ DWORD( d3d_MatrixMode ) ] do
+  with d3d_Matrices[ LongWord( d3d_MatrixMode ) ] do
     begin
       _11 := x * _11;
       _12 := x * _12;
@@ -799,19 +799,19 @@ begin
       _33 := z * _33;
       _34 := z * _34;
     end;
-  d3d_Device.SetTransform( d3d_MatrixMode, d3d_Matrices[ DWORD( d3d_MatrixMode ) ] );
+  d3d_Device.SetTransform( d3d_MatrixMode, d3d_Matrices[ LongWord( d3d_MatrixMode ) ] );
 end;
 
 procedure glTranslatef;
 begin
-  with d3d_Matrices[ DWORD( d3d_MatrixMode ) ] do
+  with d3d_Matrices[ LongWord( d3d_MatrixMode ) ] do
     begin
       _41 := _11 * x + _21 * y + _31 * z + _41;
       _42 := _12 * x + _22 * y + _32 * z + _42;
       _43 := _13 * x + _23 * y + _33 * z + _43;
       _44 := _14 * x + _24 * y + _34 * z + _44;
     end;
-  d3d_Device.SetTransform( d3d_MatrixMode, d3d_Matrices[ DWORD( d3d_MatrixMode ) ] );
+  d3d_Device.SetTransform( d3d_MatrixMode, d3d_Matrices[ LongWord( d3d_MatrixMode ) ] );
 end;
 
 procedure glVertex2f;
