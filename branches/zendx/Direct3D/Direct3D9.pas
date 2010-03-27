@@ -3475,7 +3475,7 @@ type
   {$EXTERNALSYM IDirect3D9Helper}
   IDirect3D9Helper = class
     (*** helper information ***)
-    szVersionString: PWideAnsiChar;
+    szVersionString: PWideChar;
   end;
 
 
@@ -3661,7 +3661,7 @@ type
   {$EXTERNALSYM IDirect3DStateBlock9Helper}
   IDirect3DStateBlock9Helper = class
     (*** helper information ***)
-    CreationCallStack: PWideAnsiChar;
+    CreationCallStack: PWideChar;
   end;
 
 
@@ -3685,7 +3685,7 @@ type
     (*** helper information ***)
     PresentParameters: TD3DPresentParameters;
     DisplayMode: TD3DDisplayMode;
-    CreationCallStack: PWideAnsiChar;
+    CreationCallStack: PWideChar;
   end;
 
 
@@ -3718,7 +3718,7 @@ type
   {$EXTERNALSYM IDirect3DVertexDeclaration9Helper}
   IDirect3DVertexDeclaration9Helper = class
     (*** helper information ***)
-    CreationCallStack: PWideAnsiChar;
+    CreationCallStack: PWideChar;
   end;
 
 
@@ -3736,7 +3736,7 @@ type
   IDirect3DVertexShader9Helper = class
     (*** helper information ***)
     Version: DWORD;
-    CreationCallStack: PWideAnsiChar;
+    CreationCallStack: PWideChar;
   end;
 
 
@@ -3754,7 +3754,7 @@ type
   IDirect3DPixelShader9Helper = class
     (*** helper information ***)
     Version: DWORD;
-    CreationCallStack: PWideAnsiChar;
+    CreationCallStack: PWideChar;
   end;
 
 
@@ -3788,7 +3788,7 @@ type
   {$EXTERNALSYM IDirect3DTexture9Helper}
   IDirect3DTexture9Helper = class
     (*** helper information ***)
-    Name: PWideAnsiChar;
+    Name: PWideChar;
     Width: LongWord;
     Height: LongWord;
     Levels: LongWord;
@@ -3799,7 +3799,7 @@ type
     LOD: DWORD;
     FilterType: TD3DTextureFilterType;
     LockCount: LongWord;
-    CreationCallStack: PWideAnsiChar;
+    CreationCallStack: PWideChar;
   end;
 
 
@@ -3819,7 +3819,7 @@ type
   {$EXTERNALSYM IDirect3DVolumeTexture9Helper}
   IDirect3DVolumeTexture9Helper = class
     (*** helper information ***)
-    Name: PWideAnsiChar;
+    Name: PWideChar;
     Width: LongWord;
     Height: LongWord;
     Depth: LongWord;
@@ -3831,7 +3831,7 @@ type
     LOD: DWORD;
     FilterType: TD3DTextureFilterType;
     LockCount: LongWord;
-    CreationCallStack: PWideAnsiChar;
+    CreationCallStack: PWideChar;
   end;
 
 
@@ -3851,7 +3851,7 @@ type
   {$EXTERNALSYM IDirect3DCubeTexture9Helper}
   IDirect3DCubeTexture9Helper = class
     (*** helper information ***)
-    Name: PWideAnsiChar;
+    Name: PWideChar;
     Width: LongWord;
     Height: LongWord;
     Depth: LongWord;
@@ -3863,7 +3863,7 @@ type
     LOD: DWORD;
     FilterType: TD3DTextureFilterType;
     LockCount: LongWord;
-    CreationCallStack: PWideAnsiChar;
+    CreationCallStack: PWideChar;
   end;
 
 
@@ -3881,14 +3881,14 @@ type
   {$EXTERNALSYM IDirect3DVertexBuffer9Helper}
   IDirect3DVertexBuffer9Helper = class
     (*** helper information ***)
-    Name: PWideAnsiChar;
+    Name: PWideChar;
     Length: LongWord;
     Usage: DWORD;
     FVF: DWORD;
     Pool: TD3DPool;
     Priority: DWORD;
     LockCount: LongWord;
-    CreationCallStack: PWideAnsiChar;
+    CreationCallStack: PWideChar;
   end;
 
 
@@ -3906,14 +3906,14 @@ type
   {$EXTERNALSYM IDirect3DIndexBuffer9Helper}
   IDirect3DIndexBuffer9Helper = class
     (*** helper information ***)
-    Name: PWideAnsiChar;
+    Name: PWideChar;
     Length: LongWord;
     Usage: DWORD;
     Format: TD3DFormat;
     Pool: TD3DPool;
     Priority: DWORD;
     LockCount: LongWord;
-    CreationCallStack: PWideAnsiChar;
+    CreationCallStack: PWideChar;
   end;
 
 
@@ -3934,7 +3934,7 @@ type
   {$EXTERNALSYM IDirect3DSurface9Helper}
   IDirect3DSurface9Helper = class
     (*** helper information ***)
-    Name: PWideAnsiChar;
+    Name: PWideChar;
     Width: LongWord;
     Height: LongWord;
     Usage: DWORD;
@@ -3945,7 +3945,7 @@ type
     Priority: DWORD;
     LockCount: LongWord;
     DCCount: LongWord;
-    CreationCallStack: PWideAnsiChar;
+    CreationCallStack: PWideChar;
   end;
 
 
@@ -3968,7 +3968,7 @@ type
   {$EXTERNALSYM IDirect3DVolume9Helper}
   IDirect3DVolume9Helper = class
     (*** helper information ***)
-    Name: PWideAnsiChar;
+    Name: PWideChar;
     Width: LongWord;
     Height: LongWord;
     Depth: LongWord;
@@ -3976,7 +3976,7 @@ type
     Format: TD3DFormat;
     Pool: TD3DPool;
     LockCount: LongWord;
-    CreationCallStack: PWideAnsiChar;
+    CreationCallStack: PWideChar;
   end;
 
 
@@ -3998,7 +3998,7 @@ type
     (*** helper information ***)
     _Type: TD3DQueryType;
     DataSize: DWORD;
-    CreationCallStack: PWideAnsiChar;
+    CreationCallStack: PWideChar;
   end;
 
 
@@ -4264,13 +4264,13 @@ function Direct3DCreate9(SDKVersion: LongWord): IDirect3D9; stdcall;
  * Stubs for graphics profiling.
  *)
 
-function D3DPERF_BeginEvent(col: TD3DColor; wszName: PWideAnsiChar): Integer; stdcall; external Direct3D9dll;
+function D3DPERF_BeginEvent(col: TD3DColor; wszName: PWideChar): Integer; stdcall; external Direct3D9dll;
 {$EXTERNALSYM D3DPERF_BeginEvent}
 function D3DPERF_EndEvent: Integer; stdcall; external Direct3D9dll;
 {$EXTERNALSYM D3DPERF_EndEvent}
-procedure D3DPERF_SetMarker(col: TD3DColor; wszName: PWideAnsiChar); stdcall; external Direct3D9dll;
+procedure D3DPERF_SetMarker(col: TD3DColor; wszName: PWideChar); stdcall; external Direct3D9dll;
 {$EXTERNALSYM D3DPERF_SetMarker}
-procedure D3DPERF_SetRegion(col: TD3DColor; wszName: PWideAnsiChar); stdcall; external Direct3D9dll;
+procedure D3DPERF_SetRegion(col: TD3DColor; wszName: PWideChar); stdcall; external Direct3D9dll;
 {$EXTERNALSYM D3DPERF_SetRegion}
 function D3DPERF_QueryRepeatFrame: BOOL; stdcall; external Direct3D9dll;
 {$EXTERNALSYM D3DPERF_QueryRepeatFrame}
