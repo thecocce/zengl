@@ -265,7 +265,6 @@ begin
         FullScreen_PresentationInterval := D3DPRESENT_INTERVAL_IMMEDIATE;
       {$ENDIF}
       {$IFDEF USE_DIRECT3D9}
-      SwapEffect := D3DSWAPEFFECT_COPY;
       if scr_VSync Then
         PresentationInterval := D3DPRESENT_INTERVAL_ONE
       else
