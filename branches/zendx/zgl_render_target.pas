@@ -36,9 +36,8 @@ uses
   zgl_textures;
 
 const
-  RT_TYPE_SIMPLE  = 0;
+  RT_TYPE_PBUFFER = 0;
   RT_TYPE_FBO     = 1;
-  RT_TYPE_PBUFFER = 2;
   RT_FULL_SCREEN  = 1;
   RT_CLEAR_SCREEN = 2;
   RT_SAVE_CONTENT = 4;
