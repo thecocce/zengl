@@ -195,7 +195,7 @@ begin
   zgl_GetMem( Pointer( Result.Next.Handle ), SizeOf( zglTD3DTarget ) );
 
   case _type of
-    RT_TYPE_SIMPLE, RT_TYPE_FBO, RT_TYPE_PBUFFER:
+    RT_TYPE_PBUFFER, RT_TYPE_FBO:
       begin
         if Surface.Flags and TEX_RGB > 0 Then
           fmt := D3DFMT_X8R8G8B8
@@ -263,7 +263,7 @@ begin
       ogl_Mode := 1;
 
       case Target._type of
-        RT_TYPE_SIMPLE, RT_TYPE_FBO, RT_TYPE_PBUFFER:
+        RT_TYPE_PBUFFER, RT_TYPE_FBO:
           begin
             if Target.Surface <> Target.Handle.Old Then
               begin
@@ -341,7 +341,7 @@ begin
     end else
       begin
         case lRTarget._type of
-          RT_TYPE_SIMPLE, RT_TYPE_FBO, RT_TYPE_PBUFFER:
+          RT_TYPE_PBUFFER, RT_TYPE_FBO:
             begin
               {$IFDEF USE_DIRECT3D8}
               d3d_Device.SetRenderTarget( d3d_Surface, d3d_Stencil );
