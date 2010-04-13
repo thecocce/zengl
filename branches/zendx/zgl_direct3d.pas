@@ -221,7 +221,7 @@ begin
     begin
       d3d.EnumAdapterModes( D3DADAPTER_DEFAULT, i, d3d_Mode );
       if ( d3d_Mode.Width <> scr_Width ) or ( d3d_Mode.Height <> scr_Height) Then continue;
-      if ( scr_BPP = 16 ) and ( d3d_GetFormatID( d3d_Mode.Format ) > d3d_GetFormatID( D3DFMT_A1R5G5B5 ) ) Then continue;
+      if ( not wnd_FullScreen ) and ( scr_Desktop.dmBitsPerPel = 16 ) and ( d3d_GetFormatID( d3d_Mode.Format ) > d3d_GetFormatID( D3DFMT_A1R5G5B5 ) ) Then continue;
       if ( d3d_GetFormatID( d3d_Mode.Format ) > d3d_GetFormatID( d3d_Format ) ) Then d3d_Format := d3d_Mode.Format;
     end;
   {$ENDIF}
@@ -233,7 +233,7 @@ begin
     begin
       d3d.EnumAdapterModes( D3DADAPTER_DEFAULT, d3d_Format, i, d3d_Mode );
       if ( d3d_Mode.Width <> scr_Width ) or ( d3d_Mode.Height <> scr_Height) Then continue;
-      if ( scr_BPP = 16 ) and ( d3d_GetFormatID( d3d_Mode.Format ) > d3d_GetFormatID( D3DFMT_A1R5G5B5 ) ) Then continue;
+      if ( not wnd_FullScreen ) and ( scr_Desktop.dmBitsPerPel = 16 ) and ( d3d_GetFormatID( d3d_Mode.Format ) > d3d_GetFormatID( D3DFMT_A1R5G5B5 ) ) Then continue;
       if ( d3d_GetFormatID( d3d_Mode.Format ) > d3d_GetFormatID( d3d_Format ) ) Then d3d_Format := d3d_Mode.Format;
     end;
   {$ENDIF}
@@ -277,11 +277,6 @@ begin
     d3d_Params := d3d_ParamsF
   else
     d3d_Params := d3d_ParamsW;
-
-  if d3d_GetFormatID( d3d_Params.BackBufferFormat ) < 4 Then
-    scr_BPP := 16
-  else
-    scr_BPP := 32;
 
   // D3D Device
   // D3DCREATE_HARDWARE_VERTEXPROCESSING
@@ -381,11 +376,6 @@ begin
     d3d_Params := d3d_ParamsF
   else
     d3d_Params := d3d_ParamsW;
-
-  if d3d_GetFormatID( d3d_Params.BackBufferFormat ) < 4 Then
-    scr_BPP := 16
-  else
-    scr_BPP := 32;
 
   d3d_Device.Reset( d3d_Params );
   d3d_ResetState;

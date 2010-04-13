@@ -40,7 +40,7 @@ procedure scr_Reset;
 procedure scr_Clear;
 procedure scr_Flush;
 
-procedure scr_SetOptions( const Width, Height, BPP, Refresh : Word; const FullScreen, VSync : Boolean );
+procedure scr_SetOptions( const Width, Height, Refresh : Word; const FullScreen, VSync : Boolean );
 procedure scr_CorrectResolution( const Width, Height : Word );
 procedure scr_SetViewPort;
 procedure scr_SetVSync( const VSync : Boolean );
@@ -57,7 +57,6 @@ end;
 var
   scr_Width   : Integer = 800;
   scr_Height  : Integer = 600;
-  scr_BPP     : Integer = 32;
   scr_Refresh : Integer;
   scr_VSync   : Boolean;
   scr_ResList : zglTResolutionList;
@@ -184,7 +183,6 @@ begin
   wnd_Height     := Height;
   scr_Width      := Width;
   scr_Height     := Height;
-  scr_BPP        := BPP;
   wnd_FullScreen := FullScreen;
   scr_Vsync      := VSync;
   if not app_Initialized Then exit;
@@ -196,12 +194,10 @@ begin
     begin
       scr_Width  := Width;
       scr_Height := Height;
-      scr_BPP    := BPP;
     end else
       begin
-        scr_Width  := zgl_Get( DESKTOP_WIDTH );
-        scr_Height := zgl_Get( DESKTOP_HEIGHT );
-        scr_BPP     := GetDisplayColors;
+        scr_Width   := zgl_Get( DESKTOP_WIDTH );
+        scr_Height  := zgl_Get( DESKTOP_HEIGHT );
         scr_Refresh := GetDisplayRefresh;
       end;
 
@@ -209,9 +205,9 @@ begin
     glClear( GL_COLOR_BUFFER_BIT );
 
   if wnd_FullScreen Then
-    log_Add( 'Set screen options: ' + u_IntToStr( scr_Width ) + ' x ' + u_IntToStr( scr_Height ) + ' x ' + u_IntToStr( scr_BPP ) + 'bpp fullscreen' )
+    log_Add( 'Set screen options: ' + u_IntToStr( scr_Width ) + ' x ' + u_IntToStr( scr_Height ) + ' fullscreen' )
   else
-    log_Add( 'Set screen options: ' + u_IntToStr( wnd_Width ) + ' x ' + u_IntToStr( wnd_Height ) + ' x ' + u_IntToStr( scr_BPP ) + 'bpp windowed' );
+    log_Add( 'Set screen options: ' + u_IntToStr( wnd_Width ) + ' x ' + u_IntToStr( wnd_Height ) + ' windowed' );
   if app_Work Then
     wnd_Update();
 end;

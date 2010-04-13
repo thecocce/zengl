@@ -200,7 +200,6 @@ begin
             scr_Init();
             scr_Width  := scr_Desktop.dmPelsWidth;
             scr_Height := scr_Desktop.dmPelsHeight;
-            scr_BPP    := scr_Desktop.dmBitsPerPel;
             wnd_Update();
           end else
             begin
