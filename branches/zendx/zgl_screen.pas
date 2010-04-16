@@ -121,6 +121,12 @@ function scr_Create;
 begin
   Result := FALSE;
   scr_Init;
+  if scr_Desktop.dmBitsPerPel <> 32 Then
+    begin
+      u_Error( 'Desktop not set to 32-bit mode.' );
+      zgl_Exit;
+      exit;
+    end;
   log_Add( 'Current mode: ' + u_IntToStr( zgl_Get( DESKTOP_WIDTH ) ) + ' x ' + u_IntToStr( zgl_Get( DESKTOP_HEIGHT ) ) );
   scr_GetResList();
   Result := TRUE;

@@ -221,7 +221,6 @@ begin
     begin
       d3d.EnumAdapterModes( D3DADAPTER_DEFAULT, i, d3d_Mode );
       if ( d3d_Mode.Width <> scr_Width ) or ( d3d_Mode.Height <> scr_Height) Then continue;
-      if ( not wnd_FullScreen ) and ( scr_Desktop.dmBitsPerPel = 16 ) and ( d3d_GetFormatID( d3d_Mode.Format ) > d3d_GetFormatID( D3DFMT_A1R5G5B5 ) ) Then continue;
       if ( d3d_GetFormatID( d3d_Mode.Format ) > d3d_GetFormatID( d3d_Format ) ) Then d3d_Format := d3d_Mode.Format;
     end;
   {$ENDIF}
@@ -233,7 +232,6 @@ begin
     begin
       d3d.EnumAdapterModes( D3DADAPTER_DEFAULT, d3d_Format, i, d3d_Mode );
       if ( d3d_Mode.Width <> scr_Width ) or ( d3d_Mode.Height <> scr_Height) Then continue;
-      if ( not wnd_FullScreen ) and ( scr_Desktop.dmBitsPerPel = 16 ) and ( d3d_GetFormatID( d3d_Mode.Format ) > d3d_GetFormatID( D3DFMT_A1R5G5B5 ) ) Then continue;
       if ( d3d_GetFormatID( d3d_Mode.Format ) > d3d_GetFormatID( d3d_Format ) ) Then d3d_Format := d3d_Mode.Format;
     end;
   {$ENDIF}
@@ -448,9 +446,6 @@ end;
 function d3d_GetFormatID;
 begin
   case Format of
-    D3DFMT_R5G6B5:   Result := 1;
-    D3DFMT_X1R5G5B5: Result := 2;
-    D3DFMT_A1R5G5B5: Result := 3;
     D3DFMT_X8R8G8B8: Result := 4;
     D3DFMT_A8R8G8B8: Result := 5;
   else
