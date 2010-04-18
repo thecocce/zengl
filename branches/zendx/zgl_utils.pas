@@ -75,7 +75,7 @@ function u_StrToInt;
   var
     e : Integer;
 begin
-  Val( String( Value ), Result, e );
+  Val( Value, Result, e );
   if e <> 0 Then
     Result := 0;
 end;
@@ -89,7 +89,7 @@ function u_StrToFloat;
   var
     e : Integer;
 begin
-  Val( String( Value ), Result, e );
+  Val( Value, Result, e );
   if e <> 0 Then
     Result := 0;
 end;

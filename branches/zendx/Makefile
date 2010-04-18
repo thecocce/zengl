@@ -1,5 +1,5 @@
 FPC     = fpc
-FLAGS   = -O3 -XdsX -CX -Sd
+FLAGS   = -O3 -XdsX -CX -Sd -Cg
 INCLUDE = -FuDirect3D -FuPasJPEG
 OUTPUT  = ./
 DESTDIR = /usr
