@@ -106,12 +106,12 @@ begin
       if Assigned( Font.CharDesc[ c ] ) Then
         begin
           lastPage := Font.CharDesc[ c ].Page;
-          batch2d_Check( GL_TRIANGLES, FX_BLEND, Font.Pages[ Font.CharDesc[ c ].Page ] );
+          batch2d_Check( GL_QUADS, FX_BLEND, Font.Pages[ Font.CharDesc[ c ].Page ] );
 
           glEnable( GL_BLEND );
           glEnable( GL_TEXTURE_2D );
           glBindTexture( GL_TEXTURE_2D, Font.Pages[ Font.CharDesc[ c ].Page ].ID );
-          glBegin( GL_TRIANGLES );
+          glBegin( GL_QUADS );
         end else
           begin
             glEnable( GL_BLEND );
@@ -157,13 +157,13 @@ begin
               glBindTexture( GL_TEXTURE_2D, Font.Pages[ CharDesc.Page ].ID );
               glBegin( GL_TRIANGLES );
             end else
-              if batch2d_Check( GL_TRIANGLES, FX_BLEND, Font.Pages[ CharDesc.Page ] ) Then
+              if batch2d_Check( GL_QUADS, FX_BLEND, Font.Pages[ CharDesc.Page ] ) Then
                 begin
                   glEnable( GL_BLEND );
 
                   glEnable( GL_TEXTURE_2D );
                   glBindTexture( GL_TEXTURE_2D, Font.Pages[ CharDesc.Page ].ID );
-                  glBegin( GL_TRIANGLES );
+                  glBegin( GL_QUADS );
                 end;
         end;
 
@@ -178,29 +178,21 @@ begin
 
       if Flags and TEXT_FX_VCA > 0 Then
         begin
-          glColor4ubv( @FX2D_VCA1[ 0 ] );
+          glColor4ubv( @fx2dVCA1[ 0 ] );
           glTexCoord2fv( @charDesc.TexCoords[ 0 ] );
           gl_Vertex2fv( @quad[ 0 ] );
 
-          glColor4ubv( @FX2D_VCA2[ 0 ] );
+          glColor4ubv( @fx2dVCA2[ 0 ] );
           glTexCoord2fv( @charDesc.TexCoords[ 1 ] );
           gl_Vertex2fv( @quad[ 1 ] );
 
-          glColor4ubv( @FX2D_VCA3[ 0 ] );
+          glColor4ubv( @fx2dVCA3[ 0 ] );
           glTexCoord2fv( @charDesc.TexCoords[ 2 ] );
           gl_Vertex2fv( @quad[ 2 ] );
 
-          glColor4ubv( @FX2D_VCA3[ 0 ] );
-          glTexCoord2fv( @charDesc.TexCoords[ 2 ] );
-          gl_Vertex2fv( @quad[ 2 ] );
-
-          glColor4ubv( @FX2D_VCA4[ 0 ] );
+          glColor4ubv( @fx2dVCA4[ 0 ] );
           glTexCoord2fv( @charDesc.TexCoords[ 3 ] );
           gl_Vertex2fv( @quad[ 3 ] );
-
-          glColor4ubv( @FX2D_VCA1[ 0 ] );
-          glTexCoord2fv( @charDesc.TexCoords[ 0 ] );
-          gl_Vertex2fv( @quad[ 0 ] );
         end else
           begin
             glTexCoord2fv( @charDesc.TexCoords[ 0 ] );
@@ -212,14 +204,8 @@ begin
             glTexCoord2fv( @charDesc.TexCoords[ 2 ] );
             gl_Vertex2fv( @quad[ 2 ] );
 
-            glTexCoord2fv( @charDesc.TexCoords[ 2 ] );
-            gl_Vertex2fv( @quad[ 2 ] );
-
             glTexCoord2fv( @charDesc.TexCoords[ 3 ] );
             gl_Vertex2fv( @quad[ 3 ] );
-
-            glTexCoord2fv( @charDesc.TexCoords[ 0 ] );
-            gl_Vertex2fv( @quad[ 0 ] );
           end;
 
       X := X + ( Font.CharDesc[ c ].ShiftP + textStep ) * textScale;

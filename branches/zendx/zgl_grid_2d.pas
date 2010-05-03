@@ -82,7 +82,7 @@ begin
   u := Texture^.U / ( Grid.Cols - 1 );
   v := Texture^.V / ( Grid.Rows - 1 );
 
-  if ( not b2d_Started ) or batch2d_Check( GL_TRIANGLES, FX, Texture ) Then
+  if ( not b2d_Started ) or batch2d_Check( GL_QUADS, FX, Texture ) Then
     begin
       if FX and FX_BLEND > 0 Then
         glEnable( GL_BLEND )
@@ -91,13 +91,18 @@ begin
       glEnable( GL_TEXTURE_2D );
       glBindTexture( GL_TEXTURE_2D, Texture.ID );
 
-      glBegin( GL_TRIANGLES );
+      glBegin( GL_QUADS );
     end;
 
   if FX and FX_COLOR > 0 Then
-    glColor4ub( FX2D_R, FX2D_G, FX2D_B, Alpha )
-  else
-    glColor4ub( 255, 255, 255, Alpha );
+    begin
+      fx2dAlpha^ := Alpha;
+      glColor4ubv( @fx2dColor[ 0 ] );
+    end else
+      begin
+        fx2dAlphaDef^ := Alpha;
+        glColor4ubv( @fx2dColorDef[ 0 ] );
+      end;
 
   for i := 0 to Grid.Cols - 2 do
     begin
@@ -121,14 +126,8 @@ begin
           glTexCoord2f( ( iU + iiU ) * u, Texture^.V - ( jV + ijV ) * v );
           gl_Vertex2fv( @quad[ 2 ] );
 
-          glTexCoord2f( ( iU + iiU ) * u, Texture^.V - ( jV + ijV ) * v );
-          gl_Vertex2fv( @quad[ 2 ] );
-
           glTexCoord2f( iU * u, Texture^.V - ( jV + ijV ) * v );
           gl_Vertex2fv( @quad[ 3 ] );
-
-          glTexCoord2f( iU * u, Texture^.V - jV * v );
-          gl_Vertex2fv( @quad[ 0 ] );
 
           INC( jV, ijV );
         end;
@@ -184,7 +183,7 @@ begin
   u := u / ( Grid.Cols - 1 );
   v := v / ( Grid.Rows - 1 );
 
-  if ( not b2d_Started ) or batch2d_Check( GL_TRIANGLES, FX, Texture ) Then
+  if ( not b2d_Started ) or batch2d_Check( GL_QUADS, FX, Texture ) Then
     begin
       if FX and FX_BLEND > 0 Then
         glEnable( GL_BLEND )
@@ -193,13 +192,18 @@ begin
       glEnable( GL_TEXTURE_2D );
       glBindTexture( GL_TEXTURE_2D, Texture.ID );
 
-      glBegin( GL_TRIANGLES );
+      glBegin( GL_QUADS );
     end;
 
   if FX and FX_COLOR > 0 Then
-    glColor4ub( FX2D_R, FX2D_G, FX2D_B, Alpha )
-  else
-    glColor4ub( 255, 255, 255, Alpha );
+    begin
+      fx2dAlpha^ := Alpha;
+      glColor4ubv( @fx2dColor[ 0 ] );
+    end else
+      begin
+        fx2dAlphaDef^ := Alpha;
+        glColor4ubv( @fx2dColorDef[ 0 ] );
+      end;
 
   for i := 0 to Grid.Cols - 2 do
     begin
@@ -223,14 +227,8 @@ begin
           glTexCoord2f( ( iU + iiU ) * u + tX, Texture^.V - ( jV + ijV ) * v - tY );
           gl_Vertex2fv( @quad[ 2 ] );
 
-          glTexCoord2f( ( iU + iiU ) * u + tX, Texture^.V - ( jV + ijV ) * v - tY );
-          gl_Vertex2fv( @quad[ 2 ] );
-
           glTexCoord2f( iU * u + tX, Texture^.V - ( jV + ijV ) * v - tY );
           gl_Vertex2fv( @quad[ 3 ] );
-
-          glTexCoord2f( iU * u + tX, Texture^.V - jV * v - tY );
-          gl_Vertex2fv( @quad[ 0 ] );
 
           INC( jV, ijV );
         end;
@@ -284,7 +282,7 @@ begin
   u  := u * ( CutRect.W / Texture.U ) / ( Grid.Cols - 1 );
   v  := v * ( CutRect.H / Texture.V ) / ( Grid.Rows - 1 );
 
-  if ( not b2d_Started ) or batch2d_Check( GL_TRIANGLES, FX, Texture ) Then
+  if ( not b2d_Started ) or batch2d_Check( GL_QUADS, FX, Texture ) Then
     begin
       if FX and FX_BLEND > 0 Then
         glEnable( GL_BLEND )
@@ -293,13 +291,18 @@ begin
       glEnable( GL_TEXTURE_2D );
       glBindTexture( GL_TEXTURE_2D, Texture.ID );
 
-      glBegin( GL_TRIANGLES );
+      glBegin( GL_QUADS );
     end;
 
   if FX and FX_COLOR > 0 Then
-    glColor4ub( FX2D_R, FX2D_G, FX2D_B, Alpha )
-  else
-    glColor4ub( 255, 255, 255, Alpha );
+    begin
+      fx2dAlpha^ := Alpha;
+      glColor4ubv( @fx2dColor[ 0 ] );
+    end else
+      begin
+        fx2dAlphaDef^ := Alpha;
+        glColor4ubv( @fx2dColorDef[ 0 ] );
+      end;
 
   for i := 0 to Grid.Cols - 2 do
     begin
@@ -323,14 +326,8 @@ begin
           glTexCoord2f( ( iU + iiU ) * u + tX, Texture^.V - ( jV + ijV ) * v - tY );
           gl_Vertex2fv( @quad[ 2 ] );
 
-          glTexCoord2f( ( iU + iiU ) * u + tX, Texture^.V - ( jV + ijV ) * v - tY );
-          gl_Vertex2fv( @quad[ 2 ] );
-
           glTexCoord2f( iU * u + tX, Texture^.V - ( jV + ijV ) * v - tY );
           gl_Vertex2fv( @quad[ 3 ] );
-
-          glTexCoord2f( iU * u + tX, Texture^.V - jV * v - tY );
-          gl_Vertex2fv( @quad[ 0 ] );
 
           INC( jV, ijV );
         end;

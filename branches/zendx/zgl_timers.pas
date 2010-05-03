@@ -56,8 +56,8 @@ var
   canKillTimers : Boolean = TRUE;
   timersToKill  : Word = 0;
   aTimersToKill : array[ 0..1023 ] of zglPTimer;
-  frequency : int64;
-  freq      : Single;
+  t_frequency : int64;
+  t_freq      : Single;
   t_start   : Double;
 
 implementation
@@ -144,7 +144,7 @@ function timer_GetTicks;
     t : int64;
 begin
   QueryPerformanceCounter( t );
-  Result := 1000 * T * freq - t_start;
+  Result := 1000 * T * t_freq - t_start;
 end;
 
 procedure timer_Reset;
@@ -161,8 +161,8 @@ begin
 end;
 
 initialization
-  QueryPerformanceFrequency( frequency );
-  freq := 1 / frequency;
+  QueryPerformanceFrequency( t_frequency );
+  t_freq  := 1 / t_frequency;
   t_start := timer_GetTicks();
 
 end.

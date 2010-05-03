@@ -41,6 +41,7 @@ const
   TEX_FORMAT_EXTENSION   = $000010;
   TEX_FORMAT_FILE_LOADER = $000011;
   TEX_FORMAT_MEM_LOADER  = $000012;
+  TEX_CURRENT_EFFECT     = $000013;
   SND_FORMAT_EXTENSION   = $000020;
   SND_FORMAT_FILE_LOADER = $000021;
   SND_FORMAT_MEM_LOADER  = $000022;
@@ -311,6 +312,11 @@ begin
       begin
         managerTexture.Formats[ managerTexture.Count.Formats ].MemLoader := UserData;
         INC( managerTexture.Count.Formats );
+      end;
+    TEX_CURRENT_EFFECT:
+      begin
+        tex_CalcCustomEffect := UserData;
+        if not Assigned( tex_CalcCustomEffect ) Then tex_CalcCustomEffect := zeroce;
       end;
     // Sound
     {$IFDEF USE_SOUND}

@@ -66,7 +66,9 @@ uses
   {$ENDIF}
 
   zgl_primitives_2d,
+  {$IFDEF USE_SENGINE}
   zgl_sengine_2d,
+  {$ENDIF}
   zgl_sprite_2d,
   zgl_grid_2d,
 
@@ -85,7 +87,8 @@ const
 exports
   // Main
   zgl_Init                 name prefix + 'zgl_Init',
-  zgl_InitToHandle,
+  zgl_InitToHandle         name prefix + 'zgl_InitToHandle',
+
   zgl_Exit                 name prefix + 'zgl_Exit',
   zgl_Reg                  name prefix + 'zgl_Reg',
   zgl_Get                  name prefix + 'zgl_Get',
@@ -212,12 +215,18 @@ exports
   pr2d_TriList             name prefix + 'pr2d_TriList',
 
   // Sprite Engine 2D
+  {$IFDEF USE_SENGINE}
   sengine2d_AddSprite      name prefix + 'sengine2d_AddSprite',
   sengine2d_DelSprite      name prefix + 'sengine2d_DelSprite',
   sengine2d_ClearAll       name prefix + 'sengine2d_ClearAll',
   sengine2d_Set            name prefix + 'sengine2d_Set',
   sengine2d_Draw           name prefix + 'sengine2d_Draw',
   sengine2d_Proc           name prefix + 'sengine2d_Proc',
+  {$ENDIF}
+
+  // Particles Engine 2D
+  {$IFDEF USE_PARTICLES}
+  {$ENDIF}
 
   // Sprite 2D
   texture2d_Draw           name prefix + 'texture2d_Draw',
