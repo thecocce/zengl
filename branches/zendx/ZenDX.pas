@@ -69,6 +69,9 @@ uses
   {$IFDEF USE_SENGINE}
   zgl_sengine_2d,
   {$ENDIF}
+  {$IFDEF USE_PARTICLES}
+  zgl_particles_2d,
+  {$ENDIF}
   zgl_sprite_2d,
   zgl_grid_2d,
 
@@ -226,6 +229,15 @@ exports
 
   // Particles Engine 2D
   {$IFDEF USE_PARTICLES}
+  pengine2d_AddEmitter     name prefix + 'pengine2d_AddEmitter',
+  pengine2d_DelEmitter     name prefix + 'pengine2d_DelEmitter',
+  pengine2d_ClearAll       name prefix + 'pengine2d_ClearAll',
+  pengine2d_Set            name prefix + 'pengine2d_Set',
+  pengine2d_Draw           name prefix + 'pengine2d_Draw',
+  pengine2d_Proc           name prefix + 'pengine2d_Proc',
+  emitter2d_Init           name prefix + 'emitter2d_Init',
+  emitter2d_Draw           name prefix + 'emitter2d_Draw',
+  emitter2d_Proc           name prefix + 'emitter2d_Proc',
   {$ENDIF}
 
   // Sprite 2D
