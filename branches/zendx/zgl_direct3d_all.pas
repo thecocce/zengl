@@ -1191,6 +1191,7 @@ procedure glGetTexImage;
   var
     r : TD3DLockedRect;
     d : TD3DSurface_Desc;
+    s : Integer;
     {$IFDEF USE_DIRECT3D8}
     src, dst : IDirect3DSurface8;
     {$ENDIF}
@@ -1201,11 +1202,13 @@ begin
   if ( RenderTexID > d3d_texCount ) or
      ( not Assigned( d3d_texArray[ RenderTexID ].Texture ) ) Then exit;
 
+  s := Integer( format = GL_RGBA ) * 4 + Integer( format = GL_RGB ) * 3;
+
   d3d_texArray[ RenderTexID ].Texture.GetLevelDesc( 0, d );
   if d.Pool = D3DPOOL_MANAGED Then
     begin
       d3d_texArray[ RenderTexID ].Texture.LockRect( 0, r, nil, D3DLOCK_READONLY or D3DLOCK_DISCARD );
-      Move( r.pBits^, pixels^, d.Width * d.Height * 4 );
+      Move( r.pBits^, pixels^, d.Width * d.Height * s );
       d3d_texArray[ RenderTexID ].Texture.UnlockRect( 0 );
     end else
       if d.Pool = D3DPOOL_DEFAULT Then
@@ -1221,7 +1224,7 @@ begin
           {$ENDIF}
 
           dst.LockRect( r, nil, D3DLOCK_READONLY );
-          Move( r.pBits^, pixels^, d.Width * d.Height * 4 );
+          Move( r.pBits^, pixels^, d.Width * d.Height * s );
           dst.UnlockRect;
 
           dst := nil;
