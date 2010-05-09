@@ -83,7 +83,7 @@ function file_Exists;
   var
     fileHandle : zglTFile;
 begin
-  file_Open( fileHandle, filePath + FileName, FOM_OPENR );
+  file_Open( fileHandle, FileName, FOM_OPENR );
   Result := fileHandle <> INVALID_HANDLE_VALUE;
   if Result Then
     file_Close( fileHandle );
