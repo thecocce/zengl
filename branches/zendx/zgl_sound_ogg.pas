@@ -69,6 +69,7 @@ uses
   zgl_utils;
 
 const
+  OGG_EXTENSION : array[ 0..3 ] of AnsiChar = ( 'O', 'G', 'G', #0 );
   libogg        = 'libogg.dll';
   libvorbis     = 'libvorbis.dll';
   libvorbisfile = 'libvorbisfile.dll';
@@ -519,12 +520,12 @@ begin
 end;
 
 initialization
-  oggDecoder.Ext   := 'OGG';
+  oggDecoder.Ext   := OGG_EXTENSION;
   oggDecoder.Open  := ogg_DecoderOpen;
   oggDecoder.Read  := ogg_DecoderRead;
   oggDecoder.Loop  := ogg_DecoderLoop;
   oggDecoder.Close := ogg_DecoderClose;
-  zgl_Reg( SND_FORMAT_EXTENSION, PChar( 'OGG' ) );
+  zgl_Reg( SND_FORMAT_EXTENSION,   @OGG_EXTENSION[ 0 ] );
   zgl_Reg( SND_FORMAT_FILE_LOADER, @ogg_LoadFromFile );
   zgl_Reg( SND_FORMAT_MEM_LOADER,  @ogg_LoadFromMemory );
   zgl_Reg( SND_FORMAT_DECODER,     @oggDecoder );
