@@ -25,8 +25,7 @@ unit zgl_utils;
 interface
 uses
   Windows,
-  zgl_types,
-  zgl_log;
+  zgl_types;
 
 const
   LIB_ERROR  = 0;
@@ -64,7 +63,8 @@ function dlsym  ( hModule : HMODULE; lpProcName : PAnsiChar) : Pointer; stdcall;
 
 implementation
 uses
-  zgl_font;
+  zgl_font,
+  zgl_log;
 
 function u_IntToStr;
 begin

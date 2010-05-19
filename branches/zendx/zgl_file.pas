@@ -50,7 +50,6 @@ function  file_Seek( const FileHandle : zglTFile; const Offset, Mode : LongWord 
 function  file_GetPos( const FileHandle : zglTFile ) : LongWord;
 function  file_Read( const FileHandle : zglTFile; var Buffer; const Bytes : LongWord ) : LongWord;
 function  file_Write( const FileHandle : zglTFile; const Buffer; const Bytes : LongWord ) : LongWord;
-procedure file_Trunc( const FileHandle : zglTFile; const Bytes : LongWord );
 function  file_GetSize( const FileHandle : zglTFile ) : LongWord;
 procedure file_Flush( const FileHandle : zglTFile );
 procedure file_Close( var FileHandle : zglTFile );
@@ -61,6 +60,8 @@ procedure file_GetDirectory( const FileName : String; var Result : String );
 procedure file_SetPath( const Path : String );
 
 implementation
+uses
+  zgl_utils;
 
 var
   filePath : String = '';
@@ -111,10 +112,6 @@ end;
 function file_Write;
 begin
   WriteFile( FileHandle, Buffer, Bytes, Result, nil );
-end;
-
-procedure file_Trunc;
-begin
 end;
 
 function file_GetSize;
