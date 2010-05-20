@@ -28,7 +28,7 @@ uses
   zgl_types;
 
 const
-  cs_ZenGL = 'ZenDX 0.2 RC2';
+  cs_ZenGL = 'ZenDX 0.2 RC3';
 
   // zgl_Reg
   SYS_APP_INIT           = $000001;
@@ -50,6 +50,8 @@ const
   WIDGET_FILL_DESC       = $000031;
   WIDGET_ONDRAW          = $000032;
   WIDGET_ONPROC          = $000033;
+  WIDGET_ONFREEDESC      = $000034;
+  WIDGET_ONFREEDATA      = $000035;
 
   // zgl_Get
   SYS_FPS         = 1;
@@ -368,6 +370,14 @@ begin
     WIDGET_ONPROC:
       begin
         managerGUI.Types[ widgetTLast ].OnProc := UserData;
+      end;
+    WIDGET_ONFREEDESC:
+      begin
+        managerGUI.Types[ widgetTLast ].OnFreeDesc := UserData;
+      end;
+    WIDGET_ONFREEDATA:
+      begin
+        managerGUI.Types[ widgetTLast ].OnFreeData := UserData;
       end;
     {$ENDIF}
   end;
