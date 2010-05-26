@@ -250,7 +250,6 @@ procedure joy_Proc;
 begin
   if joyCount = 0 Then exit;
 
-  {$IFDEF LINUX}
   state.dwSize := SizeOf( TJOYINFOEX );
   for i := 0 to joyCount - 1 do
     begin
