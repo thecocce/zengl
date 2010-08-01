@@ -118,14 +118,22 @@ begin
 end;
 
 function scr_Create;
+  var
+    settings : DEVMODE;
 begin
   Result := FALSE;
   scr_Init;
   if scr_Desktop.dmBitsPerPel <> 32 Then
     begin
-      u_Error( 'Desktop not set to 32-bit mode.' );
-      zgl_Exit;
-      exit;
+      settings              := scr_Desktop;
+      settings.dmBitsPerPel := 32;
+
+      if ChangeDisplaySettings( settings, CDS_TEST or CDS_FULLSCREEN ) <> DISP_CHANGE_SUCCESSFUL Then
+        begin
+          u_Error( 'Desktop doesn''t support 32-bit color mode.' );
+          zgl_Exit;
+        end else
+          ChangeDisplaySettings( settings, CDS_FULLSCREEN );
     end;
   log_Add( 'Current mode: ' + u_IntToStr( zgl_Get( DESKTOP_WIDTH ) ) + ' x ' + u_IntToStr( zgl_Get( DESKTOP_HEIGHT ) ) );
   scr_GetResList();
