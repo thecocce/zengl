@@ -1119,7 +1119,7 @@ end;
 procedure FillTexture( Src, Dest : Pointer; W, H, P : Integer );
   var
     i : Integer;
-    D, S : LongWord;
+    D, S : Ptr;
 begin
   D := Ptr( Dest );
   S := Ptr( Src );
