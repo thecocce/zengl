@@ -156,9 +156,6 @@ var
   sndCanPlayFile : Boolean = TRUE;
   sndAutoPaused  : Boolean;
 
-  {$IFNDEF USE_OPENAL}
-  sfCS        : TRTLCriticalSection;
-  {$ENDIF}
   sfCanUse    : array[ 1..SND_MAX ] of Integer;
   sfStream    : array[ 1..SND_MAX ] of zglTSoundStream;
   sfVolume    : Single = 1;
@@ -170,8 +167,12 @@ var
   sfSource   : array[ 1..SND_MAX ] of LongWord;
   sfBuffers  : array[ 1..SND_MAX, 0..3 ] of LongWord;
   {$ELSE}
-  sfSource  : array[ 1..SND_MAX ] of IDirectSoundBuffer;
-  sfLastPos : array[ 1..SND_MAX ] of LongWord;
+  sfCS          : TRTLCriticalSection;
+  sfNotify      : array[ 1..SND_MAX ] of IDirectSoundNotify;
+  sfNotifyPos   : array[ 1..SND_MAX ] of TDSBPositionNotify;
+  sfNotifyEvent : array[ 1..SND_MAX ] of HANDLE;
+  sfSource      : array[ 1..SND_MAX ] of IDirectSoundBuffer;
+  sfLastPos     : array[ 1..SND_MAX ] of LongWord;
   {$ENDIF}
 
   sfThread   : array[ 1..SND_MAX ] of LongWord;
@@ -405,14 +406,16 @@ begin
   FreeOpenAL();
 {$ELSE}
   for i := 1 to SND_MAX do
-    sfSource[ i ]  := nil;
+    begin
+      CloseHandle( sfNotifyEvent[ i ] );
+      sfNotify[ i ] := nil;
+      sfSource[ i ] := nil;
+    end;
   ds_Device := nil;
 
   FreeDSound();
   log_Add( 'DirectSound: sound system finalized successful' );
-{$ENDIF}
 
-{$IFNDEF USE_OPENAL}
   Windows.DeleteCriticalSection( sfCS );
 {$ENDIF}
 end;
@@ -950,7 +953,7 @@ function snd_PlayFile;
     _end      : Boolean;
     bytesRead : Integer;
     {$IFNDEF USE_OPENAL}
-    buffDesc  : zglTBufferDesc;
+    buffDesc : zglTBufferDesc;
     {$ENDIF}
 begin
   if ( not sndInitialized ) or ( not sndCanPlayFile ) Then exit;
@@ -1027,6 +1030,14 @@ begin
   bytesRead := sfStream[ Result ]._decoder.Read( sfStream[ Result ], sfStream[ Result ].Buffer, sfStream[ Result ].BufferSize, _end );
   dsu_FillData( sfSource[ Result ], sfStream[ Result ].Buffer, bytesRead );
 
+  sfNotify[ Result ] := nil;
+  sfSource[ Result ].QueryInterface( IDirectSoundNotify, sfNotify[ Result ] );
+  CloseHandle( sfNotifyEvent[ Result ] );
+  sfNotifyEvent[ Result ] := CreateEvent( nil, FALSE, FALSE, nil );
+  sfNotifyPos[ Result ].dwOffset := 0;
+  sfNotifyPos[ Result ].hEventNotify := sfNotifyEvent[ Result ];
+  sfNotify[ Result ].SetNotificationPositions( 1, @sfNotifyPos[ Result ] );
+
   sfLastPos[ Result ] := 0;
   sfSource[ Result ].SetCurrentPosition( 0 );
   sfSource[ Result ].Play( 0, 0, DSBPLAY_LOOPING );
@@ -1085,10 +1096,10 @@ end;
 
 function snd_ProcFile;
   var
-    id   : Integer;
-    _end : Boolean;
-  {$IFDEF USE_OPENAL}
+    id        : Integer;
+    _end      : Boolean;
     bytesRead : Integer;
+  {$IFDEF USE_OPENAL}
     processed : LongInt;
     buffer    : LongWord;
   {$ELSE}
@@ -1132,7 +1143,7 @@ begin
         sfSource[ id ].Restore();
       Windows.LeaveCriticalSection( sfCS );
 
-      FillSize := ( sfStream[ id ].BufferSize + position - sfLastPos[ id ] ) mod sfStream[ id ].BufferSize;
+      fillSize := ( sfStream[ id ].BufferSize + position - sfLastPos[ id ] ) mod sfStream[ id ].BufferSize;
 
       block1 := nil;
       block2 := nil;
@@ -1142,9 +1153,9 @@ begin
       if sfSource[ id ].Lock( sfLastPos[ id ], fillSize, block1, b1Size, block2, b2Size, 0 ) <> DS_OK Then break;
       sfLastPos[ id ] := position;
 
-      sfStream[ id ]._decoder.Read( sfStream[ id ], block1, b1Size, _end );
+      bytesRead := sfStream[ id ]._decoder.Read( sfStream[ id ], block1, b1Size, _end );
       if ( b2Size <> 0 ) and ( not _end ) Then
-        sfStream[ ID ]._decoder.Read( sfStream[ id ], block2, b2Size, _end );
+        INC( bytesRead, sfStream[ ID ]._decoder.Read( sfStream[ id ], block2, b2Size, _end ) );
 
       sfSource[ id ].Unlock( block1, b1Size, block2, b2Size );
       {$ENDIF}
@@ -1153,13 +1164,19 @@ begin
           sfStream[ id ]._complete := 0;
           sfStream[ id ]._lastTime := timer_GetTicks();
         end;
-      if _end then
+      if _end Then
         begin
           if sfStream[ id ].Loop Then
             begin
               sfStream[ id ]._decoder.Loop( sfStream[ id ] );
             end else
               begin
+                {$IFNDEF USE_OPENAL}
+                sfNotifyPos[ id ].dwOffset := bytesRead;
+                ResetEvent( sfNotifyEvent[ id ] );
+                WaitForSingleObject( sfNotifyEvent[ id ], INFINITE );
+                sfSource[ id ].Stop();
+                {$ENDIF}
                 while sfStream[ id ]._complete < sfStream[ id ].Length do
                   begin
                     sfStream[ id ]._complete := timer_GetTicks() - sfStream[ id ]._lastTime + sfStream[ id ]._complete;
@@ -1174,10 +1191,6 @@ begin
     end;
   if not app_Work Then
     {$IFDEF LINUX_OR_DARWIN} EndThread( 0 ); {$ELSE} exit; {$ENDIF}
-
-{$IFNDEF USE_OPENAL}
-  sfSource[ id ].Stop();
-{$ENDIF}
 
 {$IFDEF LINUX_OR_DARWIN}
   EndThread( 0 );
