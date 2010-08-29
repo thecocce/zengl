@@ -18,7 +18,7 @@
  *  You should have received a copy of the GNU Lesser General Public
  *  License along with ZenGL. If not, see http://www.gnu.org/licenses/
 }
-library ZenDX;
+library ZenGL;
 
 {$I zgl_config.cfg}
 
@@ -348,6 +348,8 @@ exports
 
   u_SortList               name prefix + 'u_SortList'
   ;
+
+{$R *.res}
 
 begin
 end.
