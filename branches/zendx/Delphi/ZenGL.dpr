@@ -1,1 +1,1 @@
-{$I ../ZenDX.pas}
+{$I ../ZenGL.pas}
