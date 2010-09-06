@@ -36,8 +36,6 @@ uses
   zgl_textures;
 
 const
-  RT_TYPE_PBUFFER = 0;
-  RT_TYPE_FBO     = 1;
   RT_FULL_SCREEN  = 1;
   RT_CLEAR_SCREEN = 2;
   RT_SAVE_CONTENT = 4;
@@ -75,7 +73,7 @@ type
 type
   zglTRenderCallback = procedure( Data : Pointer );
 
-function rtarget_Add( _type : Byte; const Surface : zglPTexture; const Flags : Byte ) : zglPRenderTarget;
+function rtarget_Add( const Surface : zglPTexture; const Flags : Byte ) : zglPRenderTarget;
 procedure rtarget_Del( var Target : zglPRenderTarget );
 procedure rtarget_Set( const Target : zglPRenderTarget );
 procedure rtarget_DrawIn( const Target : zglPRenderTarget; const RenderCallback : zglTRenderCallback; const Data : Pointer );
@@ -215,7 +213,7 @@ begin
   {$ENDIF}
   rtarget_Restore( Surface );
 
-  Result.next._type      := _type;
+  Result.next._type      := 0;
   Result.next.Handle.Old := Surface;
   Result.next.Surface    := Surface;
   Result.next.Flags      := Flags;
