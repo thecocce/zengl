@@ -36,9 +36,10 @@ uses
   zgl_textures;
 
 const
-  RT_FULL_SCREEN  = 1;
-  RT_CLEAR_SCREEN = 2;
-  RT_SAVE_CONTENT = 4;
+  RT_DEFAULT      = $00;
+  RT_FULL_SCREEN  = $01;
+  RT_CLEAR_SCREEN = $02;
+  RT_SAVE_CONTENT = $04;
 
 type
   zglPD3DTarget = ^zglTD3DTarget;
