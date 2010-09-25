@@ -22,6 +22,10 @@ library ZenGL;
 
 {$I zgl_config.cfg}
 
+{$IFDEF FPC}
+  {$R ZenGL.res}
+{$ENDIF}
+
 uses
   zgl_main,
   zgl_application,

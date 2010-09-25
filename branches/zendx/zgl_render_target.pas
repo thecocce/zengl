@@ -101,13 +101,18 @@ var
   lCanDraw : Boolean;
   lCam2D   : Boolean;
   lPCam2D  : zglTCamera2D;
-  lMode    : Integer;
   {$IFDEF USE_DIRECT3D8}
   lSurface : IDirect3DSurface8;
   {$ENDIF}
   {$IFDEF USE_DIRECT3D9}
   lSurface : IDirect3DSurface9;
   {$ENDIF}
+  lGLW     : Integer;
+  lGLH     : Integer;
+  lClipW   : Integer;
+  lClipH   : Integer;
+  lResCX   : Single;
+  lResCY   : Single;
 
 procedure rtarget_Save;
   var
@@ -253,9 +258,14 @@ begin
     begin
       lCanDraw := d3d_CanDraw;
       d3d_BeginScene();
-      lRTarget := Target;
-      lMode    := ogl_Mode;
-      ogl_Mode := 1;
+      lRTarget   := Target;
+      lGLW       := ogl_Width;
+      lGLH       := ogl_Height;
+      lClipW     := ogl_ClipW;
+      lClipH     := ogl_ClipH;
+      lResCX     := scr_ResCX;
+      lResCY     := scr_ResCY;
+      ogl_Target := TARGET_TEXTURE;
 
       if Target.Surface <> Target.Handle.Old Then
         begin
@@ -300,25 +310,24 @@ begin
         begin
           if app_Flags and CORRECT_RESOLUTION > 0 Then
             begin
-              rtWidth  := scr_ResW;
-              rtHeight := scr_ResH;
-            end else
-              begin
-                rtWidth  := ogl_Width;
-                rtHeight := ogl_Height;
-              end;
+              ogl_Width  := scr_ResW;
+              ogl_Height := scr_ResH;
+            end;
         end else
           begin
-            rtWidth  := Target.Surface.Width;
-            rtHeight := Target.Surface.Height;
+            ogl_Width  := Target.Surface.Width;
+            ogl_Height := Target.Surface.Height;
+            ogl_ClipX  := 0;
+            ogl_ClipY  := 0;
+            ogl_ClipW  := ogl_Width;
+            ogl_ClipH  := ogl_Height;
+            scr_ResCX  := 1;
+            scr_ResCY  := 1;
           end;
-      case lMode of
-        2: Set2DMode();
-        3: Set3DMode();
-      end;
+      SetCurrentMode();
 
       glScalef( 1, -1, 1 );
-      glTranslatef( 0, -rtHeight, 0 );
+      glTranslatef( 0, -ogl_Height, 0 );
       glViewport( 0, 0, Target.Surface.Width, Target.Surface.Height );
       if cam2dApply Then
         begin
@@ -347,10 +356,20 @@ begin
 
           lCam2D   := cam2dApply;
           lPCam2D  := cam2DGlobal^;
-          ogl_Mode := lMode;
+
+          ogl_Target := TARGET_SCREEN;
+          ogl_Width  := lGLW;
+          ogl_Height := lGLH;
+          if lRTarget.Flags and RT_FULL_SCREEN = 0 Then
+            begin
+              ogl_ClipW := lClipW;
+              ogl_ClipH := lClipH;
+              scr_ResCX := lResCX;
+              scr_ResCY := lResCY;
+            end;
+
           lRTarget := nil;
           SetCurrentMode();
-          scr_SetViewPort();
           if lCam2D Then
             cam2d_Apply( @lPCam2D );
           if not lCanDraw then

@@ -33,6 +33,10 @@ uses
   {$ENDIF}
   ;
 
+const
+  TARGET_SCREEN  = 1;
+  TARGET_TEXTURE = 2;
+
 function  d3d_Create : Boolean;
 procedure d3d_Destroy;
 function  d3d_Restore : Boolean;
@@ -99,7 +103,8 @@ var
   ogl_MTexture   : array[ 0..8 ] of DWORD;
   ogl_Separate   : Boolean;
 
-  ogl_Mode : WORD = 3; // 2D/3D Modes
+  ogl_Mode   : Integer = 3; // 2D/3D Modes
+  ogl_Target : Integer = TARGET_SCREEN;
 
   ogl_Width  : Integer;
   ogl_Height : Integer;
@@ -536,20 +541,20 @@ end;
 
 procedure Set2DMode;
 begin
+  ogl_Mode := 2;
   if cam2dApply Then cam2d_Apply( nil );
-  if ogl_Mode <> 1 Then ogl_Mode := 2;
 
   glDisable( GL_DEPTH_TEST );
   glMatrixMode( GL_PROJECTION );
   glLoadIdentity;
-  if ogl_Mode = 2 Then
+  if ogl_Target = TARGET_SCREEN Then
     begin
       if app_Flags and CORRECT_RESOLUTION > 0 Then
         glOrtho( 0, Round( ogl_Width - scr_AddCX * 2 / scr_ResCX ), Round( ogl_Height - scr_AddCY * 2 / scr_ResCY ), 0, -1, 1 )
       else
         glOrtho( 0, wnd_Width, wnd_Height, 0, -1, 1 );
     end else
-      glOrtho( 0, rtWidth, rtHeight, 0, -1, 1 );
+      glOrtho( 0, ogl_Width, ogl_Height, 0, -1, 1 );
   glMatrixMode( GL_MODELVIEW );
   glLoadIdentity;
   scr_SetViewPort;
@@ -557,9 +562,9 @@ end;
 
 procedure Set3DMode;
 begin
-  if cam2dApply Then cam2d_Apply( nil );
-  if ogl_Mode <> 1 Then ogl_Mode := 3;
+  ogl_Mode := 3;
   ogl_FOVY := FOVY;
+  if cam2dApply Then cam2d_Apply( nil );
 
   glColor4ub( 255, 255, 255, 255 );
 
