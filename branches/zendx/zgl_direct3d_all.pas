@@ -1229,11 +1229,7 @@ begin
           INC( dst, d.Width * s );
         end;
       d3d_texArray[ RenderTexID ].Texture.UnlockRect( level );
-    end else
-      if d.Pool = D3DPOOL_DEFAULT Then
-        begin
-          // Лень... надеюсь никому в голову не придет строить атласы из RenderTarget'ов 8)
-        end;
+    end;
 end;
 
 procedure glGetTexImage;

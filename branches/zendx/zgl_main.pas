@@ -114,6 +114,9 @@ uses
   zgl_timers,
   zgl_log,
   zgl_textures,
+  {$IFDEF USE_TEXTURE_ATLAS}
+  zgl_texture_atlas,
+  {$ENDIF}
   zgl_render_target,
   zgl_font,
   {$IFDEF USE_SOUND}
@@ -215,6 +218,15 @@ begin
       p := managerRTarget.First.next;
       rtarget_Del( zglPRenderTarget( p ) );
     end;
+
+  {$IFDEF USE_TEXTURE_ATLAS}
+  log_Add( 'Atlases to free: ' + u_IntToStr( managerAtlas.Count ) );
+  while managerAtlas.Count > 0 do
+    begin
+      p := managerAtlas.First.next;
+      atlas_Del( zglPAtlas( p ) );
+    end;
+  {$ENDIF}
 
   log_Add( 'Textures to free: ' + u_IntToStr( managerTexture.Count.Items ) );
   while managerTexture.Count.Items > 0 do
@@ -373,6 +385,9 @@ begin
     // Managers
     MANAGER_TIMER:   Result := Ptr( @managerTimer );
     MANAGER_TEXTURE: Result := Ptr( @managerTexture );
+    {$IFDEF USE_TEXTURE_ATLAS}
+    MANAGER_ATLAS:   Result := Ptr( @managerAtlas );
+    {$ENDIF}
     MANAGER_FONT:    Result := Ptr( @managerFont );
     MANAGER_RTARGET: Result := Ptr( @managerRTarget );
     {$IFDEF USE_SOUND}
