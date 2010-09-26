@@ -92,6 +92,7 @@ const
   GL_QUADS                          = $0007;
 
   // Texture
+  GL_UNPACK_ROW_LENGTH              = $0CF2;
   GL_TEXTURE_2D                     = $0DE1;
   GL_TEXTURE0_ARB                   = $84C0;
   GL_MAX_TEXTURE_SIZE               = $0D33;
@@ -275,7 +276,9 @@ procedure glGenTextures(n: GLsizei; textures: PGLuint);
 procedure glDeleteTextures(n: GLsizei; const textures: PGLuint);
 procedure glTexParameterf(target: GLenum; pname: GLenum; param: GLfloat);
 procedure glTexParameteri(target: GLenum; pname: GLenum; param: GLint);
+procedure glPixelStorei(pname: GLenum; param: GLint);
 procedure glTexImage2D(target: GLenum; level, internalformat: GLint; width, height: GLsizei; border: GLint; format, atype: GLenum; const pixels: Pointer);
+procedure glTexSubImage2D(target: GLenum; level, xoffset, yoffset: GLint; width, height: GLsizei; format, atype: GLenum; const pixels: Pointer);
 procedure glGetTexImage(target: GLenum; level: GLint; format: GLenum; atype: GLenum; pixels: Pointer);
 procedure glCopyTexSubImage2D(target: GLenum; level, xoffset, yoffset, x, y: GLint; width, height: GLsizei);
 procedure glTexEnvi(target: GLenum; pname: GLenum; param: GLint);
@@ -293,6 +296,8 @@ procedure gluTessCallback(tess: Integer; which: Integer; fn: Pointer); stdcall e
 procedure gluTessEndContour(tess: Integer); stdcall external libGLU;
 procedure gluTessEndPolygon(tess: Integer); stdcall external libGLU;
 procedure gluTessVertex(tess: Integer; vertex: PDouble; data: Pointer); stdcall external libGLU;
+
+procedure d3d_FillTexture( Src, Dest : Pointer; W, H, P : Integer );
 
 var
   gl_TexCoord2f   : procedure( U, V : Single );
@@ -334,10 +339,11 @@ var
   popMatrices : array of array[ 0..23 ] of TD3DMatrix;
   pushCount   : Integer;
   // Textures
-  lMagFilter  : LongWord;
-  lMinFilter  : LongWord;
-  lMipFilter  : LongWord;
-  lWrap       : LongWord;
+  psiUnpackRowLength : Integer;
+  lMagFilter : LongWord;
+  lMinFilter : LongWord;
+  lMipFilter : LongWord;
+  lWrap      : LongWord;
   // Buffers
   newTriangle  : Boolean;
   newTriangleC : Integer;
@@ -1116,7 +1122,7 @@ begin
     d3d_texArray[ RenderTexID ].Wrap := lWrap;
 end;
 
-procedure FillTexture( Src, Dest : Pointer; W, H, P : Integer );
+procedure d3d_FillTexture;
   var
     i : Integer;
     D, S : Ptr;
@@ -1146,6 +1152,13 @@ begin
         end;
 end;
 
+procedure glPixelStorei;
+begin
+  case pname of
+    GL_UNPACK_ROW_LENGTH: psiUnpackRowLength := param;
+  end;
+end;
+
 procedure glTexImage2D;
   var
     fmt  : TD3DFormat;
@@ -1167,10 +1180,10 @@ begin
 
   if target = GL_TEXTURE_2D Then
     begin
-      d3d_texArray[ RenderTexID ].MagFilter  := lMagFilter;
-      d3d_texArray[ RenderTexID ].MinFilter  := lMinFilter;
-      d3d_texArray[ RenderTexID ].MipFilter  := lMipFilter;
-      d3d_texArray[ RenderTexID ].Wrap       := lWrap;
+      d3d_texArray[ RenderTexID ].MagFilter := lMagFilter;
+      d3d_texArray[ RenderTexID ].MinFilter := lMinFilter;
+      d3d_texArray[ RenderTexID ].MipFilter := lMipFilter;
+      d3d_texArray[ RenderTexID ].Wrap      := lWrap;
       {$IFDEF USE_DIRECT3D8}
       if d3d_Device.CreateTexture( width, height, 1, 0, fmt, D3DPOOL_MANAGED, d3d_texArray[ RenderTexID ].Texture ) <> D3D_OK Then
       {$ENDIF}
@@ -1181,10 +1194,46 @@ begin
           log_Add( 'Can''t CreateTexture' );
           exit;
         end;
-      d3d_texArray[ RenderTexID ].Texture.LockRect( 0, r, nil, D3DLOCK_DISCARD );
-      FillTexture( pixels, r.pBits, width, height, size );
-      d3d_texArray[ RenderTexID ].Texture.UnlockRect( 0 );
+      d3d_texArray[ RenderTexID ].Texture.LockRect( level, r, nil, D3DLOCK_DISCARD );
+      d3d_FillTexture( pixels, r.pBits, width, height, size );
+      d3d_texArray[ RenderTexID ].Texture.UnlockRect( level );
     end;
+end;
+
+procedure glTexSubImage2D;
+  var
+    r        : TD3DLockedRect;
+    d        : TD3DSurface_Desc;
+    i, s, w  : Integer;
+    src, dst : PByte;
+begin
+  if ( RenderTexID > d3d_texCount ) or
+     ( not Assigned( d3d_texArray[ RenderTexID ].Texture ) ) Then exit;
+
+  s := Integer( format = GL_RGBA ) * 4 + Integer( format = GL_RGB ) * 3;
+
+  d3d_texArray[ RenderTexID ].Texture.GetLevelDesc( level, d );
+  src := pixels;
+  if psiUnpackRowLength = 0 Then
+    w := width
+  else
+    w := psiUnpackRowLength;
+  if d.Pool = D3DPOOL_MANAGED Then
+    begin
+      d3d_texArray[ RenderTexID ].Texture.LockRect( level, r, nil, D3DLOCK_DISCARD );
+      dst := PByte( Ptr( r.pBits ) + xoffset * s + yoffset * d.Width * s );
+      for i := 0 to height - 1 do
+        begin
+          Move( src^, dst^, width * s );
+          INC( src, w * s );
+          INC( dst, d.Width * s );
+        end;
+      d3d_texArray[ RenderTexID ].Texture.UnlockRect( level );
+    end else
+      if d.Pool = D3DPOOL_DEFAULT Then
+        begin
+          // Лень... надеюсь никому в голову не придет строить атласы из RenderTarget'ов 8)
+        end;
 end;
 
 procedure glGetTexImage;
@@ -1204,16 +1253,16 @@ begin
 
   s := Integer( format = GL_RGBA ) * 4 + Integer( format = GL_RGB ) * 3;
 
-  d3d_texArray[ RenderTexID ].Texture.GetLevelDesc( 0, d );
+  d3d_texArray[ RenderTexID ].Texture.GetLevelDesc( level, d );
   if d.Pool = D3DPOOL_MANAGED Then
     begin
-      d3d_texArray[ RenderTexID ].Texture.LockRect( 0, r, nil, D3DLOCK_READONLY or D3DLOCK_DISCARD );
+      d3d_texArray[ RenderTexID ].Texture.LockRect( level, r, nil, D3DLOCK_READONLY or D3DLOCK_DISCARD );
       Move( r.pBits^, pixels^, d.Width * d.Height * s );
       d3d_texArray[ RenderTexID ].Texture.UnlockRect( 0 );
     end else
       if d.Pool = D3DPOOL_DEFAULT Then
         begin
-          d3d_texArray[ RenderTexID ].Texture.GetSurfaceLevel( 0, src );
+          d3d_texArray[ RenderTexID ].Texture.GetSurfaceLevel( level, src );
           {$IFDEF USE_DIRECT3D8}
           d3d_Device.CreateImageSurface( d.Width, d.Height, d.Format, dst );
           d3d_Device.CopyRects( src, nil, 0, dst, nil );
@@ -1310,7 +1359,7 @@ begin
       d3d_Device.CreateTexture( width, height, 0, 0, fmt, D3DPOOL_MANAGED, d3d_texArray[ d3d_texCount - 1 ].Texture, nil );
       {$ENDIF}
       d3d_texArray[ d3d_texCount - 1 ].Texture.LockRect( 0, r, nil, D3DLOCK_DISCARD );
-      FillTexture( data, r.pBits, width, height, size );
+      d3d_FillTexture( data, r.pBits, width, height, size );
       d3d_texArray[ d3d_texCount - 1 ].Texture.UnlockRect( 0 );
     end;
 end;
