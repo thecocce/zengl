@@ -311,7 +311,7 @@ begin
     end;
 
   if alcMakeContextCurrent( oal_Context ) Then
-    log_Add( 'OpenAL: sound system initialized successful' )
+    log_Add( 'OpenAL: sound system initialized' )
   else
     begin
       log_Add( 'OpenAL: cannot set current context' );
@@ -357,7 +357,7 @@ begin
   if ds_Device.SetCooperativeLevel( wnd_Handle, DSSCL_PRIORITY ) <> DS_OK Then
     log_Add( 'DirectSound: Can''t SetCooperativeLevel' );
 
-  log_Add( 'DirectSound: sound system initialized successful' );
+  log_Add( 'DirectSound: sound system initialized' );
 {$ENDIF}
 
   for i := 1 to SND_MAX do
@@ -402,7 +402,7 @@ begin
   alcDestroyContext( oal_Context );
   log_Add( 'OpenAL: close sound device' );
   alcCloseDevice( oal_Device );
-  log_Add( 'OpenAL: sound system finalized successful' );
+  log_Add( 'OpenAL: sound system finalized' );
   FreeOpenAL();
 {$ELSE}
   for i := 1 to SND_MAX do
@@ -414,7 +414,7 @@ begin
   ds_Device := nil;
 
   FreeDSound();
-  log_Add( 'DirectSound: sound system finalized successful' );
+  log_Add( 'DirectSound: sound system finalized' );
 
   Windows.DeleteCriticalSection( sfCS );
 {$ENDIF}
@@ -519,7 +519,7 @@ begin
     ds_Device.DuplicateSoundBuffer( Result.Channel[ 0 ].Source, Result.Channel[ i ].Source );
 {$ENDIF}
 
-  log_Add( 'Successful loading of sound: "' + FileName + '"' );
+  log_Add( 'Sound loaded: "' + FileName + '"' );
 end;
 
 function snd_LoadFromMemory;
@@ -1189,8 +1189,6 @@ begin
               end;
         end;
     end;
-  if not app_Work Then
-    {$IFDEF LINUX_OR_DARWIN} EndThread( 0 ); {$ELSE} exit; {$ENDIF}
 
 {$IFDEF LINUX_OR_DARWIN}
   EndThread( 0 );
