@@ -1,4 +1,4 @@
-Crossplatform gamede velopment library.
+Crossplatform game development library.
 
   * *Supported compilers:* [http://freepascal.org FreePascal], Delphi
   * *Graphics API:* OpenGL, Direct3D 8/9
