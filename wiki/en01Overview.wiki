@@ -22,7 +22,7 @@ Crossplatform gamedevelopment library.
     * handling Unicode input
     * possibility to restrict the input to the Latin alphabet
   * *Textures*
-    * supported *tga*, *png* и *jpg*
+    * supported *tga*, *png* and *jpg*
     * correct work with NPOT textures
     * control the filter parameters
     * work with masks
