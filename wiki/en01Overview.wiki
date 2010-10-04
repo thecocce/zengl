@@ -1,4 +1,4 @@
-Crossplatform gamedevelopment library.
+Crossplatform gamede velopment library.
 
   * *Supported compilers:* [http://freepascal.org FreePascal], Delphi
   * *Graphics API:* OpenGL, Direct3D 8/9
@@ -18,8 +18,8 @@ Crossplatform gamedevelopment library.
     * window title, position and size
     * cursor visibility in window space
   * *Input*
-    * handling keyboard events, mouse and joystick
-    * handling Unicode input
+    * handling keyboard, mouse and joystick input
+    * handling Unicode text input
     * possibility to restrict the input to the Latin alphabet
   * *Textures*
     * supported *tga*, *png* and *jpg*
