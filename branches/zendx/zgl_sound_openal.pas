@@ -80,7 +80,7 @@ var
   oal_Library : LongWord;
 
   alcGetString           : function(device: PALCdevice; param: LongInt): PAnsiChar; cdecl;
-  alcGetError            : function(device: PALCdevice): LongInt; cdecl;
+  alGetError             : function(device: PALCdevice): LongInt; cdecl;
   // Device
   alcOpenDevice          : function(const devicename: PAnsiChar): PALCdevice; cdecl;
   alcCloseDevice         : function(device: PALCdevice): Boolean; cdecl;
@@ -135,12 +135,12 @@ begin
   if oal_Library <> LIB_ERROR Then
     begin
       alcGetString           := dlsym( oal_Library, 'alcGetString' );
-      alcGetError            := dlsym( oal_Library, 'alcGetError' );
       alcOpenDevice          := dlsym( oal_Library, 'alcOpenDevice' );
       alcCloseDevice         := dlsym( oal_Library, 'alcCloseDevice' );
       alcCreateContext       := dlsym( oal_Library, 'alcCreateContext' );
       alcMakeContextCurrent  := dlsym( oal_Library, 'alcMakeContextCurrent' );
       alcDestroyContext      := dlsym( oal_Library, 'alcDestroyContext' );
+      alGetError             := dlsym( oal_Library, 'alGetError' );
       alListenerfv           := dlsym( oal_Library, 'alListenerfv' );
       alGenSources           := dlsym( oal_Library, 'alGenSources' );
       alDeleteSources        := dlsym( oal_Library, 'alDeleteSources' );
