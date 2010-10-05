@@ -144,7 +144,7 @@ function  snd_PlayFile( const FileName : String; const Loop : Boolean = FALSE ) 
 procedure snd_PauseFile( const ID : Integer );
 procedure snd_StopFile( const ID : Integer );
 procedure snd_ResumeFile( const ID : Integer );
-function  snd_ProcFile( data : Pointer ) : PInteger; stdcall;
+function  snd_ProcFile( data : Pointer ) : LongInt; register;
 
 var
   managerSound : zglTSoundManager;
@@ -167,7 +167,6 @@ var
   sfSource   : array[ 1..SND_MAX ] of LongWord;
   sfBuffers  : array[ 1..SND_MAX, 0..3 ] of LongWord;
   {$ELSE}
-  sfCS          : TRTLCriticalSection;
   sfNotify      : array[ 1..SND_MAX ] of IDirectSoundNotify;
   sfNotifyPos   : array[ 1..SND_MAX ] of TDSBPositionNotify;
   sfNotifyEvent : array[ 1..SND_MAX ] of THandle;
@@ -302,7 +301,7 @@ begin
       exit;
     end;
 
-  log_Add( 'OpenAL: create context' );
+  log_Add( 'OpenAL: creating context' );
   oal_Context := alcCreateContext( oal_Device, nil );
   if not Assigned( oal_Context ) Then
     begin
@@ -341,9 +340,9 @@ begin
   SetLength( oal_SrcPtrs, i );
   SetLength( oal_SrcState, i );
 
-  log_Add( 'OpenAL: generate ' + u_IntToStr( length( oal_Sources ) ) + ' source' );
+  log_Add( 'OpenAL: generated ' + u_IntToStr( length( oal_Sources ) ) + ' source' );
 {$ELSE}
-  log_Add( 'DirectSound: load DSound.dll' );
+  log_Add( 'DirectSound: loading DSound.dll' );
   if not InitDSound() Then
     log_Add( 'DirectSound: Error while loading libraries' );
 
@@ -362,10 +361,6 @@ begin
 
   for i := 1 to SND_MAX do
     sfCanUse[ i ] := 100;
-
-{$IFNDEF USE_OPENAL}
-  Windows.InitializeCriticalSection( sfCS );
-{$ENDIF}
 
   sndInitialized := TRUE;
   Result         := TRUE;
@@ -398,9 +393,9 @@ begin
   SetLength( oal_SrcPtrs, 0 );
   SetLength( oal_SrcState, 0 );
 
-  log_Add( 'OpenAL: destroy current sound context' );
+  log_Add( 'OpenAL: destroying current sound context' );
   alcDestroyContext( oal_Context );
-  log_Add( 'OpenAL: close sound device' );
+  log_Add( 'OpenAL: closing sound device' );
   alcCloseDevice( oal_Device );
   log_Add( 'OpenAL: sound system finalized' );
   FreeOpenAL();
@@ -415,8 +410,6 @@ begin
 
   FreeDSound();
   log_Add( 'DirectSound: sound system finalized' );
-
-  Windows.DeleteCriticalSection( sfCS );
 {$ENDIF}
 end;
 
@@ -504,7 +497,7 @@ begin
 
   if not Assigned( Result.Data ) Then
     begin
-      log_Add( 'Cannot load sound: "' + FileName + '"' );
+      log_Add( 'Unable to load sound: "' + FileName + '"' );
       snd_Del( Result );
       exit;
     end;
@@ -969,7 +962,6 @@ begin
         FreeMemory( sfStream[ Result ].Buffer );
       if Assigned( sfStream[ Result ]._data ) Then
         FreeMemory( sfStream[ Result ]._data );
-      CloseHandle( sfThread[ Result ] );
     end;
 
   if not file_Exists( FileName ) Then
@@ -1050,7 +1042,11 @@ begin
   sfStream[ Result ]._waiting  := FALSE;
   sfStream[ Result ]._complete := 0;
   sfStream[ Result ]._lastTime := timer_GetTicks;
-  sfThread[ Result ] := CreateThread( nil, 0, @snd_ProcFile, Pointer( Result ), 0, sfThreadID[ Result ] );
+{$IFDEF FPC}
+  sfThread[ Result ] := LongWord( BeginThread( @snd_ProcFile, Pointer( Result ) ) );
+{$ELSE}
+  sfThread[ Result ] := BeginThread( nil, 0, @snd_ProcFile, Pointer( Result ), 0, sfThreadID[ Result ] );
+{$ENDIF}
 end;
 
 procedure snd_PauseFile;
@@ -1138,10 +1134,8 @@ begin
           DEC( processed );
         end;
       {$ELSE}
-      Windows.EnterCriticalSection( sfCS );
       while LongWord( sfSource[ id ].GetCurrentPosition( @position, @b1Size ) ) = DSERR_BUFFERLOST do
         sfSource[ id ].Restore();
-      Windows.LeaveCriticalSection( sfCS );
 
       fillSize := ( sfStream[ id ].BufferSize + position - sfLastPos[ id ] ) mod sfStream[ id ].BufferSize;
 
@@ -1190,9 +1184,7 @@ begin
         end;
     end;
 
-{$IFDEF LINUX_OR_DARWIN}
   EndThread( 0 );
-{$ENDIF}
 end;
 
 end.
