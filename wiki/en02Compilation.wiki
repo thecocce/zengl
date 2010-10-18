@@ -1,0 +1,60 @@
+= Compilation =
+
+ZenGL support two main Pascal compilers - FreePascal and Delphi. On this page you will find some description of main moments and possible problems with compilation.
+
+== Supported version of compilers ==
+
+=== FreePascal ===
+
+Supported versions are 2.4.x and 2.2.x. If you use some version from 2.2.x series it's strongly recommended to use the latest one - 2.2.4.
+
+=== Delphi ===
+
+Officially supported versions are Delphi 7, Delphi 2009 and Delphi 2010. Also compilation available with other versions higher than 7, but there is no official testing of this compatibility. So if you get some troubles - please write about them.
+
+== Compilation ZenGL under different OSes ==
+
+=== GNU/Linux ===
+
+There are Makefile and Lazarus project file for compilation ZenGL under GNU/Linux. Makefile can be find in *src* directory  with source code of library. Lazarus project file placed in *src/Lazarus*. Also there is ability to do cross-compilation for Windows(commands *make win32* and *make win64*).
+
+Additionaly for compilation in some distributives must be installed some dev-packages(for example in Debian and Ubuntu). *TODO: write the list of dev-packages*
+
+=== Windows ===
+
+There are two ways to compile ZenGL under Windows - using Delphi and Lazarus. Project files for those IDE's can be find in directories *Delphi* and *Lazarus* inside directory with source code - *src*. For Lazarus recommended to use *ZenGL-win.lpi* project file.
+
+=== MacOS X ===
+
+As for GNU/Linux under MacOS X there is also Makefile. But for compilation under MacOS X must be used command *make macos* instead of *make*. After that will be compiled universal dylib for architectures x86 and PowerPC.
+
+*Possible problems:* there is a problem with XCode linker that available for MacOS X 10.6. So any application compiled under MacOS X 10.6 can crash under early versions of MacOS X(like 10.5 and 10.4). Compilation under MacOS X 10.5 and 10.4 doesn't cause this problem.
+
+== Configuration of ZenGL ==
+
+There are two files for configuration of ZenGL - *zgl_config.cfg* и *zgl_fpc.cfg*. The second one intended only for FreePascal. All "options" can be simply turned on/off by uncommenting/commenting of defines.
+
+=== zgl_config.cfg ===
+
+First lines of this file contains sections for different OSes, but only next defines can be changed:
+  * *USE_OGG_FROM_SYSTEM* responsible for place where FreePascal will seek the *.a* files for static compilation with libogg, libvorbis and libvorbisfile
+  * *USE_PASJPEG*(only for Windows) - whether to use PasJPEG instead of standard jpeg loader
+  * *USE_OPENAL*(only for Windows) - whether to use OpenAL instead of DirectSound
+
+Next group of defines can disable not needed functionality:
+  * *USE_JOYSTICK* - joystick support
+  * *USE_TEXTURE_ATLAS* - texture atlases
+  * *USE_SENGINE* - procedural sprite engine
+  * *USE_PARTICLES* - particle subsystem
+  * *USE_SOUND* - sound subsystem
+
+*USE_LOG_FLUSH* turn on/off flush after every log message. It's needed only in few cases and only for Windows. When it's turned on, logging will be slowly.
+
+=== zgl_fpc.cfg ===
+
+*USE_OGG_STATIC* - the only one available define for changing. It is responsible for static linking ZenGL with libogg, libvorbis and libvorbisfile. For static linking FreePascal needed *.a* and *.o* files. Here the list of archives with needed files for different OSes:
+  * [http://www.andru-kun.inf.ua/zengl/extra/libogg-static-linux.tar.bz2 GNU/Linux] - for x86 and x86_64 applications
+  * [http://www.andru-kun.inf.ua/zengl/extra/libogg-static-win32.7z Windows] - only for static linking with 32bit applications
+  * [http://www.andru-kun.inf.ua/zengl/extra/libogg-static-macos.7z MacOS X] - for x86 and PowerPC
+
+Usually all needed files under GNU/Linux available in /usr/lib and FreePascal can use them when *USE_OGG_FROM_SYSTEM* defined, but not in all distributives this files available(for example in ArchLinux).
