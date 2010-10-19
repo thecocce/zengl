@@ -1,6 +1,6 @@
 = Compilation =
 
-ZenGL support two main Pascal compilers - FreePascal and Delphi. On this page you will find some description of main moments and possible problems with compilation.
+ZenGL supports two main Pascal compilers - FreePascal and Delphi. On this page you will find some description of main moments and possible problems with compilation.
 
 == Supported version of compilers ==
 
@@ -18,7 +18,7 @@ Officially supported versions are Delphi 7, Delphi 2009 and Delphi 2010. Also co
 
 There are Makefile and Lazarus project file for compilation ZenGL under GNU/Linux. Makefile can be find in *src* directory  with source code of library. Lazarus project file placed in *src/Lazarus*. Also there is ability to do cross-compilation for Windows(commands *make win32* and *make win64*).
 
-Additionaly for compilation in some distributives must be installed some dev-packages(for example in Debian and Ubuntu). *TODO: write the list of dev-packages*
+Additionally for compilation in some distributives must be installed some dev-packages(for example in Debian and Ubuntu). *TODO: write the list of dev-packages*
 
 === Windows ===
 
@@ -52,7 +52,7 @@ Next group of defines can disable not needed functionality:
 
 === zgl_fpc.cfg ===
 
-*USE_OGG_STATIC* - the only one available define for changing. It is responsible for static linking ZenGL with libogg, libvorbis and libvorbisfile. For static linking FreePascal needed *.a* and *.o* files. Here the list of archives with needed files for different OSes:
+*USE_OGG_STATIC* - the only one available define for changing. It's responsible for static linking ZenGL with libogg, libvorbis and libvorbisfile. For static linking FreePascal needed *.a* and *.o* files. Here the list of archives with needed files for different OSes:
   * [http://www.andru-kun.inf.ua/zengl/extra/libogg-static-linux.tar.bz2 GNU/Linux] - for x86 and x86_64 applications
   * [http://www.andru-kun.inf.ua/zengl/extra/libogg-static-win32.7z Windows] - only for static linking with 32bit applications
   * [http://www.andru-kun.inf.ua/zengl/extra/libogg-static-macos.7z MacOS X] - for x86 and PowerPC
