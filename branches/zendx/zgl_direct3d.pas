@@ -315,6 +315,9 @@ begin
   for i := 0 to d3d_texCount - 1 do
     d3d_texArray[ i ].Texture := nil;
   SetLength( d3d_texArray, 0 );
+  for i := 0 to d3d_texCount - 1 do
+    d3d_resArray[ i ] := nil;
+  SetLength( d3d_resArray, 0 );
 
   //d3d_Device._Release;
   d3d_Device := nil;

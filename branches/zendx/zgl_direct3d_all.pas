@@ -1003,6 +1003,7 @@ begin
 
   if Assigned( d3d_texArray[ textures^ ].Texture ) Then
     d3d_texArray[ textures^ ].Texture := nil;
+  d3d_resArray[ textures^ ] := nil;
 
   textures^ := 0;
 end;
