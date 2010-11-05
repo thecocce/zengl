@@ -1,9 +1,9 @@
 Crossplatform game development library.
 
+  * *Supported OS:* GNU/Linux, Windows, MacOS X
   * *Supported compilers:* [http://freepascal.org FreePascal], Delphi
   * *Graphics API:* OpenGL, Direct3D 8/9
   * *Sound API:* OpenAL, DirectSound
-  * *Supported OS:* GNU/Linux, Windows, MacOS X
   * *License:* [http://www.gnu.org/licenses/lgpl-3.0.txt GNU LGPL version 3]
 
   * *Main*
