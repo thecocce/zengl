@@ -1,9 +1,9 @@
 Кроссплатформенная библиотека для разработки игр. 
 
+  * *Поддерживаемые ОС:* GNU/Linux, Windows, MacOS X
   * *Совместимые компиляторы:* [http://freepascal.org FreePascal], Delphi
   * *Графический API:* OpenGL, Direct3D 8/9
   * *Звуковой API:* OpenAL, DirectSound
-  * *Поддерживаемые ОС:* GNU/Linux, Windows, MacOS X
   * *Лицензия:* [http://www.gnu.org/licenses/lgpl-3.0.txt GNU LGPL version 3]
 
   * *Общее*
