@@ -57,4 +57,4 @@ ZenGL проверяется на совместимость с Delphi 7, Delphi
   * [http://www.andru-kun.inf.ua/zengl/extra/libogg-static-win32.7z Windows] - только для статической сборки с 32-битными приложениями
   * [http://www.andru-kun.inf.ua/zengl/extra/libogg-static-macos.7z MacOS X] - для архитектур x86 и PowerPC
 
-Обычно все необходимые файлы для GNU/Linux присутствуют в /usr/lib и при объявлении *USE_OGG_FROM_SYSTEM* можно использовать их, но не во всех дистрибутивах они есть(к примеру в ArchLinux).
+Обычно все необходимые файлы для GNU/Linux присутствуют в /usr/lib и при объявлении *USE_OGG_FROM_SYSTEM* можно использовать их, но не во всех дистрибутивах они есть(к примеру в ArchLinux). Но не забывайте про условия LGPL лицензии, если будете использовать статическую сборку!

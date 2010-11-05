@@ -57,4 +57,4 @@ Next group of defines can disable not needed functionality:
   * [http://www.andru-kun.inf.ua/zengl/extra/libogg-static-win32.7z Windows] - only for static linking with 32bit applications
   * [http://www.andru-kun.inf.ua/zengl/extra/libogg-static-macos.7z MacOS X] - for x86 and PowerPC
 
-Usually all needed files under GNU/Linux available in /usr/lib and FreePascal can use them when *USE_OGG_FROM_SYSTEM* defined, but not in all distributives this files available(for example in ArchLinux).
+Usually all needed files under GNU/Linux available in /usr/lib and FreePascal can use them when *USE_OGG_FROM_SYSTEM* defined, but not in all distributives this files available(for example in ArchLinux). Don't forget about terms of LGPL license, if you will use static linking!
