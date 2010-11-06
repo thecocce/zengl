@@ -55,6 +55,6 @@ Next group of defines can disable not needed functionality:
 *USE_OGG_STATIC* - the only one available define for changing. It's responsible for static linking ZenGL with libogg, libvorbis and libvorbisfile. For static linking FreePascal needed *.a* and *.o* files. Here the list of archives with needed files for different OSes:
   * [http://www.andru-kun.inf.ua/zengl/extra/libogg-static-linux.tar.bz2 GNU/Linux] - for x86 and x86_64 applications
   * [http://www.andru-kun.inf.ua/zengl/extra/libogg-static-win32.7z Windows] - only for static linking with 32bit applications
-  * [http://www.andru-kun.inf.ua/zengl/extra/libogg-static-macos.7z MacOS X] - for x86 and PowerPC
+  * [http://www.andru-kun.inf.ua/zengl/extra/libogg-static-macos.zip MacOS X] - for x86 and PowerPC
 
 Usually all needed files under GNU/Linux available in /usr/lib and FreePascal can use them when *USE_OGG_FROM_SYSTEM* defined, but not in all distributives this files available(for example in ArchLinux).

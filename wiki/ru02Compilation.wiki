@@ -55,6 +55,6 @@ ZenGL проверяется на совместимость с Delphi 7, Delphi
 *USE_OGG_STATIC* - единственный доступный для редактирования дефайн. Он отвечает за статическую сборку ZenGL с библиотеками libogg, libvorbis и libvorbisfile. Для статической сборки необходимы *.a* и *.o* файлы. Ниже представлен список архивов с необходимыми файлами для разных ОС:
   * [http://www.andru-kun.inf.ua/zengl/extra/libogg-static-linux.tar.bz2 GNU/Linux] - для сборки x86 и x86_64 приложений
   * [http://www.andru-kun.inf.ua/zengl/extra/libogg-static-win32.7z Windows] - только для статической сборки с 32-битными приложениями
-  * [http://www.andru-kun.inf.ua/zengl/extra/libogg-static-macos.7z MacOS X] - для архитектур x86 и PowerPC
+  * [http://www.andru-kun.inf.ua/zengl/extra/libogg-static-macos.zip MacOS X] - для архитектур x86 и PowerPC
 
 Обычно все необходимые файлы для GNU/Linux присутствуют в /usr/lib и при объявлении *USE_OGG_FROM_SYSTEM* можно использовать их, но не во всех дистрибутивах они есть(к примеру в ArchLinux).
