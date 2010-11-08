@@ -115,6 +115,7 @@ exports
   scr_SetFSAA              name prefix + 'scr_SetFSAA',
   scr_SetOptions           name prefix + 'scr_SetOptions',
   scr_CorrectResolution    name prefix + 'scr_CorrectResolution',
+  scr_ReadPixels           name prefix + 'scr_ReadPixels',
 
   // INI
   ini_LoadFromFile         name prefix + 'ini_LoadFromFile',
@@ -182,6 +183,7 @@ exports
   tex_LoadFromMemory       name prefix + 'tex_LoadFromMemory',
   tex_SetFrameSize         name prefix + 'tex_SetFrameSize',
   tex_SetMask              name prefix + 'tex_SetMask',
+  tex_SetData              name prefix + 'tex_SetData',
   tex_GetData              name prefix + 'tex_GetData',
   tex_Filter               name prefix + 'tex_Filter',
   tex_SetAnisotropy        name prefix + 'tex_SetAnisotropy',
