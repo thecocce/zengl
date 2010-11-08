@@ -84,7 +84,7 @@ begin
       H := H * FX2D_SY;
     end;
 
-  if ( app_Flags and CLIP_INVISIBLE > 0 ) Then
+  if render2d_Clip Then
     if FX and FX2D_VCHANGE = 0 Then
       begin
         if not sprite2d_InScreen( X, Y, W, H, Angle ) Then Exit;
@@ -260,7 +260,7 @@ begin
       H := H * FX2D_SY;
     end;
 
-  if ( app_Flags and CLIP_INVISIBLE > 0 ) Then
+  if render2d_Clip Then
     if FX and FX2D_VCHANGE = 0 Then
       begin
         if not sprite2d_InScreen( X, Y, W, H, Angle ) Then Exit;
@@ -438,7 +438,7 @@ begin
       H := H * FX2D_SY;
     end;
 
-  if ( app_Flags and CLIP_INVISIBLE > 0 ) Then
+  if render2d_Clip Then
     if FX and FX2D_VCHANGE = 0 Then
       begin
         if not sprite2d_InScreen( X, Y, W, H, Angle ) Then Exit;
@@ -621,7 +621,7 @@ begin
       H := H * FX2D_SY;
     end;
 
-  if ( app_Flags and CLIP_INVISIBLE > 0 ) Then
+  if render2d_Clip Then
     if FX and FX2D_VCHANGE = 0 Then
       begin
         if not sprite2d_InScreen( X, Y, W, H, Angle ) Then Exit;

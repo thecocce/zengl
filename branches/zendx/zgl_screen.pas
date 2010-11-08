@@ -45,6 +45,7 @@ procedure scr_CorrectResolution( const Width, Height : Word );
 procedure scr_SetViewPort;
 procedure scr_SetVSync( const VSync : Boolean );
 procedure scr_SetFSAA( const FSAA : Byte );
+procedure scr_ReadPixels( var pData : Pointer; const X, Y, Width, Height : Word );
 
 type
   zglPResolutionList = ^zglTResolutionList;
@@ -219,9 +220,9 @@ begin
     glClear( GL_COLOR_BUFFER_BIT );
 
   if wnd_FullScreen Then
-    log_Add( 'Set screen options: ' + u_IntToStr( scr_Width ) + ' x ' + u_IntToStr( scr_Height ) + ' fullscreen' )
+    log_Add( 'Screen options changed to: ' + u_IntToStr( scr_Width ) + ' x ' + u_IntToStr( scr_Height ) + ' fullscreen' )
   else
-    log_Add( 'Set screen options: ' + u_IntToStr( wnd_Width ) + ' x ' + u_IntToStr( wnd_Height ) + ' windowed' );
+    log_Add( 'Screen options changed to: ' + u_IntToStr( wnd_Width ) + ' x ' + u_IntToStr( wnd_Height ) + ' windowed' );
   if app_Work Then
     wnd_Update();
 end;
@@ -314,12 +315,18 @@ begin
   ogl_FSAA := FSAA;
 
   if ogl_FSAA <> 0 Then
-    log_Add( 'Set FSAA: ' + u_IntToStr( ogl_FSAA ) + 'x' )
+    log_Add( 'FSAA changed to: ' + u_IntToStr( ogl_FSAA ) + 'x' )
   else
-    log_Add( 'Set FSAA: off' );
+    log_Add( 'FSAA changed to: off' );
 
   if wnd_Handle <> 0 Then
     wnd_Update;
+end;
+
+procedure scr_ReadPixels;
+begin
+  GetMem( pData, Width * Height * 4 );
+  glReadPixels( X, ogl_ClipH - Height - Y, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, pData );
 end;
 
 end.

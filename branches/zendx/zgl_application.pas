@@ -269,14 +269,14 @@ begin
       end;
     WM_MBUTTONDOWN, WM_MBUTTONDBLCLK:
       begin
-        mouseDown[ M_BMIDLE ] := TRUE;
-        if mouseCanClick[ M_BMIDLE ] Then
+        mouseDown[ M_BMIDDLE ] := TRUE;
+        if mouseCanClick[ M_BMIDDLE ] Then
           begin
-            mouseClick[ M_BMIDLE ]    := TRUE;
-            mouseCanClick[ M_BMIDLE ] := FALSE;
+            mouseClick[ M_BMIDDLE ]    := TRUE;
+            mouseCanClick[ M_BMIDDLE ] := FALSE;
           end;
         if Msg = WM_MBUTTONDBLCLK Then
-          mouseDblClick[ M_BMIDLE ] := TRUE;
+          mouseDblClick[ M_BMIDDLE ] := TRUE;
       end;
     WM_RBUTTONDOWN, WM_RBUTTONDBLCLK:
       begin
@@ -297,9 +297,9 @@ begin
       end;
     WM_MBUTTONUP:
       begin
-        mouseDown[ M_BMIDLE ]     := FALSE;
-        mouseUp  [ M_BMIDLE ]     := TRUE;
-        mouseCanClick[ M_BMIDLE ] := TRUE;
+        mouseDown[ M_BMIDDLE ]     := FALSE;
+        mouseUp  [ M_BMIDDLE ]     := TRUE;
+        mouseCanClick[ M_BMIDDLE ] := TRUE;
       end;
     WM_RBUTTONUP:
       begin

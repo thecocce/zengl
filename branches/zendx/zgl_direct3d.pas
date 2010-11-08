@@ -327,10 +327,9 @@ end;
 
 function d3d_Restore;
   var
-    r   : zglPRenderTarget;
-    t   : zglPTexture;
-    d   : TD3DSurface_Desc;
-    fmt : TD3DFormat;
+    r : zglPRenderTarget;
+    t : zglPTexture;
+    d : TD3DSurface_Desc;
 begin
   Result := FALSE;
   if not Assigned( d3d_Device ) Then exit;
@@ -402,18 +401,14 @@ begin
   t := managerTexture.First.Next;
   while Assigned( t ) do
     begin
-      if t.Flags and TEX_RGB > 0 Then
-        fmt := D3DFMT_X8R8G8B8
-      else
-        fmt := D3DFMT_A8R8G8B8;
       if not Assigned( d3d_texArray[ t.ID ].Texture ) Then
         begin
           {$IFDEF USE_DIRECT3D8}
-          d3d_Device.CreateTexture( Round( t.Width / t.U ), Round( t.Height / t.V ), 1, D3DUSAGE_RENDERTARGET, fmt, D3DPOOL_DEFAULT,
+          d3d_Device.CreateTexture( Round( t.Width / t.U ), Round( t.Height / t.V ), 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT,
                                     d3d_texArray[ t.ID ].Texture );
           {$ENDIF}
           {$IFDEF USE_DIRECT3D9}
-          d3d_Device.CreateTexture( Round( t.Width / t.U ), Round( t.Height / t.V ), 1, D3DUSAGE_RENDERTARGET, fmt, D3DPOOL_DEFAULT,
+          d3d_Device.CreateTexture( Round( t.Width / t.U ), Round( t.Height / t.V ), 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT,
                                     d3d_texArray[ t.ID ].Texture, nil );
           {$ENDIF}
           rtarget_Restore( t );
@@ -434,7 +429,6 @@ begin
     begin
       d3d_Device.SetRenderState( D3DRS_SEPARATEALPHABLENDENABLE, iTRUE );
       d3d_Device.SetRenderState( D3DRS_BLENDOP,        D3DBLENDOP_ADD );
-      d3d_Device.SetRenderState( D3DRS_BLENDOPALPHA,   D3DBLENDOP_ADD );
       d3d_Device.SetRenderState( D3DRS_SRCBLENDALPHA,  D3DBLEND_ONE );
       d3d_Device.SetRenderState( D3DRS_DESTBLENDALPHA, D3DBLEND_INVSRCALPHA);
     end;

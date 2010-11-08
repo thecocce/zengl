@@ -24,6 +24,7 @@ unit zgl_direct3d_all;
 
 interface
 uses
+  Windows,
   {$IFDEF USE_DIRECT3D8}
   DirectXGraphics
   {$ENDIF}
@@ -47,7 +48,6 @@ const
   GL_FLOAT                          = $1406;
 
   // PixelFormat
-  GL_RGB                            = $1907;
   GL_RGBA                           = $1908;
 
   // Alpha Function
@@ -238,6 +238,7 @@ type
     Wrap       : LongWord;
 end;
 
+procedure glReadPixels(x, y: GLint; width, height: GLsizei; format, atype: GLenum; pixels: Pointer);
 // Clear
 procedure glClear(mask: GLbitfield);
 // State
@@ -297,7 +298,7 @@ procedure gluTessEndContour(tess: Integer); stdcall external libGLU;
 procedure gluTessEndPolygon(tess: Integer); stdcall external libGLU;
 procedure gluTessVertex(tess: Integer; vertex: PDouble; data: Pointer); stdcall external libGLU;
 
-procedure d3d_FillTexture( Src, Dest : Pointer; W, H, P : Integer );
+procedure d3d_FillTexture( Src, Dest : Pointer; W, H : Integer );
 
 var
   gl_TexCoord2f   : procedure( U, V : Single );
@@ -358,6 +359,46 @@ var
   ScissorY : Integer;
   ScissorW : Integer;
   ScissorH : Integer;
+
+procedure glReadPixels;
+  var
+    i : Integer;
+    a : TRect;
+    r : TD3DLockedRect;
+    d : TD3DSurface_Desc;
+    {$IFDEF USE_DIRECT3D8}
+    src, dst : IDirect3DSurface8;
+    {$ENDIF}
+    {$IFDEF USE_DIRECT3D9}
+    src, dst : IDirect3DSurface9;
+    {$ENDIF}
+begin
+  {$IFDEF USE_DIRECT3D8}
+  d3d_Device.GetRenderTarget( src );
+  d3d_Device.CreateImageSurface( d.Width, d.Height, d.Format, dst );
+  d3d_Device.CopyRects( src, nil, 0, dst, nil );
+  {$ENDIF}
+  {$IFDEF USE_DIRECT3D9}
+  d3d_Device.GetRenderTarget( 0, src );
+  src.GetDesc( d );
+  d3d_Device.CreateOffscreenPlainSurface( d.Width, d.Height, d.Format, D3DPOOL_SYSTEMMEM, dst, 0 );
+  d3d_Device.GetRenderTargetData( src, dst );
+  {$ENDIF}
+
+  y := ( d.Height - Height ) - y;
+
+  a.Left   := x;
+  a.Top    := y;
+  a.Right  := x + width - 1;
+  a.Bottom := y + height - 1;
+  dst.LockRect( r, @a, D3DLOCK_READONLY );
+  for i := 0 to height - 1 do
+    Move( PByte( Ptr( r.pBits ) + ( height - i - 1 ) * d.Width * 4 )^, PByte( Ptr( pixels ) + i * width * 4 )^, width * 4 );
+  dst.UnlockRect;
+
+  dst := nil;
+  src := nil;
+end;
 
 procedure glClear;
 begin
@@ -1130,27 +1171,15 @@ procedure d3d_FillTexture;
 begin
   D := Ptr( Dest );
   S := Ptr( Src );
-  if P = 3 Then
+  for i := 0 to W * H - 1 do
     begin
-      for i := 0 to W * H - 1 do
-        begin
-          PByte( D + 2 )^ :=  PByte( S + 0 )^;
-          PByte( D + 1 )^ :=  PByte( S + 1 )^;
-          PByte( D + 0 )^ :=  PByte( S + 2 )^;
-          PByte( D + 3 )^ :=  255;
-          INC( D, 4{P} );
-          INC( S, P );
-        end;
-    end else
-      for i := 0 to W * H - 1 do
-        begin
-          PByte( D + 2 )^ :=  PByte( S + 0 )^;
-          PByte( D + 1 )^ :=  PByte( S + 1 )^;
-          PByte( D + 0 )^ :=  PByte( S + 2 )^;
-          PByte( D + 3 )^ :=  PByte( S + 3 )^;
-          INC( D, P );
-          INC( S, P );
-        end;
+      PByte( D + 2 )^ :=  PByte( S + 0 )^;
+      PByte( D + 1 )^ :=  PByte( S + 1 )^;
+      PByte( D + 0 )^ :=  PByte( S + 2 )^;
+      PByte( D + 3 )^ :=  PByte( S + 3 )^;
+      INC( D, 4 );
+      INC( S, 4 );
+    end;
 end;
 
 procedure glPixelStorei;
@@ -1162,23 +1191,8 @@ end;
 
 procedure glTexImage2D;
   var
-    fmt  : TD3DFormat;
-    size : Integer;
-    r    : TD3DLockedRect;
+    r : TD3DLockedRect;
 begin
-  case format of
-    GL_RGB:
-      begin
-        fmt  := D3DFMT_X8R8G8B8;
-        size := 3;
-      end;
-    GL_RGBA:
-      begin
-        fmt  := D3DFMT_A8R8G8B8;
-        size := 4;
-      end;
-  end;
-
   if target = GL_TEXTURE_2D Then
     begin
       d3d_texArray[ RenderTexID ].MagFilter := lMagFilter;
@@ -1186,17 +1200,17 @@ begin
       d3d_texArray[ RenderTexID ].MipFilter := lMipFilter;
       d3d_texArray[ RenderTexID ].Wrap      := lWrap;
       {$IFDEF USE_DIRECT3D8}
-      if d3d_Device.CreateTexture( width, height, 1, 0, fmt, D3DPOOL_MANAGED, d3d_texArray[ RenderTexID ].Texture ) <> D3D_OK Then
+      if d3d_Device.CreateTexture( width, height, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, d3d_texArray[ RenderTexID ].Texture ) <> D3D_OK Then
       {$ENDIF}
       {$IFDEF USE_DIRECT3D9}
-      if d3d_Device.CreateTexture( width, height, 1, 0, fmt, D3DPOOL_MANAGED, d3d_texArray[ RenderTexID ].Texture, nil ) <> D3D_OK Then
+      if d3d_Device.CreateTexture( width, height, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, d3d_texArray[ RenderTexID ].Texture, nil ) <> D3D_OK Then
       {$ENDIF}
         begin
           log_Add( 'Can''t CreateTexture' );
           exit;
         end;
       d3d_texArray[ RenderTexID ].Texture.LockRect( level, r, nil, D3DLOCK_DISCARD );
-      d3d_FillTexture( pixels, r.pBits, width, height, size );
+      d3d_FillTexture( pixels, r.pBits, width, height );
       d3d_texArray[ RenderTexID ].Texture.UnlockRect( level );
     end;
 end;
@@ -1204,14 +1218,13 @@ end;
 procedure glTexSubImage2D;
   var
     r        : TD3DLockedRect;
+    a        : TRect;
     d        : TD3DSurface_Desc;
-    i, s, w  : Integer;
+    i, w     : Integer;
     src, dst : PByte;
 begin
   if ( RenderTexID > d3d_texCount ) or
      ( not Assigned( d3d_texArray[ RenderTexID ].Texture ) ) Then exit;
-
-  s := Integer( format = GL_RGBA ) * 4 + Integer( format = GL_RGB ) * 3;
 
   d3d_texArray[ RenderTexID ].Texture.GetLevelDesc( level, d );
   src := pixels;
@@ -1221,13 +1234,17 @@ begin
     w := psiUnpackRowLength;
   if d.Pool = D3DPOOL_MANAGED Then
     begin
-      d3d_texArray[ RenderTexID ].Texture.LockRect( level, r, nil, D3DLOCK_DISCARD );
-      dst := PByte( Ptr( r.pBits ) + xoffset * s + yoffset * d.Width * s );
+      a.Left   := xoffset;
+      a.Top    := yoffset;
+      a.Right  := xoffset + width - 1;
+      a.Bottom := yoffset + height - 1;
+      d3d_texArray[ RenderTexID ].Texture.LockRect( level, r, @a, 0 );
+      dst := r.pBits;
       for i := 0 to height - 1 do
         begin
-          Move( src^, dst^, width * s );
-          INC( src, w * s );
-          INC( dst, d.Width * s );
+          Move( src^, dst^, width * 4 );
+          INC( src, w * 4 );
+          INC( dst, d.Width * 4 );
         end;
       d3d_texArray[ RenderTexID ].Texture.UnlockRect( level );
     end;
@@ -1237,7 +1254,6 @@ procedure glGetTexImage;
   var
     r : TD3DLockedRect;
     d : TD3DSurface_Desc;
-    s : Integer;
     {$IFDEF USE_DIRECT3D8}
     src, dst : IDirect3DSurface8;
     {$ENDIF}
@@ -1248,13 +1264,11 @@ begin
   if ( RenderTexID > d3d_texCount ) or
      ( not Assigned( d3d_texArray[ RenderTexID ].Texture ) ) Then exit;
 
-  s := Integer( format = GL_RGBA ) * 4 + Integer( format = GL_RGB ) * 3;
-
   d3d_texArray[ RenderTexID ].Texture.GetLevelDesc( level, d );
   if d.Pool = D3DPOOL_MANAGED Then
     begin
       d3d_texArray[ RenderTexID ].Texture.LockRect( level, r, nil, D3DLOCK_READONLY or D3DLOCK_DISCARD );
-      Move( r.pBits^, pixels^, d.Width * d.Height * s );
+      Move( r.pBits^, pixels^, d.Width * d.Height * 4 );
       d3d_texArray[ RenderTexID ].Texture.UnlockRect( 0 );
     end else
       if d.Pool = D3DPOOL_DEFAULT Then
@@ -1270,7 +1284,7 @@ begin
           {$ENDIF}
 
           dst.LockRect( r, nil, D3DLOCK_READONLY );
-          Move( r.pBits^, pixels^, d.Width * d.Height * s );
+          Move( r.pBits^, pixels^, d.Width * d.Height * 4 );
           dst.UnlockRect;
 
           dst := nil;
@@ -1326,23 +1340,8 @@ end;
 
 function gluBuild2DMipmaps;
   var
-    fmt  : TD3DFormat;
-    size : Integer;
-    r    : TD3DLockedRect;
+    r : TD3DLockedRect;
 begin
-  case format of
-    GL_RGB:
-      begin
-        fmt  := D3DFMT_X8R8G8B8;
-        size := 3;
-      end;
-    GL_RGBA:
-      begin
-        fmt  := D3DFMT_A8R8G8B8;
-        size := 4;
-      end;
-  end;
-
   if target = GL_TEXTURE_2D Then
     begin
       d3d_texArray[ d3d_texCount - 1 ].MagFilter  := lMagFilter;
@@ -1350,13 +1349,13 @@ begin
       d3d_texArray[ d3d_texCount - 1 ].MipFilter  := lMipFilter;
       d3d_texArray[ d3d_texCount - 1 ].Wrap       := lWrap;
       {$IFDEF USE_DIRECT3D8}
-      d3d_Device.CreateTexture( width, height, 0, 0, fmt, D3DPOOL_MANAGED, d3d_texArray[ d3d_texCount - 1 ].Texture );
+      d3d_Device.CreateTexture( width, height, 0, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, d3d_texArray[ d3d_texCount - 1 ].Texture );
       {$ENDIF}
       {$IFDEF USE_DIRECT3D9}
-      d3d_Device.CreateTexture( width, height, 0, 0, fmt, D3DPOOL_MANAGED, d3d_texArray[ d3d_texCount - 1 ].Texture, nil );
+      d3d_Device.CreateTexture( width, height, 0, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, d3d_texArray[ d3d_texCount - 1 ].Texture, nil );
       {$ENDIF}
       d3d_texArray[ d3d_texCount - 1 ].Texture.LockRect( 0, r, nil, D3DLOCK_DISCARD );
-      d3d_FillTexture( data, r.pBits, width, height, size );
+      d3d_FillTexture( data, r.pBits, width, height );
       d3d_texArray[ d3d_texCount - 1 ].Texture.UnlockRect( 0 );
     end;
 end;

@@ -258,7 +258,7 @@ begin
   Result := atlas_AddNode( @Atlas.root, Atlas.Texture, Texture.Width, Texture.Height );
   Result.FramesX := Texture.FramesX;
   Result.FramesY := Texture.FramesY;
-  tex_GetData( Texture, pData, i );
+  tex_GetData( Texture, pData );
   atals_InsertDataToNode( Result, pData, Round( Texture.Width / Texture.U ), Texture.Width, Texture.Height );
 
   FreeMem( pData );
@@ -304,9 +304,7 @@ begin
   tex.Flags   := Flags;
   if ( Flags and TEX_CONVERT_TO_POT > 0 ) Then
     tex.Flags := tex.Flags xor TEX_CONVERT_TO_POT;
-  if ( Flags and TEX_RGB > 0 ) and ( Flags and TEX_CALCULATE_ALPHA > 0 ) Then
-    tex.Flags := Flags xor TEX_CALCULATE_ALPHA;
-  if ( tex.Flags and TEX_RGB = 0 ) and ( tex.Flags and TEX_CALCULATE_ALPHA > 0 ) Then
+  if tex.Flags and TEX_CALCULATE_ALPHA > 0 Then
     tex_CalcTransparent( pData, TransparentColor, w, h );
   tex_CalcFlags( tex, pData );
 
@@ -314,7 +312,7 @@ begin
   Result.FramesX := tex.FramesX;
   Result.FramesY := tex.FramesY;
   GetMem( pABGR, tex.Width * tex.Height * 4 );
-  d3d_FillTexture( pData, pABGR, tex.Width, tex.Height, 4 );
+  d3d_FillTexture( pData, pABGR, tex.Width, tex.Height );
   atals_InsertDataToNode( Result, pABGR, tex.Width, tex.Width, tex.Height );
 
   FreeMemory( pData );
@@ -351,9 +349,7 @@ begin
   tex.Flags   := Flags;
   if ( Flags and TEX_CONVERT_TO_POT > 0 ) Then
     tex.Flags := tex.Flags xor TEX_CONVERT_TO_POT;
-  if ( Flags and TEX_RGB > 0 ) and ( Flags and TEX_CALCULATE_ALPHA > 0 ) Then
-    tex.Flags := Flags xor TEX_CALCULATE_ALPHA;
-  if ( tex.Flags and TEX_RGB = 0 ) and ( tex.Flags and TEX_CALCULATE_ALPHA > 0 ) Then
+  if tex.Flags and TEX_CALCULATE_ALPHA > 0 Then
     tex_CalcTransparent( pData, TransparentColor, w, h );
   tex_CalcFlags( tex, pData );
 
@@ -361,7 +357,7 @@ begin
   Result.FramesX := tex.FramesX;
   Result.FramesY := tex.FramesY;
   GetMem( pABGR, tex.Width * tex.Height * 4 );
-  d3d_FillTexture( pData, pABGR, tex.Width, tex.Height, 4 );
+  d3d_FillTexture( pData, pABGR, tex.Width, tex.Height );
   atals_InsertDataToNode( Result, pABGR, tex.Width, tex.Width, tex.Height );
 
   FreeMemory( pData );

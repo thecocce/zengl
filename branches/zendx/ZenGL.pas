@@ -217,6 +217,7 @@ exports
   // FX
   fx_SetBlendMode          name prefix + 'fx_SetBlendMode',
   fx_SetColorMode          name prefix + 'fx_SetColorMode',
+  fx_SetColorMask          name prefix + 'fx_SetColorMask',
   // FX 2D
   fx2d_SetColor            name prefix + 'fx2d_SetColor',
   fx2d_SetVCA              name prefix + 'fx2d_SetVCA',

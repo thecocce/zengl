@@ -188,8 +188,6 @@ begin
 end;
 
 function rtarget_Add;
-var
-  fmt : TD3DFormat;
 begin
   Result := @managerRTarget.First;
   while Assigned( Result.Next ) do
@@ -198,21 +196,16 @@ begin
   zgl_GetMem( Pointer( Result.Next ), SizeOf( zglTRenderTarget ) );
   zgl_GetMem( Pointer( Result.Next.Handle ), SizeOf( zglTD3DTarget ) );
 
-  if Surface.Flags and TEX_RGB > 0 Then
-    fmt := D3DFMT_X8R8G8B8
-  else
-    fmt := D3DFMT_A8R8G8B8;
-
   rtarget_Save( Surface );
   d3d_texArray[ Surface.ID ].Texture := nil;
   {$IFDEF USE_DIRECT3D8}
-  d3d_Device.CreateTexture( Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ), 1, D3DUSAGE_RENDERTARGET, fmt, D3DPOOL_DEFAULT,
+  d3d_Device.CreateTexture( Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ), 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT,
                             d3d_texArray[ Surface.ID ].Texture );
   d3d_Device.CreateDepthStencilSurface( Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ), d3d_Params.AutoDepthStencilFormat,
                             D3DMULTISAMPLE_NONE, Result.Next.Handle.Depth );
   {$ENDIF}
   {$IFDEF USE_DIRECT3D9}
-  d3d_Device.CreateTexture( Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ), 1, D3DUSAGE_RENDERTARGET, fmt, D3DPOOL_DEFAULT,
+  d3d_Device.CreateTexture( Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ), 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT,
                             d3d_texArray[ Surface.ID ].Texture, nil );
   d3d_Device.CreateDepthStencilSurface( Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ), d3d_Params.AutoDepthStencilFormat,
                                         D3DMULTISAMPLE_NONE, 0, TRUE, Result.Next.Handle.Depth, nil );
@@ -379,7 +372,7 @@ end;
 
 procedure rtarget_DrawIn;
 begin
-  if ogl_Separate or ( Target.Surface.Flags and TEX_RGB > 0 ) Then
+  if ogl_Separate Then
     begin
       rtarget_Set( Target );
       RenderCallback( Data );

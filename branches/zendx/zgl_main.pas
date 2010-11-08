@@ -113,6 +113,7 @@ uses
   zgl_direct3d_all,
   zgl_timers,
   zgl_log,
+  zgl_render_2d,
   zgl_textures,
   {$IFDEF USE_TEXTURE_ATLAS}
   zgl_texture_atlas,
@@ -453,6 +454,9 @@ begin
   if What and SND_CAN_PLAY_FILE > 0 Then
     sndCanPlayFile := TRUE;
   {$ENDIF}
+
+  if What and CLIP_INVISIBLE > 0 Then
+    render2d_Clip := TRUE;
 end;
 
 procedure zgl_Disable;
@@ -492,6 +496,9 @@ begin
   if What and SND_CAN_PLAY_FILE > 0 Then
     sndCanPlayFile := FALSE;
   {$ENDIF}
+
+  if What and CLIP_INVISIBLE > 0 Then
+    render2d_Clip := FALSE;
 end;
 
 end.
