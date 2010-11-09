@@ -27,11 +27,11 @@ uses
   Windows;
 
 const
-  M_BLEFT  = 0;
-  M_BMIDLE = 1;
-  M_BRIGHT = 2;
-  M_WUP    = 0;
-  M_WDOWN  = 1;
+  M_BLEFT   = 0;
+  M_BMIDDLE = 1;
+  M_BRIGHT  = 2;
+  M_WUP     = 0;
+  M_WDOWN   = 1;
 
 function mouse_X : Integer;
 function mouse_Y : Integer;
