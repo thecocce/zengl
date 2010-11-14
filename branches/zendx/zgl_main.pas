@@ -207,6 +207,7 @@ begin
   if app_WorkTime <> 0 Then
     log_Add( 'Average FPS: ' + u_IntToStr( Round( app_FPSAll / app_WorkTime ) ) );
 
+  app_PExit();
   scr_Destroy();
 
   log_Add( 'Timers to free: ' + u_IntToStr( managerTimer.Count ) );
@@ -261,7 +262,6 @@ begin
 
   if not app_InitToHandle Then wnd_Destroy();
 
-  app_PExit();
   d3d_Destroy();
   log_Add( 'End' );
   log_Close();
