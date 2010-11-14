@@ -1,4 +1,4 @@
-Crossplatform game development library.
+Cross-platform game development library.
 
   * *Supported OS:* GNU/Linux, Windows, MacOS X
   * *Supported compilers:* [http://freepascal.org FreePascal], Delphi
