@@ -286,6 +286,7 @@ exports
   text_DrawInRect          name prefix + 'text_DrawInRect',
   text_DrawInRectEx        name prefix + 'text_DrawInRectEx',
   text_GetWidth            name prefix + 'text_GetWidth',
+  text_GetHeight           name prefix + 'text_GetHeight',
   textFx_SetLength         name prefix + 'textFx_SetLength',
 
   // Sound
