@@ -375,6 +375,7 @@ procedure glReadPixels;
 begin
   {$IFDEF USE_DIRECT3D8}
   d3d_Device.GetRenderTarget( src );
+  src.GetDesc( d );
   d3d_Device.CreateImageSurface( d.Width, d.Height, d.Format, dst );
   d3d_Device.CopyRects( src, nil, 0, dst, nil );
   {$ENDIF}
