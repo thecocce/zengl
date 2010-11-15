@@ -26,7 +26,7 @@ Cross-platform game development library.
     * correct work with NPOT textures
     * control the filter parameters
     * masking
-    * _render targets_ for rendering to texture
+    * _render targets_ for rendering into texture
   * *Text*
     * textured Unicode-font
     * rendering UTF-8 or ANSI text
