@@ -19,7 +19,7 @@ Cross-platform game development library.
     * cursor visibility in window space
   * *Input*
     * handling keyboard, mouse and joystick input
-    * handling Unicode text input
+    * handling of Unicode text input
     * possibility to restrict the input to the Latin alphabet
   * *Textures*
     * supported *tga*, *png* and *jpg*
