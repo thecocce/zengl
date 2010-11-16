@@ -13,9 +13,9 @@ Cross-platform game development library.
     * resource loading from files and memory
     * easy way to add supporting for new resource format
   * *Configuration of*
-    * antialiasing, screen resolution, screen refresh and vertical synchronization
+    * antialiasing, screen resolution, refresh rate and vertical synchronization
     * aspect correction
-    * window title, position and size
+    * title, position and size of window
     * cursor visibility in window space
   * *Input*
     * handling keyboard, mouse and joystick input
@@ -42,9 +42,9 @@ Cross-platform game development library.
     * control the color and alpha of vertices of sprites and primitives
     * additional sprite transformations(flipping, zooming, vertices offset)
     * fast clipping of invisible sprites
-    * 2D camera with ability to zoom and to rotate the scene
+    * 2D camera with ability to zoom and rotate the scene
   * *Sound*
-    * work through OpenAL or DirectSound in depends on configuration or OS
+    * works through OpenAL or DirectSound in depends on configuration or OS
     * correct work without soundcard
     * support *wav* and *ogg* as sound samples
     * playing *ogg* files in separate thread
@@ -56,6 +56,6 @@ Cross-platform game development library.
     * basic set of collision functions
   * *Additional*
     * reading and writing ini-files
-    * functions for using files and memory
+    * functions for work with files and memory
 
 [http://andru-kun.inf.ua/zengl/screens/screen01.jpg http://andru-kun.inf.ua/zengl/screens/screen01s.jpg] [http://andru-kun.inf.ua/zengl/screens/screen02.jpg http://andru-kun.inf.ua/zengl/screens/screen02s.jpg] [http://andru-kun.inf.ua/zengl/screens/screen03.jpg http://andru-kun.inf.ua/zengl/screens/screen03s.jpg] [http://andru-kun.inf.ua/zengl/screens/screen04.png http://andru-kun.inf.ua/zengl/screens/screen04s.png]
