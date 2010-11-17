@@ -298,7 +298,7 @@ procedure gluTessEndContour(tess: Integer); stdcall external libGLU;
 procedure gluTessEndPolygon(tess: Integer); stdcall external libGLU;
 procedure gluTessVertex(tess: Integer; vertex: PDouble; data: Pointer); stdcall external libGLU;
 
-procedure d3d_FillTexture( Src, Dest : Pointer; W, H : Integer );
+procedure d3d_FillTexture( const Src, Dst : Pointer; const Width, Height : Integer; const DstStride : Integer = 0 );
 
 var
   gl_TexCoord2f   : procedure( U, V : Single );
@@ -362,7 +362,8 @@ var
 
 procedure glReadPixels;
   var
-    i : Integer;
+    i, j : Integer;
+    pSrc, pDst : Ptr;
     a : TRect;
     r : TD3DLockedRect;
     d : TD3DSurface_Desc;
@@ -393,8 +394,21 @@ begin
   a.Right  := x + width - 1;
   a.Bottom := y + height - 1;
   dst.LockRect( r, @a, D3DLOCK_READONLY );
-  for i := 0 to height - 1 do
-    Move( PByte( Ptr( r.pBits ) + ( height - i - 1 ) * d.Width * 4 )^, PByte( Ptr( pixels ) + i * width * 4 )^, width * 4 );
+  pSrc := Ptr( r.pBits );
+  pDst := Ptr( pixels + width * ( height - 1 ) * 4 );
+  for j := 0 to height - 1 do
+    begin
+      for i := 0 to width - 1 do
+        begin
+          PByte( pDst + 2 )^ := PByte( pSrc + 0 )^;
+          PByte( pDst + 1 )^ := PByte( pSrc + 1 )^;
+          PByte( pDst + 0 )^ := PByte( pSrc + 2 )^;
+          PByte( pDst + 3 )^ := 255; // PByte( pSrc + 3 )^ всегда равно нулю O_o
+          INC( pSrc, 4 );
+          INC( pDst, 4 );
+        end;
+      DEC( pDst, width * 4 * 2 );
+    end;
   dst.UnlockRect;
 
   dst := nil;
@@ -1167,19 +1181,32 @@ end;
 
 procedure d3d_FillTexture;
   var
-    i : Integer;
-    D, S : Ptr;
+    d, s : Ptr;
+    i, j, w, stride : Integer;
 begin
-  D := Ptr( Dest );
-  S := Ptr( Src );
-  for i := 0 to W * H - 1 do
+  if psiUnpackRowLength > 0 Then
+    w := psiUnpackRowLength
+  else
+    w := Width;
+  if DstStride > 0 Then
+    stride := DstStride - w * 4
+  else
+    stride := 0;
+
+  d := Ptr( Dst );
+  s := Ptr( Src );
+  for j := 0 to Height - 1 do
     begin
-      PByte( D + 2 )^ :=  PByte( S + 0 )^;
-      PByte( D + 1 )^ :=  PByte( S + 1 )^;
-      PByte( D + 0 )^ :=  PByte( S + 2 )^;
-      PByte( D + 3 )^ :=  PByte( S + 3 )^;
-      INC( D, 4 );
-      INC( S, 4 );
+      for i := 0 to w - 1 do
+        begin
+          PByte( d + 2 )^ := PByte( s + 0 )^;
+          PByte( d + 1 )^ := PByte( s + 1 )^;
+          PByte( d + 0 )^ := PByte( s + 2 )^;
+          PByte( d + 3 )^ := PByte( s + 3 )^;
+          INC( d, 4 );
+          INC( s, 4 );
+        end;
+      INC( d, stride );
     end;
 end;
 
@@ -1218,21 +1245,14 @@ end;
 
 procedure glTexSubImage2D;
   var
-    r        : TD3DLockedRect;
-    a        : TRect;
-    d        : TD3DSurface_Desc;
-    i, w     : Integer;
-    src, dst : PByte;
+    r : TD3DLockedRect;
+    a : TRect;
+    d : TD3DSurface_Desc;
 begin
   if ( RenderTexID > d3d_texCount ) or
      ( not Assigned( d3d_texArray[ RenderTexID ].Texture ) ) Then exit;
 
   d3d_texArray[ RenderTexID ].Texture.GetLevelDesc( level, d );
-  src := pixels;
-  if psiUnpackRowLength = 0 Then
-    w := width
-  else
-    w := psiUnpackRowLength;
   if d.Pool = D3DPOOL_MANAGED Then
     begin
       a.Left   := xoffset;
@@ -1240,13 +1260,7 @@ begin
       a.Right  := xoffset + width - 1;
       a.Bottom := yoffset + height - 1;
       d3d_texArray[ RenderTexID ].Texture.LockRect( level, r, @a, 0 );
-      dst := r.pBits;
-      for i := 0 to height - 1 do
-        begin
-          Move( src^, dst^, width * 4 );
-          INC( src, w * 4 );
-          INC( dst, d.Width * 4 );
-        end;
+      d3d_FillTexture( pixels, r.pBits, width, height, d.Width * 4 );
       d3d_texArray[ RenderTexID ].Texture.UnlockRect( level );
     end;
 end;
@@ -1269,7 +1283,7 @@ begin
   if d.Pool = D3DPOOL_MANAGED Then
     begin
       d3d_texArray[ RenderTexID ].Texture.LockRect( level, r, nil, D3DLOCK_READONLY or D3DLOCK_DISCARD );
-      Move( r.pBits^, pixels^, d.Width * d.Height * 4 );
+      d3d_FillTexture( r.pBits, pixels, d.Width, d.Height );
       d3d_texArray[ RenderTexID ].Texture.UnlockRect( 0 );
     end else
       if d.Pool = D3DPOOL_DEFAULT Then
@@ -1285,7 +1299,7 @@ begin
           {$ENDIF}
 
           dst.LockRect( r, nil, D3DLOCK_READONLY );
-          Move( r.pBits^, pixels^, d.Width * d.Height * 4 );
+          d3d_FillTexture( r.pBits, pixels, d.Width, d.Height );
           dst.UnlockRect;
 
           dst := nil;
