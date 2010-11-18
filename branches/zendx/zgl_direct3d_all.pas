@@ -395,7 +395,7 @@ begin
   a.Bottom := y + height - 1;
   dst.LockRect( r, @a, D3DLOCK_READONLY );
   pSrc := Ptr( r.pBits );
-  pDst := Ptr( pixels + width * ( height - 1 ) * 4 );
+  pDst := Ptr( Ptr( pixels ) + width * ( height - 1 ) * 4 );
   for j := 0 to height - 1 do
     begin
       for i := 0 to width - 1 do
