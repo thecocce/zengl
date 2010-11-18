@@ -199,7 +199,7 @@ begin
   rtarget_Save( Surface );
   d3d_texArray[ Surface.ID ].Texture := nil;
   {$IFDEF USE_DIRECT3D8}
-  d3d_Device.CreateTexture( Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ), 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT,
+  d3d_Device.CreateTexture( Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ), 1, D3DUSAGE_RENDERTARGET, D3DFMT_X8R8G8B8, D3DPOOL_DEFAULT,
                             d3d_texArray[ Surface.ID ].Texture );
   d3d_Device.CreateDepthStencilSurface( Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ), d3d_Params.AutoDepthStencilFormat,
                             D3DMULTISAMPLE_NONE, Result.Next.Handle.Depth );
