@@ -312,7 +312,7 @@ begin
   Result.FramesX := tex.FramesX;
   Result.FramesY := tex.FramesY;
   GetMem( pABGR, tex.Width * tex.Height * 4 );
-  d3d_FillTexture( pData, pABGR, tex.Width, tex.Height, 0 );
+  d3d_FillTexture( pData, pABGR, tex.Width, tex.Height );
   atals_InsertDataToNode( Result, pABGR, tex.Width, tex.Width, tex.Height );
 
   FreeMemory( pData );
@@ -357,7 +357,7 @@ begin
   Result.FramesX := tex.FramesX;
   Result.FramesY := tex.FramesY;
   GetMem( pABGR, tex.Width * tex.Height * 4 );
-  d3d_FillTexture( pData, pABGR, tex.Width, tex.Height, 0 );
+  d3d_FillTexture( pData, pABGR, tex.Width, tex.Height );
   atals_InsertDataToNode( Result, pABGR, tex.Width, tex.Width, tex.Height );
 
   FreeMemory( pData );
