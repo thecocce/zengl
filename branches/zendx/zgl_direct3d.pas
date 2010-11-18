@@ -404,7 +404,7 @@ begin
       if not Assigned( d3d_texArray[ t.ID ].Texture ) Then
         begin
           {$IFDEF USE_DIRECT3D8}
-          d3d_Device.CreateTexture( Round( t.Width / t.U ), Round( t.Height / t.V ), 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT,
+          d3d_Device.CreateTexture( Round( t.Width / t.U ), Round( t.Height / t.V ), 1, D3DUSAGE_RENDERTARGET, D3DFMT_X8R8G8B8, D3DPOOL_DEFAULT,
                                     d3d_texArray[ t.ID ].Texture );
           {$ENDIF}
           {$IFDEF USE_DIRECT3D9}
