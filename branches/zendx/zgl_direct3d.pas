@@ -388,6 +388,7 @@ begin
   r := managerRTarget.First.Next;
   while Assigned( r ) do
     begin
+      if r.Flags and RT_USE_DEPTH > 0 Then
       {$IFDEF USE_DIRECT3D8}
       d3d_Device.CreateDepthStencilSurface( Round( r.Surface.Width / r.Surface.U ), Round( r.Surface.Height / r.Surface.V ), d3d_Params.AutoDepthStencilFormat,
                                             D3DMULTISAMPLE_NONE, r.Handle.Depth );

@@ -38,8 +38,10 @@ uses
 const
   RT_DEFAULT      = $00;
   RT_FULL_SCREEN  = $01;
-  RT_CLEAR_SCREEN = $02;
-  RT_SAVE_CONTENT = $04;
+  RT_USE_DEPTH    = $02;
+  RT_CLEAR_COLOR  = $04;
+  RT_CLEAR_DEPTH  = $08;
+  RT_SAVE_CONTENT = $10;
 
 type
   zglPD3DTarget = ^zglTD3DTarget;
@@ -201,14 +203,16 @@ begin
   {$IFDEF USE_DIRECT3D8}
   d3d_Device.CreateTexture( Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ), 1, D3DUSAGE_RENDERTARGET, D3DFMT_X8R8G8B8, D3DPOOL_DEFAULT,
                             d3d_texArray[ Surface.ID ].Texture );
-  d3d_Device.CreateDepthStencilSurface( Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ), d3d_Params.AutoDepthStencilFormat,
-                            D3DMULTISAMPLE_NONE, Result.Next.Handle.Depth );
+  if Flags and RT_USE_DEPTH > 0 Then
+    d3d_Device.CreateDepthStencilSurface( Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ), d3d_Params.AutoDepthStencilFormat,
+                                          D3DMULTISAMPLE_NONE, Result.Next.Handle.Depth );
   {$ENDIF}
   {$IFDEF USE_DIRECT3D9}
   d3d_Device.CreateTexture( Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ), 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT,
                             d3d_texArray[ Surface.ID ].Texture, nil );
-  d3d_Device.CreateDepthStencilSurface( Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ), d3d_Params.AutoDepthStencilFormat,
-                                        D3DMULTISAMPLE_NONE, 0, TRUE, Result.Next.Handle.Depth, nil );
+  if Flags and RT_USE_DEPTH > 0 Then
+    d3d_Device.CreateDepthStencilSurface( Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ), d3d_Params.AutoDepthStencilFormat,
+                                          D3DMULTISAMPLE_NONE, 0, TRUE, Result.Next.Handle.Depth, nil );
   {$ENDIF}
   rtarget_Restore( Surface );
 
@@ -271,13 +275,15 @@ begin
               Target.Handle.Depth := nil;
               {$IFDEF USE_DIRECT3D8}
               d3d_Device.CreateTexture( d.Width, d.Height, 1, D3DUSAGE_RENDERTARGET, d.Format, D3DPOOL_DEFAULT, d3d_texArray[ Target.Surface.ID ].Texture );
-              d3d_Device.CreateDepthStencilSurface( d.Width, d.Height, d3d_Params.AutoDepthStencilFormat, D3DMULTISAMPLE_NONE, Target.Handle.Depth );
+              if Target.Flags and RT_USE_DEPTH > 0 Then
+                d3d_Device.CreateDepthStencilSurface( d.Width, d.Height, d3d_Params.AutoDepthStencilFormat, D3DMULTISAMPLE_NONE, Target.Handle.Depth );
               {$ENDIF}
               {$IFDEF USE_DIRECT3D9}
               d3d_Device.CreateTexture( d.Width, d.Height, 1, D3DUSAGE_RENDERTARGET, d.Format, D3DPOOL_DEFAULT, d3d_texArray[ Target.Surface.ID ].Texture,
                                         nil );
-              d3d_Device.CreateDepthStencilSurface( d.Width, d.Height, d3d_Params.AutoDepthStencilFormat, D3DMULTISAMPLE_NONE, 0, TRUE, Target.Handle.Depth,
-                                                    nil );
+              if Target.Flags and RT_USE_DEPTH > 0 Then
+                d3d_Device.CreateDepthStencilSurface( d.Width, d.Height, d3d_Params.AutoDepthStencilFormat, D3DMULTISAMPLE_NONE, 0, TRUE, Target.Handle.Depth,
+                                                      nil );
               {$ENDIF}
               rtarget_Restore( Target.Surface );
             end;
@@ -286,14 +292,18 @@ begin
       d3d_Device.GetRenderTarget( d3d_Surface );
       d3d_Device.GetDepthStencilSurface( d3d_Stencil );
       d3d_texArray[ Target.Surface.ID ].Texture.GetSurfaceLevel( 0, lSurface );
-      d3d_Device.SetRenderTarget( lSurface, Target.Handle.Depth );
+      if Target.Flags and RT_USE_DEPTH > 0 Then
+        d3d_Device.SetRenderTarget( lSurface, nil );
+      else
+        d3d_Device.SetRenderTarget( lSurface, Target.Handle.Depth );
       {$ENDIF}
       {$IFDEF USE_DIRECT3D9}
       d3d_Device.GetDepthStencilSurface( d3d_Stencil );
       d3d_Device.GetRenderTarget( 0, d3d_Surface );
       d3d_texArray[ Target.Surface.ID ].Texture.GetSurfaceLevel( 0, lSurface );
       d3d_Device.SetRenderTarget( 0, lSurface );
-      d3d_Device.SetDepthStencilSurface( Target.Handle.Depth );
+      if Target.Flags and RT_USE_DEPTH > 0 Then
+        d3d_Device.SetDepthStencilSurface( Target.Handle.Depth );
       {$ENDIF}
 
       if cam2dApply Then
@@ -328,8 +338,10 @@ begin
           cam2d_Apply( @lPCam2D );
         end;
 
-      if Target.Flags and RT_CLEAR_SCREEN > 0 Then
+      if Target.Flags and RT_CLEAR_COLOR > 0 Then
         d3d_Device.Clear( 0, nil, D3DCLEAR_TARGET, D3DCOLOR_ARGB( 0, 0, 0, 0 ), 1, 0 );
+      if Target.Flags and RT_CLEAR_DEPTH > 0 Then
+        d3d_Device.Clear( 0, nil, D3DCLEAR_ZBUFFER, D3DCOLOR_ARGB( 0, 0, 0, 0 ), 1, 0 );
     end else
       if Assigned( lRTarget ) Then
         begin
