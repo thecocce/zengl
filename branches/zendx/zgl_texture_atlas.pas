@@ -318,6 +318,7 @@ begin
   FreeMemory( pABGR );
 end;
 
+function atlas_InsertFromMemory( const Atlas : zglPAtlas; const Memory : zglTMemory; const Extension : String; const TransparentColor, Flags : LongWord ) : zglPAtlasNode;
   var
     i     : Integer;
     pData : Pointer;
@@ -362,7 +363,7 @@ begin
   FreeMemory( pABGR );
 end;
 
-procedure atals_InsertDataToNode;( var Node : zglPAtlasNode; const pData : Pointer; const RowLength, Width, Height : Word );
+procedure atals_InsertDataToNode( var Node : zglPAtlasNode; const pData : Pointer; const RowLength, Width, Height : Word );
 begin
   glEnable( GL_TEXTURE_2D );
   glPixelStorei( GL_UNPACK_ROW_LENGTH, RowLength );
