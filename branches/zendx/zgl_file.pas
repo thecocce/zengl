@@ -66,7 +66,7 @@ uses
 var
   filePath : String = '';
 
-procedure file_Open;
+procedure file_Open( var FileHandle : zglTFile; const FileName : String; const Mode : Byte );
 begin
   case Mode of
     FOM_CREATE: FileHandle := CreateFile( PChar( filePath + FileName ), GENERIC_ALL, 0, nil, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0 );
@@ -75,12 +75,12 @@ begin
   end;
 end;
 
-function file_MakeDir;
+function file_MakeDir( const Directory : String ) : Boolean;
 begin
   Result := CreateDirectory( PChar( Directory ), nil );
 end;
 
-function file_Exists;
+function file_Exists( const FileName : String ) : Boolean;
   var
     fileHandle : zglTFile;
 begin
@@ -90,7 +90,7 @@ begin
     file_Close( fileHandle );
 end;
 
-function file_Seek;
+function file_Seek( const FileHandle : zglTFile; const Offset, Mode : LongWord ) : LongWord;
 begin
   case Mode of
     FSM_SET: Result := SetFilePointer( FileHandle, Offset, nil, FILE_BEGIN );
@@ -99,38 +99,38 @@ begin
   end;
 end;
 
-function file_GetPos;
+function file_GetPos( const FileHandle : zglTFile ) : LongWord;
 begin
   Result := SetFilePointer( FileHandle, 0, nil, FILE_CURRENT );
 end;
 
-function file_Read;
+function file_Read( const FileHandle : zglTFile; var Buffer; const Bytes : LongWord ) : LongWord;
 begin
   ReadFile( FileHandle, Buffer, Bytes, Result, nil );
 end;
 
-function file_Write;
+function file_Write( const FileHandle : zglTFile; const Buffer; const Bytes : LongWord ) : LongWord;
 begin
   WriteFile( FileHandle, Buffer, Bytes, Result, nil );
 end;
 
-function file_GetSize;
+function file_GetSize( const FileHandle : zglTFile ) : LongWord;
 begin
   Result := GetFileSize( FileHandle, nil );
 end;
 
-procedure file_Flush;
+procedure file_Flush( const FileHandle : zglTFile );
 begin
   FlushFileBuffers( FileHandle );
 end;
 
-procedure file_Close;
+procedure file_Close( var FileHandle : zglTFile );
 begin
   CloseHandle( FileHandle );
   FileHandle := 0;
 end;
 
-procedure file_Find;
+procedure file_Find( const Directory : String; var List : zglTFileList; const FindDir : Boolean );
   var
     First : THandle;
     FList : {$IFDEF FPC} WIN32FINDDATAA {$ELSE} WIN32_FIND_DATA {$ENDIF};
@@ -166,7 +166,7 @@ begin
     Result := copy( Str, l - ( l - pos ) + 1, ( l - pos ) );
 end;
 
-procedure file_GetName;
+procedure file_GetName( const FileName : String; var Result : String );
   var
     tmp : String;
 begin
@@ -177,19 +177,19 @@ begin
   Result := copy( Result, 1, length( Result ) - length( tmp ) - 1 );
 end;
 
-procedure file_GetExtension;
+procedure file_GetExtension( const FileName : String; var Result : String );
 begin
   GetStr( FileName, Result, '.', FALSE );
 end;
 
-procedure file_GetDirectory;
+procedure file_GetDirectory( const FileName : String; var Result : String );
 begin
   GetStr( FileName, Result, '/', TRUE );
   if Result = '' Then
     GetStr( FileName, Result, '\', TRUE );
 end;
 
-procedure file_SetPath;
+procedure file_SetPath( const Path : String );
 begin
   filePath := Path;
 end;

@@ -65,7 +65,7 @@ uses
   zgl_application,
   zgl_main;
 
-function timer_Add;
+function timer_Add( const OnTimer : Pointer; const Interval : LongWord ) : zglPTimer;
 begin
   Result := @managerTimer.First;
   while Assigned( Result.next ) do
@@ -82,7 +82,7 @@ begin
   INC( managerTimer.Count );
 end;
 
-procedure timer_Del;
+procedure timer_Del( var Timer : zglPTimer );
 begin
   if not Assigned( Timer ) Then exit;
 
@@ -139,7 +139,7 @@ begin
   timersToKill  := 0;
 end;
 
-function timer_GetTicks;
+function timer_GetTicks : Double;
   var
     t : int64;
 begin

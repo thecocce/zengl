@@ -136,7 +136,7 @@ var
   tSCount  : Integer;
   tScissor : array of array[ 0..3 ] of Integer;
 
-function d3d_Create;
+function d3d_Create : Boolean;
   var
     i, modeCount : Integer;
 begin
@@ -325,7 +325,7 @@ begin
   d3d        := nil;
 end;
 
-function d3d_Restore;
+function d3d_Restore : Boolean;
   var
     r : zglPRenderTarget;
     t : zglPTexture;
@@ -456,7 +456,7 @@ begin
   end;
 end;
 
-function d3d_CheckFSAA;
+function d3d_CheckFSAA : TD3DMultiSampleType;
   var
     fsaa : Integer;
 begin
@@ -492,7 +492,7 @@ begin
   Result := TD3DMultiSampleType( fsaa );
 end;
 
-function d3d_BeginScene;
+function d3d_BeginScene : Boolean;
   var
     hr : HRESULT;
 begin
@@ -558,7 +558,7 @@ begin
   scr_SetViewPort;
 end;
 
-procedure Set3DMode;
+procedure Set3DMode( const FOVY : Single = 45 );
 begin
   ogl_Mode := 3;
   ogl_FOVY := FOVY;
@@ -583,7 +583,7 @@ begin
     Set3DMode( ogl_FOVY );
 end;
 
-procedure zbuffer_SetDepth;
+procedure zbuffer_SetDepth( const zNear, zFar : Single );
 begin
   ogl_zNear := zNear;
   ogl_zFar  := zFar;
@@ -594,7 +594,7 @@ begin
   glClear( GL_DEPTH_BUFFER_BIT );
 end;
 
-procedure scissor_Begin;
+procedure scissor_Begin( X, Y, Width, Height : Integer );
 begin
   if b2d_Started Then
     batch2d_Flush;

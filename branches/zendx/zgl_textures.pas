@@ -130,7 +130,7 @@ uses
 
 procedure zeroce; begin end;
 
-function tex_Add;
+function tex_Add : zglPTexture;
 begin
   Result := @managerTexture.First;
   while Assigned( Result.next ) do
@@ -143,7 +143,7 @@ begin
   INC( managerTexture.Count.Items );
 end;
 
-procedure tex_Del;
+procedure tex_Del( var Texture : zglPTexture );
 begin
   if not Assigned( Texture ) Then exit;
 
@@ -159,7 +159,7 @@ begin
   DEC( managerTexture.Count.Items );
 end;
 
-procedure tex_Create;
+procedure tex_Create( var Texture : zglTTexture; var pData : Pointer );
 begin
   tex_CalcFlags( Texture, pData );
   if Texture.Flags and TEX_COMPRESS >= 1 Then
@@ -198,7 +198,7 @@ begin
   tex_CalcTexCoords( Texture );
 end;
 
-function tex_CreateZero;
+function tex_CreateZero( const Width, Height : Word; const Color, Flags : LongWord ) : zglPTexture;
   var
     i     : LongWord;
     pData : Pointer;
@@ -220,7 +220,7 @@ begin
   FreeMemory( pData );
 end;
 
-function tex_LoadFromFile;
+function tex_LoadFromFile( const FileName : String; const TransparentColor, Flags : LongWord ) : zglPTexture;
   var
     i     : Integer;
     pData : Pointer;
@@ -270,7 +270,7 @@ begin
   FreeMemory( pData );
 end;
 
-function tex_LoadFromMemory;
+function tex_LoadFromMemory( const Memory : zglTMemory; const Extension : String; const TransparentColor, Flags : LongWord ) : zglPTexture;
   var
     i     : Integer;
     pData : Pointer;
@@ -308,7 +308,7 @@ begin
   FreeMemory( pData );
 end;
 
-procedure tex_SetFrameSize;
+procedure tex_SetFrameSize( var Texture : zglPTexture; FrameWidth, FrameHeight : Word );
 begin
   if not Assigned( Texture ) Then exit;
 
@@ -317,7 +317,7 @@ begin
   tex_CalcTexCoords( Texture^ );
 end;
 
-function tex_SetMask;
+function tex_SetMask( var Texture : zglPTexture; const Mask : zglPTexture ) : zglPTexture;
   var
     i, j   : Integer;
     tData  : Pointer;
@@ -363,7 +363,7 @@ begin
   FreeMem( mData );
 end;
 
-procedure tex_CalcTexCoords;
+procedure tex_CalcTexCoords( var Texture : zglTTexture );
   var
     i : Integer;
     tX, tY, u, v : Single;
@@ -407,7 +407,7 @@ begin
     end;
 end;
 
-procedure tex_Filter;
+procedure tex_Filter( Texture : zglPTexture; const Flags : LongWord );
 begin
   Texture.Flags := Flags;
   glBindTexture( GL_TEXTURE_2D, Texture.ID );
@@ -465,7 +465,7 @@ begin
       end;
 end;
 
-procedure tex_SetAnisotropy;
+procedure tex_SetAnisotropy( const Level : Byte );
 begin
   if Level > ogl_MaxAnisotropy Then
     ogl_Anisotropy := ogl_MaxAnisotropy
@@ -473,7 +473,7 @@ begin
     ogl_Anisotropy := Level;
 end;
 
-procedure tex_CalcFlags;
+procedure tex_CalcFlags( var Texture : zglTTexture; var pData : Pointer );
 begin
   if Texture.Flags and TEX_GRAYSCALE > 0 Then
     tex_CalcGrayScale( pData, Texture.Width, Texture.Height );
@@ -485,7 +485,7 @@ begin
     tex_CalcPOT( pData, Texture.Width, Texture.Height, Texture.U, Texture.V );
 end;
 
-procedure tex_CalcPOT;
+procedure tex_CalcPOT( var pData : Pointer; var Width, Height : Word; var U, V : Single );
   var
     i, j : LongWord;
     w, h : Word;
@@ -521,7 +521,7 @@ begin
   SetLength( data, 0 );
 end;
 
-procedure tex_CalcGrayScale;
+procedure tex_CalcGrayScale( var pData : Pointer; const Width, Height : Word );
   var
     i    : Integer;
     p    : Ptr;
@@ -538,7 +538,7 @@ begin
     end;
 end;
 
-procedure tex_CalcInvert;
+procedure tex_CalcInvert( var pData : Pointer; const Width, Height : Word );
   var
     i : Integer;
     p : Ptr;
@@ -552,7 +552,7 @@ begin
     end;
 end;
 
-procedure tex_CalcTransparent;
+procedure tex_CalcTransparent( var pData : Pointer; const TransparentColor : LongWord; const Width, Height : Word );
   var
     i       : Integer;
     r, g, b : Byte;
@@ -642,7 +642,7 @@ begin
       end;
 end;
 
-procedure tex_SetData;
+procedure tex_SetData( const Texture : zglPTexture; const pData : Pointer; const X, Y, Width, Height : Word; const Stride : Integer = 0 );
 begin
   if ( not Assigned( Texture ) ) or ( not Assigned( pData ) ) Then
     exit;
@@ -661,7 +661,7 @@ begin
   glDisable( GL_TEXTURE_2D );
 end;
 
-procedure tex_GetData;
+procedure tex_GetData( const Texture : zglPTexture; var pData : Pointer );
 begin
   if not Assigned( Texture ) Then
     begin

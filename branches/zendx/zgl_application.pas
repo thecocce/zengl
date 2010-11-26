@@ -176,7 +176,7 @@ begin
     end;
 end;
 
-function app_ProcessMessages;
+function app_ProcessMessages( hWnd : HWND; Msg : UINT; wParam : WPARAM; lParam : LPARAM ) : LRESULT; stdcall;
   var
     i   : Integer;
     len : Integer;

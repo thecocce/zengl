@@ -60,7 +60,7 @@ uses
   zgl_direct3d_all,
   zgl_render_2d;
 
-procedure cam2d_Set;
+procedure cam2d_Set( const Camera : zglPCamera2D );
 begin
   cam2dGlobal := Camera;
   if Camera = nil Then
@@ -77,7 +77,7 @@ begin
       end;
 end;
 
-procedure cam2d_Apply;
+procedure cam2d_Apply( const Camera : zglPCamera2D );
 begin
   batch2d_Flush();
 
@@ -111,7 +111,7 @@ begin
       end;
 end;
 
-procedure cam2d_Vertex2f;
+procedure cam2d_Vertex2f( X, Y : Single );
   var
     xa, ya : Single;
 begin
@@ -139,7 +139,7 @@ begin
       glVertex2f( X, Y );
 end;
 
-procedure cam2d_Vertex2fv;
+procedure cam2d_Vertex2fv( V : Pointer );
   var
     v2  : array[ 0..1 ] of Single;
     v2a : array[ 0..1 ] of Single;

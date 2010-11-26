@@ -139,7 +139,6 @@ procedure snd_SetVolume( const Sound : zglPSound; const ID : Integer; const Volu
 procedure snd_SetSpeed( const Sound : zglPSound; const ID : Integer; const Speed : Single );
 function  snd_Get( const Sound : zglPSound; const ID, What : Integer ) : Integer;
 
-function  snd_GetStreamID : Integer;
 function  snd_PlayFile( const FileName : String; const Loop : Boolean = FALSE ) : Integer;
 procedure snd_PauseFile( const ID : Integer );
 procedure snd_StopFile( const ID : Integer );
@@ -276,7 +275,7 @@ begin
       end;
 end;
 
-function snd_Init;
+function snd_Init : Boolean;
   var
     i : Integer;
 begin
@@ -415,7 +414,7 @@ begin
 {$ENDIF}
 end;
 
-function snd_Add;
+function snd_Add( const SourceCount : Integer ) : zglPSound;
   {$IFDEF USE_OPENAL}
   var
     i : Integer;
@@ -445,7 +444,7 @@ begin
   INC( managerSound.Count.Items );
 end;
 
-procedure snd_Del;
+procedure snd_Del( var Sound : zglPSound );
   {$IFNDEF USE_OPENAL}
   var
     i : Integer;
@@ -473,7 +472,7 @@ begin
   DEC( managerSound.Count.Items );
 end;
 
-function snd_LoadFromFile;
+function snd_LoadFromFile( const FileName : String; const SourceCount : Integer = 8 ) : zglPSound;
   var
     i   : Integer;
     f   : LongWord;
@@ -517,7 +516,7 @@ begin
   log_Add( 'Sound loaded: "' + FileName + '"' );
 end;
 
-function snd_LoadFromMemory;
+function snd_LoadFromMemory( const Memory : zglTMemory; const Extension : String; const SourceCount : Integer = 8 ) : zglPSound;
   var
     i : Integer;
     f : LongWord;
@@ -550,7 +549,7 @@ begin
 {$ENDIF}
 end;
 
-function snd_Play;
+function snd_Play( const Sound : zglPSound; const Loop : Boolean = FALSE; const X : Single = 0; const Y : Single = 0; const Z : Single = 0 ) : Integer;
   var
     i : Integer;
     {$IFNDEF USE_OPENAL}
@@ -632,7 +631,7 @@ begin
 {$ENDIF}
 end;
 
-procedure snd_Stop;
+procedure snd_Stop( const Sound : zglPSound; const ID : Integer );
   var
     i, j : Integer;
     snd : zglPSound;
@@ -675,7 +674,7 @@ begin
         end;
 end;
 
-procedure snd_SetPos;
+procedure snd_SetPos( const Sound : zglPSound; const ID : Integer; const X, Y, Z : Single );
   var
     i, j : Integer;
     snd  : zglPSound;
@@ -758,7 +757,7 @@ begin
         end;
 end;
 
-procedure snd_SetVolume;
+procedure snd_SetVolume( const Sound : zglPSound; const ID : Integer; const Volume : Single );
   var
     i, j : Integer;
     snd  : zglPSound;
@@ -841,7 +840,7 @@ begin
         end;
 end;
 
-procedure snd_SetSpeed;
+procedure snd_SetSpeed( const Sound : zglPSound; const ID : Integer; const Speed : Single );
   var
     i, j : Integer;
     snd  : zglPSound;
@@ -903,7 +902,7 @@ begin
         end;
 end;
 
-function snd_Get;
+function snd_Get( const Sound : zglPSound; const ID, What : Integer ) : Integer;
 begin
   if not sndInitialized Then exit;
 
@@ -928,7 +927,7 @@ begin
       end;
 end;
 
-function snd_GetStreamID;
+function snd_GetStreamID : Integer;
   var
     i : Integer;
 begin
@@ -941,7 +940,7 @@ begin
   Result := -1;
 end;
 
-function snd_PlayFile;
+function snd_PlayFile( const FileName : String; const Loop : Boolean = FALSE ) : Integer;
   var
     i         : Integer;
     ext       : String;
@@ -1051,7 +1050,7 @@ begin
 {$ENDIF}
 end;
 
-procedure snd_PauseFile;
+procedure snd_PauseFile( const ID : Integer );
 begin
   if ( not sndInitialized ) or ( not Assigned( sfStream[ ID ]._decoder ) ) or
      ( not sfStream[ ID ]._playing ) or ( sfStream[ ID ]._paused ) or ( sfStream[ ID ]._waiting ) Then exit;
@@ -1066,7 +1065,7 @@ begin
 {$ENDIF}
 end;
 
-procedure snd_StopFile;
+procedure snd_StopFile( const ID : Integer );
 begin
   if ( not sndInitialized ) or ( not Assigned( sfStream[ ID ]._decoder ) ) or ( not sfStream[ ID ]._playing ) Then exit;
 
@@ -1078,7 +1077,7 @@ begin
 {$ENDIF}
 end;
 
-procedure snd_ResumeFile;
+procedure snd_ResumeFile( const ID : Integer );
 begin
   if ( not sndInitialized ) or ( not Assigned( sfStream[ ID ]._decoder ) ) or
      ( not sfStream[ ID ]._playing ) or ( not sfStream[ ID ]._paused ) or ( sfStream[ ID ]._waiting ) Then exit;
@@ -1092,7 +1091,7 @@ begin
 {$ENDIF}
 end;
 
-function snd_ProcFile;
+function snd_ProcFile( data : Pointer ) : LongInt; register;
   var
     id        : Integer;
     _end      : Boolean;

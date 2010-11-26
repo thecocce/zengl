@@ -24,7 +24,8 @@ unit zgl_log;
 
 interface
 uses
-  zgl_file;
+  zgl_file,
+  zgl_utils;
 
 procedure log_Init;
 procedure log_Close;
@@ -41,8 +42,7 @@ implementation
 uses
   zgl_application,
   zgl_main,
-  zgl_timers,
-  zgl_utils;
+  zgl_timers;
 
 procedure log_Init;
   var
@@ -71,7 +71,7 @@ begin
     file_Close( log );
 end;
 
-procedure log_Add;
+procedure log_Add( const Message : AnsiString; const Timings : Boolean = TRUE );
   var
     str : AnsiString;
 begin
@@ -94,7 +94,7 @@ begin
     file_Flush( log );
 end;
 
-function log_Timing;
+function log_Timing : AnsiString;
   var
     v : LongWord;
 begin

@@ -119,7 +119,7 @@ begin
     end;
 end;
 
-function scr_Create;
+function scr_Create : Boolean;
   var
     settings : DEVMODE;
 begin
@@ -177,6 +177,7 @@ end;
 
 procedure scr_Reset;
 begin
+  scr_Changing := TRUE;
   ChangeDisplaySettings( DEVMODE( nil^ ), 0 );
 end;
 
@@ -190,7 +191,7 @@ procedure scr_Flush;
 begin
 end;
 
-procedure scr_SetOptions;
+procedure scr_SetOptions( const Width, Height, Refresh : Word; const FullScreen, VSync : Boolean );
 begin
   scr_Changing   := TRUE;
   ogl_Width      := Width;
@@ -228,7 +229,7 @@ begin
     wnd_Update();
 end;
 
-procedure scr_CorrectResolution;
+procedure scr_CorrectResolution( const Width, Height : Word );
 begin
   scr_ResW  := Width;
   scr_ResH  := Height;
@@ -303,14 +304,14 @@ begin
       end;
 end;
 
-procedure scr_SetVSync;
+procedure scr_SetVSync( const VSync : Boolean );
 begin
   scr_VSync := VSync;
   if wnd_Handle <> 0 Then
     wnd_Update();
 end;
 
-procedure scr_SetFSAA;
+procedure scr_SetFSAA( const FSAA : Byte );
 begin
   if ogl_FSAA = FSAA Then exit;
   ogl_FSAA := FSAA;
@@ -324,7 +325,7 @@ begin
     wnd_Update;
 end;
 
-procedure scr_ReadPixels;
+procedure scr_ReadPixels( var pData : Pointer; const X, Y, Width, Height : Word );
 begin
   batch2d_Flush();
   GetMem( pData, Width * Height * 4 );

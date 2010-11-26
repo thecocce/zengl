@@ -360,7 +360,7 @@ var
   ScissorW : Integer;
   ScissorH : Integer;
 
-procedure glReadPixels;
+procedure glReadPixels(x, y: GLint; width, height: GLsizei; format, atype: GLenum; pixels: Pointer);
   var
     i, j : Integer;
     pSrc, pDst : Ptr;
@@ -415,7 +415,7 @@ begin
   src := nil;
 end;
 
-procedure glClear;
+procedure glClear(mask: GLbitfield);
 begin
   glViewPort( 0, 0, wnd_Width, wnd_Height );
   if mask and GL_DEPTH_BUFFER_BIT > 0 Then
@@ -427,7 +427,7 @@ begin
   SetCurrentMode;
 end;
 
-procedure glBegin;
+procedure glBegin(mode: GLenum);
 begin
   bTVCount := 0;
   bPVCount := 0;
@@ -506,7 +506,7 @@ begin
   {$ENDIF}
 end;
 
-procedure glEnable;
+procedure glEnable(cap: GLenum);
 begin
   case cap of
     GL_TEXTURE_2D: RenderTextured := TRUE;
@@ -524,7 +524,7 @@ begin
   end;
 end;
 
-procedure glDisable;
+procedure glDisable(cap: GLenum);
 begin
   case cap of
     GL_TEXTURE_2D:
@@ -550,7 +550,7 @@ begin
   end;
 end;
 
-procedure glViewport;
+procedure glViewport(x, y: GLint; width, height: GLsizei);
 begin
   if not ScissorEnabled Then
     begin
@@ -588,13 +588,13 @@ begin
       end;
 end;
 
-procedure glOrtho;
+procedure glOrtho(left, right, bottom, top, zNear, zFar: GLdouble);
 begin
   glFrustum( -left - 0.5, -right - 0.5, -bottom - 0.5, -top - 0.5, zNear, zFar );
   d3d_Device.SetTransform( d3d_MatrixMode, d3d_Matrices[ LongWord( d3d_MatrixMode ) ] );
 end;
 
-procedure glScissor;
+procedure glScissor(x, y: GLint; width, height: GLsizei);
 begin
   ScissorX := x;
   ScissorY := -( y + height - wnd_Height );
@@ -620,22 +620,22 @@ begin
   glViewPort( 0, 0, 0, 0 );
 end;
 
-procedure glColor4ub;
+procedure glColor4ub(red, green, blue, alpha: GLubyte); {$IFDEF USE_INLINE} inline; {$ENDIF}
 begin
   bColor := D3DCOLOR_ARGB( alpha, red, green, blue );
 end;
 
-procedure glColor4ubv;
+procedure glColor4ubv(v: PGLubyte); {$IFDEF USE_INLINE} inline; {$ENDIF}
 begin
   bColor := D3DCOLOR_ARGB( PByte( Ptr( v ) + 3 )^, PByte( v )^, PByte( Ptr( v ) + 1 )^, PByte( Ptr( v ) + 2 )^ );
 end;
 
-procedure glColor4f;
+procedure glColor4f(red, green, blue, alpha: GLfloat); {$IFDEF USE_INLINE} inline; {$ENDIF}
 begin
   bColor := D3DCOLOR_ARGB( Round( alpha * 255 ), Round( red * 255 ), Round( green * 255 ), Round( blue * 255 ) );
 end;
 
-procedure glColorMask;
+procedure glColorMask(red, green, blue, alpha: GLboolean); {$IFDEF USE_INLINE} inline; {$ENDIF}
 begin
   d3d_Device.SetRenderState( D3DRS_COLORWRITEENABLE, D3DCOLORWRITEENABLE_RED   * red or
                                                      D3DCOLORWRITEENABLE_GREEN * green or
@@ -643,7 +643,7 @@ begin
                                                      D3DCOLORWRITEENABLE_ALPHA * alpha );
 end;
 
-procedure glAlphaFunc;
+procedure glAlphaFunc(func: GLenum; ref: GLclampf);
   var
     value : LongWord;
 begin
@@ -662,7 +662,7 @@ begin
   d3d_Device.SetRenderState( D3DRS_ALPHAFUNC, value );
 end;
 
-procedure glBlendFunc;
+procedure glBlendFunc(sfactor, dfactor: GLenum);
   var
     src, dest : LongWord;
 begin
@@ -715,7 +715,7 @@ begin
   DEC( pushCount );
 end;
 
-procedure glMatrixMode;
+procedure glMatrixMode(mode: GLenum);
 begin
   case mode of
     GL_MODELVIEW:  d3d_MatrixMode := D3DTS_VIEW;
@@ -762,7 +762,7 @@ begin
   d3d_Device.SetTransform( d3d_MatrixMode, d3d_Matrices[ LongWord( d3d_MatrixMode ) ] );
 end;
 
-procedure glFrustum;
+procedure glFrustum(left, right, bottom, top, zNear, zFar: GLdouble);
 begin
   with d3d_Matrices[ LongWord( d3d_MatrixMode ) ] do
     begin
@@ -788,7 +788,7 @@ begin
     end;
 end;
 
-procedure glRotatef;
+procedure glRotatef(angle, x, y, z: GLfloat);
   var
     sa, ca : Single;
     m      : TD3DMatrix;
@@ -841,7 +841,7 @@ begin
   d3d_Device.SetTransform( d3d_MatrixMode, d3d_Matrices[ LongWord( d3d_MatrixMode ) ] );
 end;
 
-procedure glScalef;
+procedure glScalef(x, y, z: GLfloat);
 begin
   with d3d_Matrices[ LongWord( d3d_MatrixMode ) ] do
     begin
@@ -863,7 +863,7 @@ begin
   d3d_Device.SetTransform( d3d_MatrixMode, d3d_Matrices[ LongWord( d3d_MatrixMode ) ] );
 end;
 
-procedure glTranslatef;
+procedure glTranslatef(x, y, z: GLfloat);
 begin
   with d3d_Matrices[ LongWord( d3d_MatrixMode ) ] do
     begin
@@ -875,7 +875,7 @@ begin
   d3d_Device.SetTransform( d3d_MatrixMode, d3d_Matrices[ LongWord( d3d_MatrixMode ) ] );
 end;
 
-procedure glVertex2f;
+procedure glVertex2f(x, y: GLfloat);
 begin
   if RenderTextured Then
     begin
@@ -930,7 +930,7 @@ begin
       end;
 end;
 
-procedure glVertex2fv;
+procedure glVertex2fv(v: PGLfloat);
 begin
   if RenderTextured Then
     begin
@@ -985,7 +985,7 @@ begin
       end;
 end;
 
-procedure glBindTexture;
+procedure glBindTexture(target: GLenum; texture: GLuint);
 begin
   if texture >= d3d_texCount Then
     begin
@@ -1031,7 +1031,7 @@ begin
   d3d_Device.SetTexture( 0, d3d_texArray[ texture ].Texture );
 end;
 
-procedure glGenTextures;
+procedure glGenTextures(n: GLsizei; textures: PGLuint);
   var
     i : Integer;
 begin
@@ -1053,7 +1053,7 @@ begin
   textures^ := RenderTexID;
 end;
 
-procedure glDeleteTextures;
+procedure glDeleteTextures(n: GLsizei; const textures: PGLuint);
 begin
   if textures^ >= d3d_texCount Then exit;
 
@@ -1064,7 +1064,7 @@ begin
   textures^ := 0;
 end;
 
-procedure glTexParameterf;
+procedure glTexParameterf(target: GLenum; pname: GLenum; param: GLfloat);
   label _exit;
   var
     {$IFDEF USE_DIRECT3D8}
@@ -1141,7 +1141,7 @@ _exit:
     end;
 end;
 
-procedure glTexParameteri;
+procedure glTexParameteri(target: GLenum; pname: GLenum; param: GLint);
   var
     {$IFDEF USE_DIRECT3D8}
     _type : TD3DTextureStageStateType;
@@ -1179,7 +1179,7 @@ begin
     d3d_texArray[ RenderTexID ].Wrap := lWrap;
 end;
 
-procedure d3d_FillTexture;
+procedure d3d_FillTexture( const Src, Dst : Pointer; const Width, Height : Integer; const DstStride : Integer = 0 );
   var
     d, s : Ptr;
     i, j, w, stride : Integer;
@@ -1210,14 +1210,14 @@ begin
     end;
 end;
 
-procedure glPixelStorei;
+procedure glPixelStorei(pname: GLenum; param: GLint);
 begin
   case pname of
     GL_UNPACK_ROW_LENGTH: psiUnpackRowLength := param;
   end;
 end;
 
-procedure glTexImage2D;
+procedure glTexImage2D(target: GLenum; level, internalformat: GLint; width, height: GLsizei; border: GLint; format, atype: GLenum; const pixels: Pointer);
   var
     r : TD3DLockedRect;
 begin
@@ -1243,7 +1243,7 @@ begin
     end;
 end;
 
-procedure glTexSubImage2D;
+procedure glTexSubImage2D(target: GLenum; level, xoffset, yoffset: GLint; width, height: GLsizei; format, atype: GLenum; const pixels: Pointer);
   var
     r : TD3DLockedRect;
     a : TRect;
@@ -1265,7 +1265,7 @@ begin
     end;
 end;
 
-procedure glGetTexImage;
+procedure glGetTexImage(target: GLenum; level: GLint; format: GLenum; atype: GLenum; pixels: Pointer);
   var
     r : TD3DLockedRect;
     d : TD3DSurface_Desc;
@@ -1307,11 +1307,11 @@ begin
         end;
 end;
 
-procedure glCopyTexSubImage2D;
+procedure glCopyTexSubImage2D(target: GLenum; level, xoffset, yoffset, x, y: GLint; width, height: GLsizei);
 begin
 end;
 
-procedure glTexEnvi;
+procedure glTexEnvi(target: GLenum; pname: GLenum; param: GLint);
   var
     _type : TD3DTextureStageStateType;
     value : LongWord;
@@ -1353,7 +1353,7 @@ begin
   d3d_Device.SetTextureStageState( 0, _type, value );
 end;
 
-function gluBuild2DMipmaps;
+function gluBuild2DMipmaps(target: GLenum; components, width, height: GLint; format, atype: GLenum; const data: Pointer): Integer;
   var
     r : TD3DLockedRect;
 begin
@@ -1375,7 +1375,7 @@ begin
     end;
 end;
 
-procedure glTexCoord2f;
+procedure glTexCoord2f(s, t: GLfloat);
 begin
   if bTVCount + 1 > length( bTVertices ) Then SetLength( bTVertices, bTVCount + 1 );
   bTVertices[ bTVCount ].u := s;
@@ -1387,7 +1387,7 @@ begin
     newTriangle := TRUE;
 end;
 
-procedure glTexCoord2fv;
+procedure glTexCoord2fv(v: PGLfloat);
 begin
   if bTVCount + 1 > length( bTVertices ) Then SetLength( bTVertices, bTVCount + 1 );
   bTVertices[ bTVCount ].u := zglPPoint2D( v ).X;
