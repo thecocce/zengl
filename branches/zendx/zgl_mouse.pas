@@ -65,7 +65,7 @@ uses
   zgl_window,
   zgl_screen;
 
-function mouse_X;
+function mouse_X : Integer;
 begin
   if getcurpos Then
     begin
@@ -79,7 +79,7 @@ begin
   Result := Round( ( Result - scr_AddCX ) / scr_ResCX );
 end;
 
-function mouse_Y;
+function mouse_Y : Integer;
 begin
   if getcurpos Then
     begin
@@ -93,19 +93,19 @@ begin
   Result := Round( ( Result - scr_AddCY ) / scr_ResCY );
 end;
 
-function mouse_DX;
+function mouse_DX : Integer;
 begin
   getcurpos := TRUE;
   Result := mouse_X() - wnd_Width div 2;
 end;
 
-function mouse_DY;
+function mouse_DY : Integer;
 begin
   getcurpos := TRUE;
   Result := mouse_Y() - wnd_Height div 2;
 end;
 
-function mouse_Down;
+function mouse_Down( const Button : Byte ) : Boolean;
 begin
   case Button of
     M_BLEFT:   Result := GetAsyncKeyState( VK_LBUTTON ) and $8000 <> 0;
@@ -114,22 +114,22 @@ begin
   end;
 end;
 
-function mouse_Up;
+function mouse_Up( const Button : Byte ) : Boolean;
 begin
   Result := mouseUp[ Button ];
 end;
 
-function mouse_Click;
+function mouse_Click( const Button : Byte ) : Boolean;
 begin
   Result := mouseClick[ Button ];
 end;
 
-function mouse_DblClick;
+function mouse_DblClick( const Button : Byte ) : Boolean;
 begin
   Result := mouseDblClick[ Button ];
 end;
 
-function mouse_Wheel;
+function mouse_Wheel( const Axis : Byte ) : Boolean;
 begin
   Result := mouseWheel[ Axis ];
 end;
