@@ -28,7 +28,7 @@ uses
   zgl_types;
 
 const
-  cs_ZenGL = 'ZenGL 0.2 RC5';
+  cs_ZenGL = 'ZenGL 0.2 RC6';
 
   // zgl_Reg
   SYS_APP_INIT           = $000001;
@@ -417,7 +417,7 @@ begin
   Mem := nil;
 end;
 
-procedure zgl_FreeStr;
+procedure zgl_FreeStr( var Str : String );
 begin
   Str := '';
 end;
