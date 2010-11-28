@@ -124,7 +124,7 @@ function scr_Create : Boolean;
     settings : DEVMODE;
 begin
   Result := FALSE;
-  scr_Init;
+  scr_Init();
   if scr_Desktop.dmBitsPerPel <> 32 Then
     begin
       settings              := scr_Desktop;
@@ -198,12 +198,8 @@ begin
   ogl_Height     := Height;
   wnd_Width      := Width;
   wnd_Height     := Height;
-  scr_Width      := Width;
-  scr_Height     := Height;
   wnd_FullScreen := FullScreen;
   scr_Vsync      := VSync;
-  if not app_Initialized Then exit;
-  scr_SetVSync( scr_VSync );
 
   if Height >= zgl_Get( DESKTOP_HEIGHT ) Then
     wnd_FullScreen := TRUE;
@@ -217,6 +213,9 @@ begin
         scr_Height  := zgl_Get( DESKTOP_HEIGHT );
         scr_Refresh := GetDisplayRefresh;
       end;
+
+  if not app_Initialized Then exit;
+  scr_SetVSync( scr_VSync );
 
   if Assigned( d3d_Device ) Then
     glClear( GL_COLOR_BUFFER_BIT );
