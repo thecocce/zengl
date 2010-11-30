@@ -64,7 +64,7 @@ const
 function  InitOpenAL : Boolean;
 procedure FreeOpenAL;
 
-function oal_GetSource( const Source : Pointer ) : LongWord;
+function oal_GetSource( Source : Pointer ) : LongWord;
 
 type
   PALCdevice = ^ALCdevice;
@@ -168,7 +168,7 @@ begin
   dlclose( oal_Library );
 end;
 
-function oal_GetSource( const Source : Pointer ) : LongWord;
+function oal_GetSource( Source : Pointer ) : LongWord;
   var
     i, state : Integer;
 begin

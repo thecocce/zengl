@@ -34,9 +34,9 @@ type
     Zoom  : zglTPoint2D;
 end;
 
-procedure cam2d_Set( const Camera : zglPCamera2D );
+procedure cam2d_Set( Camera : zglPCamera2D );
 function  cam2d_Get : zglPCamera2D;
-procedure cam2d_Apply( const Camera : zglPCamera2D );
+procedure cam2d_Apply( Camera : zglPCamera2D );
 
 procedure cam2d_Vertex2f( X, Y : Single );
 procedure cam2d_Vertex2fv( V : Pointer );
@@ -61,7 +61,7 @@ uses
   zgl_direct3d_all,
   zgl_render_2d;
 
-procedure cam2d_Set( const Camera : zglPCamera2D );
+procedure cam2d_Set( Camera : zglPCamera2D );
 begin
   cam2dGlobal := Camera;
   if Camera = nil Then
@@ -83,7 +83,7 @@ begin
   Result := cam2dGlobal;
 end;
 
-procedure cam2d_Apply( const Camera : zglPCamera2D );
+procedure cam2d_Apply( Camera : zglPCamera2D );
 begin
   batch2d_Flush();
 

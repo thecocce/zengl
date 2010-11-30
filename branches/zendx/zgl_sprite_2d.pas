@@ -42,11 +42,11 @@ type
     Tiles : array of array of Integer;
   end;
 
-procedure texture2d_Draw( const Texture : zglPTexture; const TexCoord : array of zglTPoint2D; X, Y, W, H, Angle : Single; const Alpha : Byte = 255; const FX : LongWord = FX_BLEND );
-procedure ssprite2d_Draw( const Texture : zglPTexture; X, Y, W, H, Angle : Single; const Alpha : Byte = 255; const FX : LongWord = FX_BLEND );
-procedure asprite2d_Draw( const Texture : zglPTexture; X, Y, W, H, Angle : Single; Frame : Word; const Alpha : Byte = 255; const FX : LongWord = FX_BLEND );
-procedure csprite2d_Draw( const Texture : zglPTexture; X, Y, W, H, Angle : Single; const CutRect : zglTRect; const Alpha : Byte = 255; const FX : LongWord = FX_BLEND );
-procedure tiles2d_Draw( const Texture : zglPTexture; const X, Y : Single; const Tiles : zglTTiles2D; const Alpha : Byte = 255; const FX : LongWord = FX_BLEND );
+procedure texture2d_Draw( Texture : zglPTexture; const TexCoord : array of zglTPoint2D; X, Y, W, H, Angle : Single; Alpha : Byte = 255; FX : LongWord = FX_BLEND );
+procedure ssprite2d_Draw( Texture : zglPTexture; X, Y, W, H, Angle : Single; Alpha : Byte = 255; FX : LongWord = FX_BLEND );
+procedure asprite2d_Draw( Texture : zglPTexture; X, Y, W, H, Angle : Single; Frame : Word; Alpha : Byte = 255; FX : LongWord = FX_BLEND );
+procedure csprite2d_Draw( Texture : zglPTexture; X, Y, W, H, Angle : Single; const CutRect : zglTRect; Alpha : Byte = 255; FX : LongWord = FX_BLEND );
+procedure tiles2d_Draw( Texture : zglPTexture; X, Y : Single; const Tiles : zglTTiles2D; Alpha : Byte = 255; FX : LongWord = FX_BLEND );
 
 implementation
 uses
@@ -61,7 +61,7 @@ uses
 const
   FLIP_TEXCOORD : array[ 0..3 ] of zglTTexCoordIndex = ( ( 0, 1, 2, 3 ), ( 1, 0, 3, 2 ), ( 3, 2, 1, 0 ), ( 2, 3, 0, 1 ) );
 
-procedure texture2d_Draw( const Texture : zglPTexture; const TexCoord : array of zglTPoint2D; X, Y, W, H, Angle : Single; const Alpha : Byte = 255; const FX : LongWord = FX_BLEND );
+procedure texture2d_Draw( Texture : zglPTexture; const TexCoord : array of zglTPoint2D; X, Y, W, H, Angle : Single; Alpha : Byte = 255; FX : LongWord = FX_BLEND );
   var
     quad : array[ 0..3 ] of zglTPoint2D;
     tci  : zglPTexCoordIndex;
@@ -236,7 +236,7 @@ begin
     end;
 end;
 
-procedure ssprite2d_Draw( const Texture : zglPTexture; X, Y, W, H, Angle : Single; const Alpha : Byte = 255; const FX : LongWord = FX_BLEND );
+procedure ssprite2d_Draw( Texture : zglPTexture; X, Y, W, H, Angle : Single; Alpha : Byte = 255; FX : LongWord = FX_BLEND );
   var
     quad : array[ 0..3 ] of zglTPoint2D;
     p    : zglPPoint2D;
@@ -413,7 +413,7 @@ begin
     end;
 end;
 
-procedure asprite2d_Draw( const Texture : zglPTexture; X, Y, W, H, Angle : Single; Frame : Word; const Alpha : Byte = 255; const FX : LongWord = FX_BLEND );
+procedure asprite2d_Draw( Texture : zglPTexture; X, Y, W, H, Angle : Single; Frame : Word; Alpha : Byte = 255; FX : LongWord = FX_BLEND );
   var
     quad : array[ 0..3 ] of zglTPoint2D;
     p    : zglPPoint2D;
@@ -597,7 +597,7 @@ begin
     end;
 end;
 
-procedure csprite2d_Draw( const Texture : zglPTexture; X, Y, W, H, Angle : Single; const CutRect : zglTRect; const Alpha : Byte = 255; const FX : LongWord = FX_BLEND );
+procedure csprite2d_Draw( Texture : zglPTexture; X, Y, W, H, Angle : Single; const CutRect : zglTRect; Alpha : Byte = 255; FX : LongWord = FX_BLEND );
   var
     quad : array[ 0..3 ] of zglTPoint2D;
     p    : zglPPoint2D;
@@ -782,7 +782,7 @@ begin
     end;
 end;
 
-procedure tiles2d_Draw( const Texture : zglPTexture; const X, Y : Single; const Tiles : zglTTiles2D; const Alpha : Byte = 255; const FX : LongWord = FX_BLEND );
+procedure tiles2d_Draw( Texture : zglPTexture; X, Y : Single; const Tiles : zglTTiles2D; Alpha : Byte = 255; FX : LongWord = FX_BLEND );
   var
     w, h, tX, tY, tU, tV, u, v   : Single;
     i, j, aI, aJ, bI, bJ, tI, tJ : Integer;

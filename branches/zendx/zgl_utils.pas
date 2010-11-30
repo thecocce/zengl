@@ -31,11 +31,11 @@ const
   LIB_ERROR  = 0;
   FILE_ERROR = 0;
 
-function u_IntToStr( const Value : Integer ) : String;
+function u_IntToStr( Value : Integer ) : String;
 function u_StrToInt( const Value : String ) : Integer;
-function u_FloatToStr( const Value : Single; const Digits : Integer = 2 ) : String;
+function u_FloatToStr( Value : Single; Digits : Integer = 2 ) : String;
 function u_StrToFloat( const Value : String ) : Single;
-function u_BoolToStr( const Value : Boolean ) : String;
+function u_BoolToStr( Value : Boolean ) : String;
 function u_StrToBool( const Value : String ) : Boolean;
 
 // Только для английских символов попадающих в диапазон 0..127
@@ -46,16 +46,16 @@ procedure u_Backspace( var Str : String );
 // Возвращает количество символов в utf8-строке
 function  u_Length( const Str : String ) : Integer;
 // Возвращает количество слов, разделеных разделителем d
-function  u_Words( const Str : String; const D : Char = ' ' ) : Integer;
-function  u_GetWord( const Str : String; const N : Integer; const D : Char = ' ' ) : String;
+function  u_Words( const Str : String; D : Char = ' ' ) : Integer;
+function  u_GetWord( const Str : String; N : Integer; D : Char = ' ' ) : String;
 procedure u_SortList( var List : zglTStringList; iLo, iHi: Integer );
 
 procedure u_Error( const ErrStr : String );
 procedure u_Warning( const ErrStr : String );
 
-function u_GetPOT( const Value : Integer ) : Integer;
+function u_GetPOT( Value : Integer ) : Integer;
 
-procedure u_Sleep( const Msec : LongWord );
+procedure u_Sleep( Msec : LongWord );
 
 function dlopen ( lpLibFileName : PAnsiChar) : HMODULE; stdcall; external 'kernel32.dll' name 'LoadLibraryA';
 function dlclose( hLibModule : HMODULE ) : Boolean; stdcall; external 'kernel32.dll' name 'FreeLibrary';
@@ -66,12 +66,12 @@ uses
   zgl_font,
   zgl_log;
 
-function u_IntToStr;
+function u_IntToStr( Value : Integer ) : String;
 begin
   Str( Value, Result );
 end;
 
-function u_StrToInt;
+function u_StrToInt( const Value : String ) : Integer;
   var
     e : Integer;
 begin
@@ -80,12 +80,12 @@ begin
     Result := 0;
 end;
 
-function u_FloatToStr;
+function u_FloatToStr( Value : Single; Digits : Integer = 2 ) : String;
 begin
   Str( Value:0:Digits, Result );
 end;
 
-function u_StrToFloat;
+function u_StrToFloat( const Value : String ) : Single;
   var
     e : Integer;
 begin
@@ -94,7 +94,7 @@ begin
     Result := 0;
 end;
 
-function u_BoolToStr;
+function u_BoolToStr( Value : Boolean ) : String;
 begin
   if Value Then
     Result := 'TRUE'
@@ -102,7 +102,7 @@ begin
     Result := 'FALSE';
 end;
 
-function u_StrToBool;
+function u_StrToBool( const Value : String ) : Boolean;
 begin
   if Value = '1' Then
     Result := TRUE
@@ -113,7 +113,7 @@ begin
       Result := FALSE;
 end;
 
-function u_StrUp;
+function u_StrUp( const Str : String ) : String;
   var
     i, l : Integer;
 begin
@@ -126,7 +126,7 @@ begin
       Result[ i ] := Str[ i ];
 end;
 
-function u_StrDown;
+function u_StrDown( const Str : String ) : String;
   var
     i, l : Integer;
 begin
@@ -139,7 +139,7 @@ begin
       Result[ i ] := Str[ i ];
 end;
 
-procedure u_Backspace;
+procedure u_Backspace( var Str : String );
   var
     i, last : Integer;
 begin
@@ -155,7 +155,7 @@ begin
   SetLength( Str, last - 1 )
 end;
 
-function u_Length;
+function u_Length( const Str : String ) : Integer;
   var
     i : Integer;
 begin
@@ -168,7 +168,7 @@ begin
     end;
 end;
 
-function u_Words;
+function u_Words( const Str : String; D : Char = ' ' ) : Integer;
   var
     i, m : Integer;
 begin
@@ -185,7 +185,7 @@ begin
     end;
 end;
 
-function u_GetWord;
+function u_GetWord( const Str : String; N : Integer; D : Char = ' ' ) : String;
   label b;
   var
     i, p : Integer;
@@ -208,7 +208,7 @@ b:
   Delete( Result, p, length( Result ) - p + 1 );
 end;
 
-procedure u_SortList;
+procedure u_SortList( var List : zglTStringList; iLo, iHi: Integer );
   var
     lo, hi : Integer;
     mid, t : String;
@@ -234,21 +234,21 @@ begin
   if lo < iHi Then u_SortList( List, lo, iHi );
 end;
 
-procedure u_Error;
+procedure u_Error( const ErrStr : String );
 begin
   MessageBox( 0, PChar( ErrStr ), 'ERROR!', MB_OK or MB_ICONERROR );
 
   log_Add( 'ERROR: ' + ErrStr );
 end;
 
-procedure u_Warning;
+procedure u_Warning( const ErrStr : String );
 begin
   MessageBox( 0, PChar( ErrStr ), 'WARNING!', MB_OK or MB_ICONWARNING );
 
   log_Add( 'WARNING: ' + ErrStr );
 end;
 
-function u_GetPOT;
+function u_GetPOT( Value : Integer ) : Integer;
 begin
   Result := Value - 1;
   Result := Result or ( Result shr 1 );
@@ -259,7 +259,7 @@ begin
   Result := Result + 1;
 end;
 
-procedure u_Sleep;
+procedure u_Sleep( Msec : LongWord );
 begin
   Sleep( Msec );
 end;

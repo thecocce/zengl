@@ -37,11 +37,11 @@ function mouse_X : Integer;
 function mouse_Y : Integer;
 function mouse_DX : Integer;
 function mouse_DY : Integer;
-function mouse_Down( const Button : Byte ) : Boolean;
-function mouse_Up( const Button : Byte ) : Boolean;
-function mouse_Click( const Button : Byte ) : Boolean;
-function mouse_DblClick( const Button : Byte ) : Boolean;
-function mouse_Wheel( const Axis : Byte ) : Boolean;
+function mouse_Down( Button : Byte ) : Boolean;
+function mouse_Up( Button : Byte ) : Boolean;
+function mouse_Click( Button : Byte ) : Boolean;
+function mouse_DblClick( Button : Byte ) : Boolean;
+function mouse_Wheel( Axis : Byte ) : Boolean;
 procedure mouse_ClearState;
 procedure mouse_Lock;
 
@@ -105,7 +105,7 @@ begin
   Result := mouse_Y() - wnd_Height div 2;
 end;
 
-function mouse_Down( const Button : Byte ) : Boolean;
+function mouse_Down( Button : Byte ) : Boolean;
 begin
   case Button of
     M_BLEFT:   Result := GetAsyncKeyState( VK_LBUTTON ) and $8000 <> 0;
@@ -114,22 +114,22 @@ begin
   end;
 end;
 
-function mouse_Up( const Button : Byte ) : Boolean;
+function mouse_Up( Button : Byte ) : Boolean;
 begin
   Result := mouseUp[ Button ];
 end;
 
-function mouse_Click( const Button : Byte ) : Boolean;
+function mouse_Click( Button : Byte ) : Boolean;
 begin
   Result := mouseClick[ Button ];
 end;
 
-function mouse_DblClick( const Button : Byte ) : Boolean;
+function mouse_DblClick( Button : Byte ) : Boolean;
 begin
   Result := mouseDblClick[ Button ];
 end;
 
-function mouse_Wheel( const Axis : Byte ) : Boolean;
+function mouse_Wheel( Axis : Byte ) : Boolean;
 begin
   Result := mouseWheel[ Axis ];
 end;

@@ -150,17 +150,17 @@ const
   KA_DOWN      = 0;
   KA_UP        = 1;
 
-function  key_Down( const KeyCode : Byte ) : Boolean;
-function  key_Up( const KeyCode : Byte ) : Boolean;
-function  key_Press( const KeyCode : Byte ) : Boolean;
-function  key_Last( const KeyAction : Byte ) : Byte;
-procedure key_BeginReadText( const Text : String; const MaxSymbols : Integer = -1 );
+function  key_Down( KeyCode : Byte ) : Boolean;
+function  key_Up( KeyCode : Byte ) : Boolean;
+function  key_Press( KeyCode : Byte ) : Boolean;
+function  key_Last( KeyAction : Byte ) : Byte;
+procedure key_BeginReadText( const Text : String; MaxSymbols : Integer = -1 );
 procedure key_GetText( var Result : String );
 procedure key_EndReadText;
 procedure key_ClearState;
 
 procedure key_InputText( const Text : String );
-function  scancode_to_utf8( const ScanCode : Byte ) : Byte;
+function  scancode_to_utf8( ScanCode : Byte ) : Byte;
 function  winkey_to_scancode( WinKey : Integer ) : Byte;
 function  SCA( KeyCode : DWORD ) : DWORD;
 procedure DoKeyPress( KeyCode : DWORD );
@@ -181,27 +181,27 @@ uses
   zgl_main,
   zgl_utils;
 
-function key_Down( const KeyCode : Byte ) : Boolean;
+function key_Down( KeyCode : Byte ) : Boolean;
 begin
   Result := keysDown[ KeyCode ];
 end;
 
-function key_Up( const KeyCode : Byte ) : Boolean;
+function key_Up( KeyCode : Byte ) : Boolean;
 begin
   Result := keysUp[ KeyCode ];
 end;
 
-function key_Press( const KeyCode : Byte ) : Boolean;
+function key_Press( KeyCode : Byte ) : Boolean;
 begin
   Result := keysPress[ KeyCode ];
 end;
 
-function key_Last( const KeyAction : Byte ) : Byte;
+function key_Last( KeyAction : Byte ) : Byte;
 begin
   Result := keysLast[ KeyAction ];
 end;
 
-procedure key_BeginReadText( const Text : String; const MaxSymbols : Integer = -1 );
+procedure key_BeginReadText( const Text : String; MaxSymbols : Integer = -1 );
 begin
   keysText    := Text;
   keysMax     := MaxSymbols;
@@ -250,7 +250,7 @@ begin
 end;
 
 // Костыли мои костыли :)
-function scancode_to_utf8( const ScanCode : Byte ) : Byte;
+function scancode_to_utf8( ScanCode : Byte ) : Byte;
 begin
   Result := 0;
 

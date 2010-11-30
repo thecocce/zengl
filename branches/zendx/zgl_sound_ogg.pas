@@ -271,7 +271,7 @@ type
 
 procedure ogg_Init;
 function  ogg_DecoderOpen( var Stream : zglTSoundStream; const FileName : String ) : Boolean;
-function  ogg_DecoderRead( var Stream : zglTSoundStream; const Buffer : Pointer; const Bytes : LongWord; var _End : Boolean ) : LongWord;
+function  ogg_DecoderRead( var Stream : zglTSoundStream; Buffer : Pointer; Bytes : LongWord; var _End : Boolean ) : LongWord;
 procedure ogg_DecoderLoop( var Stream : zglTSoundStream );
 procedure ogg_DecoderClose( var Stream : zglTSoundStream );
 
@@ -396,7 +396,7 @@ begin
     end;
 end;
 
-function ogg_DecoderRead( var Stream : zglTSoundStream; const Buffer : Pointer; const Bytes : LongWord; var _End : Boolean ) : LongWord;
+function ogg_DecoderRead( var Stream : zglTSoundStream; Buffer : Pointer; Bytes : LongWord; var _End : Boolean ) : LongWord;
   var
     bytesRead : Integer;
 begin

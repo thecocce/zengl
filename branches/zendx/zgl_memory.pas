@@ -36,11 +36,11 @@ end;
 
 procedure mem_LoadFromFile( var Memory : zglTMemory; const FileName : String );
 procedure mem_SaveToFile( var Memory : zglTMemory; const FileName : String );
-function  mem_Seek( var Memory : zglTMemory; const Offset, Mode : LongWord ) : LongWord;
-function  mem_Read( var Memory : zglTMemory; var Buffer; const Bytes : LongWord ) : LongWord;
-function  mem_ReadSwap( var Memory : zglTMemory; var Buffer; const Bytes : LongWord ) : LongWord;
-function  mem_Write( var Memory : zglTMemory; const Buffer; const Bytes : LongWord ) : LongWord;
-procedure mem_SetSize( var Memory : zglTMemory; const Size : LongWord );
+function  mem_Seek( var Memory : zglTMemory; Offset, Mode : LongWord ) : LongWord;
+function  mem_Read( var Memory : zglTMemory; var Buffer; Bytes : LongWord ) : LongWord;
+function  mem_ReadSwap( var Memory : zglTMemory; var Buffer; Bytes : LongWord ) : LongWord;
+function  mem_Write( var Memory : zglTMemory; const Buffer; Bytes : LongWord ) : LongWord;
+procedure mem_SetSize( var Memory : zglTMemory; Size : LongWord );
 procedure mem_Free( var Memory : zglTMemory );
 
 implementation
@@ -71,7 +71,7 @@ begin
   file_Close( f );
 end;
 
-function mem_Seek( var Memory : zglTMemory; const Offset, Mode : LongWord ) : LongWord;
+function mem_Seek( var Memory : zglTMemory; Offset, Mode : LongWord ) : LongWord;
 begin
   case Mode of
     FSM_SET: Memory.Position := Offset;
@@ -81,7 +81,7 @@ begin
   Result := Memory.Position;
 end;
 
-function mem_Read( var Memory : zglTMemory; var Buffer; const Bytes : LongWord ) : LongWord;
+function mem_Read( var Memory : zglTMemory; var Buffer; Bytes : LongWord ) : LongWord;
 begin
   if Bytes > 0 Then
     begin
@@ -97,7 +97,7 @@ begin
   Result := 0;
 end;
 
-function mem_ReadSwap( var Memory : zglTMemory; var Buffer; const Bytes : LongWord ) : LongWord;
+function mem_ReadSwap( var Memory : zglTMemory; var Buffer; Bytes : LongWord ) : LongWord;
   var
     i     : LongWord;
     pData : array of Byte;
@@ -122,7 +122,7 @@ begin
   Result := 0;
 end;
 
-function mem_Write( var Memory : zglTMemory; const Buffer; const Bytes : LongWord ) : LongWord;
+function mem_Write( var Memory : zglTMemory; const Buffer; Bytes : LongWord ) : LongWord;
 begin
   if Bytes = 0 Then
     begin
@@ -136,7 +136,7 @@ begin
   Result := Bytes;
 end;
 
-procedure mem_SetSize( var Memory : zglTMemory; const Size : LongWord );
+procedure mem_SetSize( var Memory : zglTMemory; Size : LongWord );
 begin
   Memory.Memory := ReAllocMemory( Memory.Memory, Size );
   Memory.Size   := Size;

@@ -93,18 +93,18 @@ const
   SND_CAN_PLAY_FILE     = $004000;
   CLIP_INVISIBLE        = $008000;
 
-procedure zgl_Init( const FSAA : Byte = 0; const StencilBits : Byte = 0 );
-procedure zgl_InitToHandle( const Handle : LongWord; const FSAA : Byte = 0; const StencilBits : Byte = 0 );
+procedure zgl_Init( FSAA : Byte = 0; StencilBits : Byte = 0 );
+procedure zgl_InitToHandle( Handle : LongWord; FSAA : Byte = 0; StencilBits : Byte = 0 );
 procedure zgl_Destroy;
 procedure zgl_Exit;
-procedure zgl_Reg( const What : LongWord; const UserData : Pointer );
-function  zgl_Get( const What : LongWord ) : Ptr;
+procedure zgl_Reg( What : LongWord; UserData : Pointer );
+function  zgl_Get( What : LongWord ) : Ptr;
 procedure zgl_GetSysDir;
-procedure zgl_GetMem( var Mem : Pointer; const Size : LongWord );
+procedure zgl_GetMem( var Mem : Pointer; Size : LongWord );
 procedure zgl_FreeMem( var Mem : Pointer );
 procedure zgl_FreeStr( var Str : String );
-procedure zgl_Enable( const What : LongWord );
-procedure zgl_Disable( const What : LongWord );
+procedure zgl_Enable( What : LongWord );
+procedure zgl_Disable( What : LongWord );
 
 implementation
 uses
@@ -127,7 +127,7 @@ uses
   {$ENDIF}
   zgl_utils;
 
-procedure zgl_Init( const FSAA : Byte = 0; const StencilBits : Byte = 0 );
+procedure zgl_Init( FSAA : Byte = 0; StencilBits : Byte = 0 );
 begin
   zgl_GetSysDir();
   log_Init();
@@ -153,7 +153,7 @@ begin
   zgl_Destroy();
 end;
 
-procedure zgl_InitToHandle( const Handle : LongWord; const FSAA : Byte = 0; const StencilBits : Byte = 0 );
+procedure zgl_InitToHandle( Handle : LongWord; FSAA : Byte = 0; StencilBits : Byte = 0 );
 begin
   zgl_GetSysDir();
   log_Init();
@@ -250,7 +250,7 @@ begin
   app_Work := FALSE;
 end;
 
-procedure zgl_Reg( const What : LongWord; const UserData : Pointer );
+procedure zgl_Reg( What : LongWord; UserData : Pointer );
   var
     i : Integer;
 begin
@@ -338,7 +338,7 @@ begin
   end;
 end;
 
-function zgl_Get( const What : LongWord ) : Ptr;
+function zgl_Get( What : LongWord ) : Ptr;
 begin
   if ( What = APP_DIRECTORY ) or ( What = USR_HOMEDIR ) Then
     if not app_GetSysDirs Then zgl_GetSysDir();
@@ -401,7 +401,7 @@ begin
   app_GetSysDirs := TRUE;
 end;
 
-procedure zgl_GetMem( var Mem : Pointer; const Size : LongWord );
+procedure zgl_GetMem( var Mem : Pointer; Size : LongWord );
 begin
   if Size > 0 Then
     begin
@@ -422,7 +422,7 @@ begin
   Str := '';
 end;
 
-procedure zgl_Enable( const What : LongWord );
+procedure zgl_Enable( What : LongWord );
 begin
   app_Flags := app_Flags or What;
 
@@ -463,7 +463,7 @@ begin
     render2d_Clip := TRUE;
 end;
 
-procedure zgl_Disable( const What : LongWord );
+procedure zgl_Disable( What : LongWord );
 begin
   if app_Flags and What > 0 Then
     app_Flags := app_Flags xor What;

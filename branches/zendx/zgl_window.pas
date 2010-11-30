@@ -28,14 +28,14 @@ uses
   zgl_direct3d,
   zgl_direct3d_all;
 
-function  wnd_Create( const Width, Height : Integer ) : Boolean;
+function  wnd_Create( Width, Height : Integer ) : Boolean;
 procedure wnd_Destroy;
 procedure wnd_Update;
 
 procedure wnd_SetCaption( const NewCaption : String );
-procedure wnd_SetSize( const Width, Height : Integer );
-procedure wnd_SetPos( const X, Y : Integer );
-procedure wnd_ShowCursor( const Show : Boolean );
+procedure wnd_SetSize( Width, Height : Integer );
+procedure wnd_SetPos( X, Y : Integer );
+procedure wnd_ShowCursor( Show : Boolean );
 procedure wnd_Select;
 
 var
@@ -69,7 +69,7 @@ uses
 function LoadCursorW(hInstance: HINST; lpCursorName: PWideChar): HCURSOR; stdcall; external user32 name 'LoadCursorW';
 {$ENDIF}
 
-function wnd_Create;
+function wnd_Create( Width, Height : Integer ) : Boolean;
 begin
   Result     := FALSE;
   wnd_Width  := Width;
@@ -181,7 +181,7 @@ begin
     wnd_SetPos( ( zgl_Get( DESKTOP_WIDTH ) - wnd_Width ) div 2, ( zgl_Get( DESKTOP_HEIGHT ) - wnd_Height ) div 2 );
 end;
 
-procedure wnd_SetCaption;
+procedure wnd_SetCaption( const NewCaption : String );
   var
     i,len : Integer;
 begin
@@ -212,7 +212,7 @@ begin
     SetWindowTextW( wnd_Handle, wnd_CaptionW );
 end;
 
-procedure wnd_SetSize;
+procedure wnd_SetSize( Width, Height : Integer );
 begin
   wnd_Width  := Width;
   wnd_Height := Height;
@@ -230,7 +230,7 @@ begin
     SetCurrentMode();
 end;
 
-procedure wnd_SetPos;
+procedure wnd_SetPos( X, Y : Integer );
 begin
   wnd_X := X;
   wnd_Y := Y;
@@ -242,7 +242,7 @@ begin
       SetWindowPos( wnd_Handle, HWND_TOPMOST, 0, 0, wnd_Width, wnd_Height, SWP_NOACTIVATE );
 end;
 
-procedure wnd_ShowCursor;
+procedure wnd_ShowCursor( Show : Boolean );
 begin
   app_ShowCursor := Show;
 end;

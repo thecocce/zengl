@@ -76,13 +76,13 @@ type
 type
   zglTRenderCallback = procedure( Data : Pointer );
 
-function rtarget_Add( const Surface : zglPTexture; const Flags : Byte ) : zglPRenderTarget;
+function rtarget_Add( Surface : zglPTexture; Flags : Byte ) : zglPRenderTarget;
 procedure rtarget_Del( var Target : zglPRenderTarget );
-procedure rtarget_Set( const Target : zglPRenderTarget );
-procedure rtarget_DrawIn( const Target : zglPRenderTarget; const RenderCallback : zglTRenderCallback; const Data : Pointer );
+procedure rtarget_Set( Target : zglPRenderTarget );
+procedure rtarget_DrawIn( Target : zglPRenderTarget; RenderCallback : zglTRenderCallback; Data : Pointer );
 
-procedure rtarget_Save( const Target : zglPTexture );
-procedure rtarget_Restore( const Target : zglPTexture );
+procedure rtarget_Save( Target : zglPTexture );
+procedure rtarget_Restore( Target : zglPTexture );
 
 var
   managerRTarget : zglTRenderTargetManager;
@@ -116,7 +116,7 @@ var
   lResCX   : Single;
   lResCY   : Single;
 
-procedure rtarget_Save;
+procedure rtarget_Save( Target : zglPTexture );
   var
     s, d : TD3DSurface_Desc;
     {$IFDEF USE_DIRECT3D8}
@@ -163,7 +163,7 @@ begin
   {$ENDIF}
 end;
 
-procedure rtarget_Restore;
+procedure rtarget_Restore( Target : zglPTexture );
   var
     {$IFDEF USE_DIRECT3D8}
     src, dst : IDirect3DSurface8;
@@ -189,7 +189,7 @@ begin
   {$ENDIF}
 end;
 
-function rtarget_Add;
+function rtarget_Add( Surface : zglPTexture; Flags : Byte ) : zglPRenderTarget;
 begin
   Result := @managerRTarget.First;
   while Assigned( Result.Next ) do
@@ -226,7 +226,7 @@ begin
   INC( managerRTarget.Count );
 end;
 
-procedure rtarget_Del;
+procedure rtarget_Del( var Target : zglPRenderTarget );
 begin
   if not Assigned( Target ) Then exit;
 
@@ -245,7 +245,7 @@ begin
   DEC( managerRTarget.Count );
 end;
 
-procedure rtarget_Set;
+procedure rtarget_Set( Target : zglPRenderTarget );
   var
     d : TD3DSurface_Desc;
 begin
@@ -382,7 +382,7 @@ begin
         end;
 end;
 
-procedure rtarget_DrawIn;
+procedure rtarget_DrawIn( Target : zglPRenderTarget; RenderCallback : zglTRenderCallback; Data : Pointer );
 begin
   if ogl_Separate Then
     begin

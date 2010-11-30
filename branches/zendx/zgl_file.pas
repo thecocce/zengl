@@ -43,17 +43,17 @@ const
   FSM_CUR    = $02;
   FSM_END    = $03;
 
-procedure file_Open( var FileHandle : zglTFile; const FileName : String; const Mode : Byte );
+procedure file_Open( var FileHandle : zglTFile; const FileName : String; Mode : Byte );
 function  file_MakeDir( const Directory : String ) : Boolean;
 function  file_Exists( const FileName : String ) : Boolean;
-function  file_Seek( const FileHandle : zglTFile; const Offset, Mode : LongWord ) : LongWord;
-function  file_GetPos( const FileHandle : zglTFile ) : LongWord;
-function  file_Read( const FileHandle : zglTFile; var Buffer; const Bytes : LongWord ) : LongWord;
-function  file_Write( const FileHandle : zglTFile; const Buffer; const Bytes : LongWord ) : LongWord;
-function  file_GetSize( const FileHandle : zglTFile ) : LongWord;
-procedure file_Flush( const FileHandle : zglTFile );
+function  file_Seek( FileHandle : zglTFile; Offset, Mode : LongWord ) : LongWord;
+function  file_GetPos( FileHandle : zglTFile ) : LongWord;
+function  file_Read( FileHandle : zglTFile; var Buffer; Bytes : LongWord ) : LongWord;
+function  file_Write( FileHandle : zglTFile; const Buffer; Bytes : LongWord ) : LongWord;
+function  file_GetSize( FileHandle : zglTFile ) : LongWord;
+procedure file_Flush( FileHandle : zglTFile );
 procedure file_Close( var FileHandle : zglTFile );
-procedure file_Find( const Directory : String; var List : zglTFileList; const FindDir : Boolean );
+procedure file_Find( const Directory : String; var List : zglTFileList; FindDir : Boolean );
 procedure file_GetName( const FileName : String; var Result : String );
 procedure file_GetExtension( const FileName : String; var Result : String );
 procedure file_GetDirectory( const FileName : String; var Result : String );
@@ -66,7 +66,7 @@ uses
 var
   filePath : String = '';
 
-procedure file_Open( var FileHandle : zglTFile; const FileName : String; const Mode : Byte );
+procedure file_Open( var FileHandle : zglTFile; const FileName : String; Mode : Byte );
 begin
   case Mode of
     FOM_CREATE: FileHandle := CreateFile( PChar( filePath + FileName ), GENERIC_ALL, 0, nil, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0 );
@@ -90,7 +90,7 @@ begin
     file_Close( fileHandle );
 end;
 
-function file_Seek( const FileHandle : zglTFile; const Offset, Mode : LongWord ) : LongWord;
+function file_Seek( FileHandle : zglTFile; Offset, Mode : LongWord ) : LongWord;
 begin
   case Mode of
     FSM_SET: Result := SetFilePointer( FileHandle, Offset, nil, FILE_BEGIN );
@@ -99,27 +99,27 @@ begin
   end;
 end;
 
-function file_GetPos( const FileHandle : zglTFile ) : LongWord;
+function file_GetPos( FileHandle : zglTFile ) : LongWord;
 begin
   Result := SetFilePointer( FileHandle, 0, nil, FILE_CURRENT );
 end;
 
-function file_Read( const FileHandle : zglTFile; var Buffer; const Bytes : LongWord ) : LongWord;
+function file_Read( FileHandle : zglTFile; var Buffer; Bytes : LongWord ) : LongWord;
 begin
   ReadFile( FileHandle, Buffer, Bytes, Result, nil );
 end;
 
-function file_Write( const FileHandle : zglTFile; const Buffer; const Bytes : LongWord ) : LongWord;
+function file_Write( FileHandle : zglTFile; const Buffer; Bytes : LongWord ) : LongWord;
 begin
   WriteFile( FileHandle, Buffer, Bytes, Result, nil );
 end;
 
-function file_GetSize( const FileHandle : zglTFile ) : LongWord;
+function file_GetSize( FileHandle : zglTFile ) : LongWord;
 begin
   Result := GetFileSize( FileHandle, nil );
 end;
 
-procedure file_Flush( const FileHandle : zglTFile );
+procedure file_Flush( FileHandle : zglTFile );
 begin
   FlushFileBuffers( FileHandle );
 end;
@@ -130,7 +130,7 @@ begin
   FileHandle := 0;
 end;
 
-procedure file_Find( const Directory : String; var List : zglTFileList; const FindDir : Boolean );
+procedure file_Find( const Directory : String; var List : zglTFileList; FindDir : Boolean );
   var
     First : THandle;
     FList : {$IFDEF FPC} WIN32FINDDATAA {$ELSE} WIN32_FIND_DATA {$ENDIF};
