@@ -349,8 +349,8 @@ begin
 
   d3d_ParamsW.BackBufferWidth  := wnd_Width;
   d3d_ParamsW.BackBufferHeight := wnd_Height;
-  d3d_ParamsF.BackBufferWidth  := scr_Width;
-  d3d_ParamsF.BackBufferHeight := scr_Height;
+  d3d_ParamsF.BackBufferWidth  := wnd_Width;
+  d3d_ParamsF.BackBufferHeight := wnd_Height;
   d3d_ParamsF.MultiSampleType  := d3d_CheckFSAA;
   {$IFDEF USE_DIRECT3D8}
   if scr_VSync Then
@@ -381,7 +381,7 @@ begin
     d3d_Params := d3d_ParamsW;
 
   d3d_Device.Reset( d3d_Params );
-  d3d_ResetState;
+  d3d_ResetState();
 
   r := managerRTarget.First.Next;
   while Assigned( r ) do

@@ -108,6 +108,7 @@ end;
 
 procedure scr_Init;
 begin
+  scr_Initialized := TRUE;
   with scr_Desktop do
     begin
       dmSize             := SizeOf( DEVMODE );
@@ -177,8 +178,6 @@ end;
 
 procedure scr_Reset;
 begin
-  scr_Changing := TRUE;
-  ChangeDisplaySettings( DEVMODE( nil^ ), 0 );
 end;
 
 procedure scr_Clear;

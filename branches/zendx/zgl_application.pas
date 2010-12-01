@@ -206,6 +206,7 @@ begin
             scr_Changing := FALSE;
             exit;
           end;
+        scr_Init();
         scr_Width  := scr_Desktop.dmPelsWidth;
         scr_Height := scr_Desktop.dmPelsHeight;
         if ( not wnd_FullScreen ) and ( scr_Create() ) Then
