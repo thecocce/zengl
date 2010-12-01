@@ -1050,7 +1050,7 @@ begin
       SetLength( d3d_texArray, d3d_texCount );
       SetLength( d3d_resArray, d3d_texCount );
       RenderTexID := d3d_texCount - 1;
-    end else RenderTexID := RenderTexID;
+    end;
   d3d_texArray[ RenderTexID ].Texture := nil;
   d3d_resArray[ RenderTexID ] := nil;
   textures^ := RenderTexID;
