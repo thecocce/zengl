@@ -214,6 +214,7 @@ begin
     d3d_Device.CreateDepthStencilSurface( Round( Surface.Width / Surface.U ), Round( Surface.Height / Surface.V ), d3d_Params.AutoDepthStencilFormat,
                                           D3DMULTISAMPLE_NONE, 0, TRUE, Result.Next.Handle.Depth, nil );
   {$ENDIF}
+  d3d_texArray[ Surface.ID ].Pool := D3DPOOL_DEFAULT;
   rtarget_Restore( Surface );
 
   Result.next._type      := 0;
@@ -285,6 +286,7 @@ begin
                 d3d_Device.CreateDepthStencilSurface( d.Width, d.Height, d3d_Params.AutoDepthStencilFormat, D3DMULTISAMPLE_NONE, 0, TRUE, Target.Handle.Depth,
                                                       nil );
               {$ENDIF}
+              d3d_texArray[ Target.Surface.ID ].Pool := D3DPOOL_DEFAULT;
               rtarget_Restore( Target.Surface );
             end;
         end;

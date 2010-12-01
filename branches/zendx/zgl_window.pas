@@ -220,7 +220,7 @@ begin
   if not app_InitToHandle Then
     wnd_SetPos( wnd_X, wnd_Y );
 
-  d3d_Restore;
+  d3d_Restore();
 
   ogl_Width  := Width;
   ogl_Height := Height;

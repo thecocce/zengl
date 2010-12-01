@@ -232,6 +232,7 @@ type
   zglD3DTexture = record
     Texture    : {$IFDEF USE_DIRECT3D8} IDirect3DTexture8 {$ENDIF}
                  {$IFDEF USE_DIRECT3D9} IDirect3DTexture9 {$ENDIF};
+    Pool       : TD3DPool;
     MagFilter  : LongWord;
     MinFilter  : LongWord;
     MipFilter  : LongWord;
@@ -1050,6 +1051,8 @@ begin
       SetLength( d3d_resArray, d3d_texCount );
       RenderTexID := d3d_texCount - 1;
     end else RenderTexID := RenderTexID;
+  d3d_texArray[ RenderTexID ].Texture := nil;
+  d3d_resArray[ RenderTexID ] := nil;
   textures^ := RenderTexID;
 end;
 
@@ -1223,6 +1226,7 @@ procedure glTexImage2D(target: GLenum; level, internalformat: GLint; width, heig
 begin
   if target = GL_TEXTURE_2D Then
     begin
+      d3d_texArray[ RenderTexID ].Pool      := D3DPOOL_MANAGED;
       d3d_texArray[ RenderTexID ].MagFilter := lMagFilter;
       d3d_texArray[ RenderTexID ].MinFilter := lMinFilter;
       d3d_texArray[ RenderTexID ].MipFilter := lMipFilter;
@@ -1359,6 +1363,7 @@ function gluBuild2DMipmaps(target: GLenum; components, width, height: GLint; for
 begin
   if target = GL_TEXTURE_2D Then
     begin
+      d3d_texArray[ d3d_texCount - 1 ].Pool       := D3DPOOL_MANAGED;
       d3d_texArray[ d3d_texCount - 1 ].MagFilter  := lMagFilter;
       d3d_texArray[ d3d_texCount - 1 ].MinFilter  := lMinFilter;
       d3d_texArray[ d3d_texCount - 1 ].MipFilter  := lMipFilter;

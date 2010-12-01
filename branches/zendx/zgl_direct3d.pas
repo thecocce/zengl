@@ -329,7 +329,6 @@ function d3d_Restore : Boolean;
   var
     r : zglPRenderTarget;
     t : zglPTexture;
-    d : TD3DSurface_Desc;
 begin
   Result := FALSE;
   if not Assigned( d3d_Device ) Then exit;
@@ -343,8 +342,7 @@ begin
   t := managerTexture.First.Next;
   while Assigned( t ) do
     begin
-      d3d_texArray[ t.ID ].Texture.GetLevelDesc( 0, d );
-      if d.Pool = D3DPOOL_DEFAULT Then
+      if d3d_texArray[ t.ID ].Pool = D3DPOOL_DEFAULT Then
         d3d_texArray[ t.ID ].Texture := nil;
       t := t.Next;
     end;
@@ -412,6 +410,7 @@ begin
           d3d_Device.CreateTexture( Round( t.Width / t.U ), Round( t.Height / t.V ), 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT,
                                     d3d_texArray[ t.ID ].Texture, nil );
           {$ENDIF}
+          d3d_texArray[ t.ID ].Pool := D3DPOOL_DEFAULT;
           rtarget_Restore( t );
         end;
       t := t.Next;
