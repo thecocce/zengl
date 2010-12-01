@@ -166,7 +166,6 @@ begin
       mem_Read( fntMem, Result.CharDesc[ c ].TexCoords[ 0 ], SizeOf( zglTPoint2D ) * 4 );
     end;
 
-  mem_Free( fntMem );
 end;
 
 function font_LoadFromFile( const FileName : String ) : zglPFont;
@@ -187,10 +186,12 @@ begin
   mem_Read( fntMem, fntID, 13 );
   if fntID <> ZGL_FONT_INFO Then
     begin
-      log_Add( FileName + ' - it''s not a ZenGL font info file' );
+      log_Add( FileName + ' - it''s not a ZenGL Font Info file' );
+      mem_Free( fntMem );
       exit;
     end else
       Result := font_Load();
+  mem_Free( fntMem );
 
   file_GetDirectory( FileName, dir );
   file_GetName( FileName, name );
@@ -208,17 +209,15 @@ end;
 
 function font_LoadFromMemory( const Memory : zglTMemory ) : zglPFont;
 begin
-  Result := nil;
-  fntMem.Size := Memory.Size;
-  zgl_GetMem( fntMem.Memory, Memory.Size );
+  fntMem.Size     := Memory.Size;
+  fntMem.Memory   := Memory.Memory;
   fntMem.Position := Memory.Position;
-  Move( Memory.Memory^, fntMem.Memory^, Memory.Size );
 
   mem_Read( fntMem, fntID, 13 );
   if fntID <> ZGL_FONT_INFO Then
     begin
-      log_Add( 'Unable to determinate ZenGL font info: From Memory' );
-      exit;
+      Result := nil;
+      log_Add( 'Unable to determinate ZenGL Font Info: From Memory' );
     end else
       Result := font_Load();
 end;
