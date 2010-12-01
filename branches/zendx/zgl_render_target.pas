@@ -295,7 +295,7 @@ begin
       d3d_Device.GetDepthStencilSurface( d3d_Stencil );
       d3d_texArray[ Target.Surface.ID ].Texture.GetSurfaceLevel( 0, lSurface );
       if Target.Flags and RT_USE_DEPTH > 0 Then
-        d3d_Device.SetRenderTarget( lSurface, nil );
+        d3d_Device.SetRenderTarget( lSurface, nil )
       else
         d3d_Device.SetRenderTarget( lSurface, Target.Handle.Depth );
       {$ENDIF}
