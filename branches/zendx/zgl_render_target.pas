@@ -309,7 +309,11 @@ begin
       {$ENDIF}
 
       if cam2dApply Then
-        glPopMatrix();
+        begin
+          lCam2D  := cam2dApply;
+          lPCam2D := cam2DGlobal^;
+          glPopMatrix();
+        end;
 
       if Target.Flags and RT_FULL_SCREEN > 0 Then
         begin
@@ -334,11 +338,8 @@ begin
       glScalef( 1, -1, 1 );
       glTranslatef( 0, -ogl_Height, 0 );
       glViewport( 0, 0, Target.Surface.Width, Target.Surface.Height );
-      if cam2dApply Then
-        begin
-          lPCam2D := cam2DGlobal^;
-          cam2d_Apply( @lPCam2D );
-        end;
+      if lCam2D Then
+        cam2d_Apply( @lPCam2D );
 
       if Target.Flags and RT_CLEAR_COLOR > 0 Then
         d3d_Device.Clear( 0, nil, D3DCLEAR_TARGET, D3DCOLOR_ARGB( 0, 0, 0, 0 ), 1, 0 );
