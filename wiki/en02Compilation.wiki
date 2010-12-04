@@ -16,7 +16,7 @@ Officially supported versions are Delphi 7, Delphi 2009 and Delphi 2010. Also co
 
 === GNU/Linux ===
 
-There are Makefile and Lazarus project file for compilation ZenGL under GNU/Linux. Makefile can be find in *src* directory  with source code of library. Lazarus project file placed in *src/Lazarus*. Also there is ability to do cross-compilation for Windows(commands *make win32* and *make win64*).
+There are Makefile and Lazarus project file for compilation ZenGL under GNU/Linux. Makefile can be found in *src* directory  with source code of library. Lazarus project file placed in *src/Lazarus*. Also there is ability to do cross-compilation for Windows(commands *make win32* and *make win64*).
 
 Additionally for compilation in some distributives(for example in Debian and Ubuntu) must be installed these dev-packages:
   * libgl1-mesa-dev
@@ -24,7 +24,7 @@ Additionally for compilation in some distributives(for example in Debian and Ubu
 
 === Windows ===
 
-There are two ways to compile ZenGL under Windows - using Delphi and Lazarus. Project files for those IDE's can be find in directories *Delphi* and *Lazarus* inside directory with source code - *src*. For Lazarus recommended to use *ZenGL-win.lpi* project file.
+There are two ways to compile ZenGL under Windows - using Delphi and Lazarus. Project files for those IDE's can be found in directories *Delphi* and *Lazarus* inside directory with source code - *src*. For Lazarus recommended to use *ZenGL-win.lpi* project file.
 
 === MacOS X ===
 
