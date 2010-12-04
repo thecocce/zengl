@@ -28,7 +28,11 @@ uses
   zgl_types;
 
 const
-  cs_ZenGL = 'ZenGL 0.2 RC6';
+  cs_ZenGL    = 'ZenGL 0.2 RC6';
+  cs_Date     = '2010.12.04';
+  cv_major    = 0;
+  cv_minor    = 2;
+  cv_revision = 0;
 
   // zgl_Reg
   SYS_APP_INIT           = $000001;
@@ -54,26 +58,30 @@ const
   WIDGET_ONFREEDATA      = $000035;
 
   // zgl_Get
-  SYS_FPS         = 1;
-  APP_PAUSED      = 2;
-  APP_DIRECTORY   = 3;
-  APP_WND_HANDLE  = 4;
-  APP_D3D_DEVICE  = 5;
-  USR_HOMEDIR     = 6;
-  LOG_FILENAME    = 7;
-  ZGL_VERSION     = 8;
-  SCR_ADD_X       = 9;
-  SCR_ADD_Y       = 10;
-  DESKTOP_WIDTH   = 11;
-  DESKTOP_HEIGHT  = 12;
-  RESOLUTION_LIST = 13;
-  MANAGER_TIMER   = 14;
-  MANAGER_TEXTURE = 15;
-  MANAGER_ATLAS   = 16;
-  MANAGER_FONT    = 17;
-  MANAGER_RTARGET = 18;
-  MANAGER_SOUND   = 19;
-  MANAGER_GUI     = 20;
+  SYS_FPS            = 1;
+  APP_PAUSED         = 2;
+  APP_DIRECTORY      = 3;
+  APP_WND_HANDLE     = 4;
+  APP_OGL_CONTEXT    = 5;
+  USR_HOMEDIR        = 6;
+  LOG_FILENAME       = 7;
+  ZGL_VERSION        = 8;
+  ZGL_VERSION_STRING = 9;
+  ZGL_VERSION_DATE   = 10;
+  VIEWPORT_WIDTH     = 11;
+  VIEWPORT_HEIGHT    = 12;
+  VIEWPORT_OFFSET_X  = 13;
+  VIEWPORT_OFFSET_Y  = 14;
+  DESKTOP_WIDTH      = 15;
+  DESKTOP_HEIGHT     = 16;
+  RESOLUTION_LIST    = 17;
+  MANAGER_TIMER      = 18;
+  MANAGER_TEXTURE    = 19;
+  MANAGER_ATLAS      = 20;
+  MANAGER_FONT       = 21;
+  MANAGER_RTARGET    = 22;
+  MANAGER_SOUND      = 23;
+  MANAGER_EMITTER2D  = 24;
 
   // zgl_Enable/zgl_Disable
   COLOR_BUFFER_CLEAR    = $000001;
@@ -122,6 +130,12 @@ uses
   {$ENDIF}
   zgl_render_target,
   zgl_font,
+  {$IFDEF USE_SENGINE}
+  zgl_sengine_2d,
+  {$ENDIF}
+  {$IFDEF USE_PARTICLES}
+  zgl_particles_2d,
+  {$ENDIF}
   {$IFDEF USE_SOUND}
   zgl_sound,
   {$ENDIF}
@@ -187,14 +201,16 @@ begin
 
   app_PExit();
 
-  log_Add( 'Timers to free: ' + u_IntToStr( managerTimer.Count ) );
+  if managerTimer.Count <> 0 Then
+    log_Add( 'Timers to free: ' + u_IntToStr( managerTimer.Count ) );
   while managerTimer.Count > 0 do
     begin
       p := managerTimer.First.next;
       timer_Del( zglPTimer( p ) );
     end;
 
-  log_Add( 'Render Targets to free: ' + u_IntToStr( managerRTarget.Count ) );
+  if managerRTarget.Count <> 0 Then
+    log_Add( 'Render Targets to free: ' + u_IntToStr( managerRTarget.Count ) );
   while managerRTarget.Count > 0 do
     begin
       p := managerRTarget.First.next;
@@ -202,7 +218,8 @@ begin
     end;
 
   {$IFDEF USE_TEXTURE_ATLAS}
-  log_Add( 'Atlases to free: ' + u_IntToStr( managerAtlas.Count ) );
+  if managerAtlas.Count <> 0 Then
+    log_Add( 'Atlases to free: ' + u_IntToStr( managerAtlas.Count ) );
   while managerAtlas.Count > 0 do
     begin
       p := managerAtlas.First.next;
@@ -210,22 +227,40 @@ begin
     end;
   {$ENDIF}
 
-  log_Add( 'Textures to free: ' + u_IntToStr( managerTexture.Count.Items ) );
+  if managerTexture.Count.Items <> 0 Then
+    log_Add( 'Textures to free: ' + u_IntToStr( managerTexture.Count.Items ) );
   while managerTexture.Count.Items > 0 do
     begin
       p := managerTexture.First.next;
       tex_Del( zglPTexture( p ) );
     end;
 
-  log_Add( 'Fonts to free: ' + u_IntToStr( managerFont.Count ) );
+  if managerFont.Count <> 0 Then
+    log_Add( 'Fonts to free: ' + u_IntToStr( managerFont.Count ) );
   while managerFont.Count > 0 do
     begin
       p := managerFont.First.next;
       font_Del( zglPFont( p ) );
     end;
 
+  {$IFDEF USE_SENGINE}
+  sengine2d_Set( nil );
+  sengine2d_ClearAll();
+  {$ENDIF}
+
+  {$IFDEF USE_PARTICLES}
+  if managerEmitter2D.Count <> 0 Then
+    log_Add( 'Emitters2D to free: ' + u_IntToStr( managerEmitter2D.Count ) );
+  for i := 0 to managerEmitter2D.Count - 1 do
+    emitter2d_Free( managerEmitter2D.List[ i ] );
+  SetLength( managerEmitter2D.List, 0 );
+  pengine2d_Set( nil );
+  pengine2d_ClearAll();
+  {$ENDIF}
+
   {$IFDEF USE_SOUND}
-  log_Add( 'Sounds to free: ' + u_IntToStr( managerSound.Count.Items ) );
+  if managerSound.Count.Items <> 0 Then
+    log_Add( 'Sounds to free: ' + u_IntToStr( managerSound.Count.Items ) );
   while managerSound.Count.Items > 0 do
     begin
       p := managerSound.First.next;
@@ -354,9 +389,13 @@ begin
     APP_D3D_DEVICE: Result := Ptr( d3d_Device );
     USR_HOMEDIR: Result := Ptr( PAnsiChar( app_UsrHomeDir ) );
     LOG_FILENAME: Result := Ptr( @logfile );
-    //ZGL_VERSION: Result := cv_version;
-    SCR_ADD_X: Result := scr_AddCX;
-    SCR_ADD_Y: Result := scr_AddCY;
+    ZGL_VERSION: Result := cv_major shl 16 + cv_minor shl 8 + cv_revision;
+    ZGL_VERSION_STRING: Result := Ptr( PAnsiChar( cs_ZenGL ) );
+    ZGL_VERSION_DATE: Result := Ptr( PAnsiChar( cs_Date ) );
+    VIEWPORT_WIDTH: Result := ogl_Width - scr_SubCX;
+    VIEWPORT_HEIGHT: Result := ogl_Height - scr_SubCY;
+    VIEWPORT_OFFSET_X: Result := scr_AddCX;
+    VIEWPORT_OFFSET_Y: Result := scr_AddCY;
     DESKTOP_WIDTH:
       Result := scr_Desktop.dmPelsWidth;
     DESKTOP_HEIGHT:
@@ -364,16 +403,21 @@ begin
     RESOLUTION_LIST: Result := Ptr( @scr_ResList );
 
     // Managers
-    MANAGER_TIMER:   Result := Ptr( @managerTimer );
-    MANAGER_TEXTURE: Result := Ptr( @managerTexture );
+    MANAGER_TIMER:     Result := Ptr( @managerTimer );
+    MANAGER_TEXTURE:   Result := Ptr( @managerTexture );
     {$IFDEF USE_TEXTURE_ATLAS}
-    MANAGER_ATLAS:   Result := Ptr( @managerAtlas );
+    MANAGER_ATLAS:     Result := Ptr( @managerAtlas );
     {$ENDIF}
-    MANAGER_FONT:    Result := Ptr( @managerFont );
-    MANAGER_RTARGET: Result := Ptr( @managerRTarget );
+    MANAGER_FONT:      Result := Ptr( @managerFont );
+    MANAGER_RTARGET:   Result := Ptr( @managerRTarget );
     {$IFDEF USE_SOUND}
-    MANAGER_SOUND:   Result := Ptr( @managerSound );
+    MANAGER_SOUND:     Result := Ptr( @managerSound );
     {$ENDIF}
+    {$IFDEF USE_PARTICLES}
+    MANAGER_EMITTER2D: Result := Ptr( @managerEmitter2D );
+    {$ENDIF}
+  else
+    Result := 0;
   end;
 end;
 

@@ -23,14 +23,32 @@ unit zgl_particles_2d;
 {$I zgl_config.cfg}
 
 interface
-
 uses
   zgl_textures,
-  zgl_math_2d;
+  zgl_math_2d,
+  zgl_file,
+  zgl_memory;
 
 const
+  ZGL_EMITTER_2D : array[ 0..14 ] of AnsiChar = ( 'Z', 'G', 'L', '_', 'E', 'M', 'I', 'T', 'T', 'E', 'R', '_', '2', 'D', #0 );
+
+  ZEF_CHUNK_TYPE      = $01;
+  ZEF_CHUNK_PARAMS    = $02;
+  ZEF_CHUNK_TEXTURE   = $03;
+  ZEF_CHUNK_BLENDMODE = $04;
+  ZEF_CHUNK_COLORMODE = $05;
+  ZEF_CHUNK_LIFETIME  = $06;
+  ZEF_CHUNK_FRAME     = $07;
+  ZEF_CHUNK_COLOR     = $08;
+  ZEF_CHUNK_SIZEXY    = $09;
+  ZEF_CHUNK_ANGLE     = $0A;
+  ZEF_CHUNK_VELOCITY  = $0B;
+  ZEF_CHUNK_AVELOCITY = $0C;
+  ZEF_CHUNK_SPIN      = $0D;
+
   EMITTER_MAX_PARTICLES = 1024;
 
+  EMITTER_NONE      = 0;
   EMITTER_POINT     = 1;
   EMITTER_LINE      = 2;
   EMITTER_RECTANGLE = 3;
@@ -194,35 +212,57 @@ type
     List  : array of zglPEmitter2D;
   end;
 
+type
+  zglPEmitter2DManager = ^zglTEmitter2DManager;
+  zglTEmitter2DManager = record
+    Count : LongWord;
+    List  : array of zglPEmitter2D;
+end;
+
 procedure pengine2d_Set( PEngine : zglPPEngine2D );
 function  pengine2d_Get : zglPPEngine2D;
 procedure pengine2d_Draw;
 procedure pengine2d_Proc( dt : Double );
-function  pengine2d_AddEmitter( Emitter : zglPEmitter2D ) : zglPEmitter2D;
+function  pengine2d_AddEmitter( Emitter : zglPEmitter2D; X : Single = 0; Y : Single = 0 ) : zglPEmitter2D;
 procedure pengine2d_DelEmitter( ID : Integer );
 procedure pengine2d_ClearAll;
 
 procedure pengine2d_Sort( iLo, iHi : Integer );
 procedure pengine2d_SortID( iLo, iHi : Integer );
 
+function  emitter2d_Add : zglPEmitter2D;
+procedure emitter2d_Del( var Emitter : zglPEmitter2D );
+
+function emitter2d_Load : zglPEmitter2D;
+function emitter2d_LoadFromFile( const FileName : String ) : zglPEmitter2D;
+function emitter2d_LoadFromMemory( const Memory : zglTMemory ) : zglPEmitter2D;
+
+procedure emitter2d_SaveToFile( Emitter : zglPEmitter2D; const FileName : String );
+
 procedure emitter2d_Init( Emitter : zglPEmitter2D );
-procedure emitter2d_Free( Emitter : zglPEmitter2D );
+procedure emitter2d_Free( var Emitter : zglPEmitter2D );
 procedure emitter2d_Draw( Emitter : zglPEmitter2D );
 procedure emitter2d_Proc( Emitter : zglPEmitter2D; dt : Double );
 procedure emitter2d_Sort( Emitter : zglPEmitter2D; iLo, iHi : Integer );
 
 procedure particle2d_Proc( Particle : zglPParticle2D; Params : zglPParticleParams; dt : Double );
 
+var
+  managerEmitter2D : zglTEmitter2DManager;
+
 implementation
 uses
   zgl_main,
+  zgl_log,
   zgl_direct3d_all,
   zgl_fx,
   zgl_render_2d;
 
 var
-  _pengine  : zglTPEngine2D;
-  pengine2d : zglPPEngine2D;
+  _pengine     : zglTPEngine2D;
+  pengine2d    : zglPPEngine2D;
+  emitter2dMem : zglTMemory;
+  emitter2dID  : array[ 0..14 ] of AnsiChar;
 
 procedure pengine2d_Set( PEngine : zglPPEngine2D );
 begin
@@ -298,7 +338,7 @@ begin
     end;
 end;
 
-function pengine2d_AddEmitter( Emitter : zglPEmitter2D ) : zglPEmitter2D;
+function pengine2d_AddEmitter( Emitter : zglPEmitter2D; X : Single = 0; Y : Single = 0 ) : zglPEmitter2D;
   var
     new : zglPEmitter2D;
     len : Integer;
@@ -310,78 +350,84 @@ begin
   pengine2d.List[ pengine2d.Count.Emitters ] := new;
   INC( pengine2d.Count.Emitters );
 
-  new._type       := Emitter._type;
-  new._parCreated := Emitter._parCreated;
-  new.ID          := pengine2d.Count.Emitters - 1;
-  new.Params      := Emitter.Params;
-  new.Life        := Emitter.Life;
-  new.Time        := Emitter.Time;
-  new.LastSecond  := Emitter.LastSecond;
-  new.Particles   := Emitter.Particles;
-  new.BBox        := Emitter.BBox;
-  Result          := new;
-  case Emitter._type of
-    EMITTER_POINT:     new.AsPoint  := Emitter.AsPoint;
-    EMITTER_LINE:      new.AsLine   := Emitter.AsLine;
-    EMITTER_RECTANGLE: new.AsRect   := Emitter.AsRect;
-    EMITTER_CIRCLE:    new.AsCircle := Emitter.AsCircle;
-  end;
-  with new.ParParams do
+  Result := new;
+  with Result^ do
     begin
-      Texture   := Emitter.ParParams.Texture;
-      BlendMode := Emitter.ParParams.BlendMode;
-      ColorMode := Emitter.ParParams.ColorMode;
+      _type       := Emitter._type;
+      _parCreated := Emitter._parCreated;
+      ID          := pengine2d.Count.Emitters - 1;
+      Params      := Emitter.Params;
+      Life        := Emitter.Life;
+      Time        := Emitter.Time;
+      LastSecond  := Emitter.LastSecond;
+      Particles   := Emitter.Particles;
+      BBox        := Emitter.BBox;
+      case Emitter._type of
+        EMITTER_POINT:     AsPoint  := Emitter.AsPoint;
+        EMITTER_LINE:      AsLine   := Emitter.AsLine;
+        EMITTER_RECTANGLE: AsRect   := Emitter.AsRect;
+        EMITTER_CIRCLE:    AsCircle := Emitter.AsCircle;
+      end;
+      with ParParams do
+        begin
+          Texture   := Emitter.ParParams.Texture;
+          BlendMode := Emitter.ParParams.BlendMode;
+          ColorMode := Emitter.ParParams.ColorMode;
 
-      LifeTimeS := Emitter.ParParams.LifeTimeS;
-      LifeTimeV := Emitter.ParParams.LifeTimeV;
-      Frame     := Emitter.ParParams.Frame;
+          LifeTimeS := Emitter.ParParams.LifeTimeS;
+          LifeTimeV := Emitter.ParParams.LifeTimeV;
+          Frame     := Emitter.ParParams.Frame;
 
-      len := length( Emitter.ParParams.Color );
-      SetLength( Color, len );
-      Move( Emitter.ParParams.Color[ 0 ], Color[ 0 ], len * SizeOf( Color[ 0 ] ) );
+          len := length( Emitter.ParParams.Color );
+          SetLength( Color, len );
+          Move( Emitter.ParParams.Color[ 0 ], Color[ 0 ], len * SizeOf( Color[ 0 ] ) );
 
-      len := length( Emitter.ParParams.Alpha );
-      SetLength( Alpha, len );
-      Move( Emitter.ParParams.Alpha[ 0 ], Alpha[ 0 ], len * SizeOf( Alpha[ 0 ] ) );
+          len := length( Emitter.ParParams.Alpha );
+          SetLength( Alpha, len );
+          Move( Emitter.ParParams.Alpha[ 0 ], Alpha[ 0 ], len * SizeOf( Alpha[ 0 ] ) );
 
-      SizeXS := Emitter.ParParams.SizeXS;
-      SizeYS := Emitter.ParParams.SizeYS;
-      SizeXV := Emitter.ParParams.SizeXV;
-      SizeYV := Emitter.ParParams.SizeYV;
+          SizeXS := Emitter.ParParams.SizeXS;
+          SizeYS := Emitter.ParParams.SizeYS;
+          SizeXV := Emitter.ParParams.SizeXV;
+          SizeYV := Emitter.ParParams.SizeYV;
 
-      len := length( Emitter.ParParams.SizeXD );
-      SetLength( SizeXD, len );
-      Move( Emitter.ParParams.SizeXD[ 0 ], SizeXD[ 0 ], len * SizeOf( SizeXD[ 0 ] ) );
+          len := length( Emitter.ParParams.SizeXD );
+          SetLength( SizeXD, len );
+          Move( Emitter.ParParams.SizeXD[ 0 ], SizeXD[ 0 ], len * SizeOf( SizeXD[ 0 ] ) );
 
-      len := length( Emitter.ParParams.SizeYD );
-      SetLength( SizeYD, len );
-      Move( Emitter.ParParams.SizeYD[ 0 ], SizeYD[ 0 ], len * SizeOf( SizeYD[ 0 ] ) );
+          len := length( Emitter.ParParams.SizeYD );
+          SetLength( SizeYD, len );
+          Move( Emitter.ParParams.SizeYD[ 0 ], SizeYD[ 0 ], len * SizeOf( SizeYD[ 0 ] ) );
 
-      AngleS    := Emitter.ParParams.AngleS;
-      AngleV    := Emitter.ParParams.AngleV;
-      VelocityS := Emitter.ParParams.VelocityS;
-      VelocityV := Emitter.ParParams.VelocityV;
+          AngleS    := Emitter.ParParams.AngleS;
+          AngleV    := Emitter.ParParams.AngleV;
+          VelocityS := Emitter.ParParams.VelocityS;
+          VelocityV := Emitter.ParParams.VelocityV;
 
-      len := length( Emitter.ParParams.VelocityD );
-      SetLength( VelocityD, len );
-      Move( Emitter.ParParams.VelocityD[ 0 ], VelocityD[ 0 ], len * SizeOf( VelocityD[ 0 ] ) );
+          len := length( Emitter.ParParams.VelocityD );
+          SetLength( VelocityD, len );
+          Move( Emitter.ParParams.VelocityD[ 0 ], VelocityD[ 0 ], len * SizeOf( VelocityD[ 0 ] ) );
 
-      aVelocityS := Emitter.ParParams.aVelocityS;
-      aVelocityV := Emitter.ParParams.aVelocityV;
+          aVelocityS := Emitter.ParParams.aVelocityS;
+          aVelocityV := Emitter.ParParams.aVelocityV;
 
-      len := length( Emitter.ParParams.aVelocityD );
-      SetLength( aVelocityD, len );
-      Move( Emitter.ParParams.aVelocityD[ 0 ], aVelocityD[ 0 ], len * SizeOf( aVelocityD[ 0 ] ) );
+          len := length( Emitter.ParParams.aVelocityD );
+          SetLength( aVelocityD, len );
+          Move( Emitter.ParParams.aVelocityD[ 0 ], aVelocityD[ 0 ], len * SizeOf( aVelocityD[ 0 ] ) );
 
-      SpinS := Emitter.ParParams.SpinS;
-      SpinV := Emitter.ParParams.SpinV;
+          SpinS := Emitter.ParParams.SpinS;
+          SpinV := Emitter.ParParams.SpinV;
 
-      len := length( Emitter.ParParams.SpinD );
-      SetLength( SpinD, len );
-      Move( Emitter.ParParams.SpinD[ 0 ], SpinD[ 0 ], len * SizeOf( SpinD[ 0 ] ) );
+          len := length( Emitter.ParParams.SpinD );
+          SetLength( SpinD, len );
+          Move( Emitter.ParParams.SpinD[ 0 ], SpinD[ 0 ], len * SizeOf( SpinD[ 0 ] ) );
+        end;
+
+      Params.Position.X := Params.Position.X + X;
+      Params.Position.Y := Params.Position.Y + Y;
+      Move( Emitter._particle[ 0 ], _particle[ 0 ], Emitter.Particles * SizeOf( zglTParticle2D ) );
     end;
 
-  Move( Emitter._particle[ 0 ], new._particle[ 0 ], Emitter.Particles * SizeOf( zglTParticle2D ) );
   emitter2d_Init( Result );
 end;
 
@@ -392,7 +438,7 @@ begin
   if ( ID < 0 ) or ( ID > pengine2d.Count.Emitters - 1 ) or ( pengine2d.Count.Emitters = 0 ) Then exit;
 
   emitter2d_Free( pengine2d.List[ ID ] );
-  FreeMem( pengine2d.List[ ID ] );
+  pengine2d.List[ ID ] := nil;
   for i := ID to pengine2d.Count.Emitters - 2 do
     begin
       pengine2d.List[ i ]    := pengine2d.List[ i + 1 ];
@@ -407,10 +453,7 @@ procedure pengine2d_ClearAll;
     i : Integer;
 begin
   for i := 0 to pengine2d.Count.Emitters - 1 do
-    begin
-      emitter2d_Free( pengine2d.List[ i ] );
-      FreeMem( pengine2d.List[ i ] );
-    end;
+    emitter2d_Free( pengine2d.List[ i ] );
   SetLength( pengine2d.List, 0 );
   pengine2d.Count.Emitters := 0;
 end;
@@ -469,6 +512,330 @@ begin
   if lo < iHi Then pengine2d_SortID( lo, iHi );
 end;
 
+function emitter2d_Add : zglPEmitter2D;
+begin
+  if managerEmitter2D.Count + 1 > length( managerEmitter2D.List ) Then
+    SetLength( managerEmitter2D.List, length( managerEmitter2D.List ) + 128 );
+
+  zgl_GetMem( Pointer( Result ), SizeOf( zglTEmitter2D ) );
+  managerEmitter2D.List[ managerEmitter2D.Count ] := Result;
+  INC( managerEmitter2D.Count );
+
+  emitter2d_Init( Result );
+end;
+
+procedure emitter2d_Del( var Emitter : zglPEmitter2D );
+  var
+    i, j : Integer;
+begin
+  for i := 0 to managerEmitter2D.Count - 1 do
+    if managerEmitter2D.List[ i ] = Emitter Then
+      begin
+        emitter2d_Free( Emitter );
+        managerEmitter2D.List[ i ] := nil;
+        for j := i to managerEmitter2D.Count - 2 do
+          managerEmitter2D.List[ i ] := managerEmitter2D.List[ i + 1 ];
+      end;
+end;
+
+function emitter2d_Load : zglPEmitter2D;
+  var
+    c     : LongWord;
+    chunk : Word;
+    size  : LongWord;
+begin
+  Result := emitter2d_Add();
+  with Result^ do
+    while mem_Read( emitter2dMem, chunk, 2 ) > 0 do
+      begin
+        mem_Read( emitter2dMem, size, 4 );
+        case chunk of
+          ZEF_CHUNK_TYPE:
+            begin
+              mem_Read( emitter2dMem, _type, 1 );
+              case _type of
+                EMITTER_POINT: mem_Read( emitter2dMem, AsPoint, SizeOf( zglTEmitterPoint ) );
+                EMITTER_LINE: mem_Read( emitter2dMem, AsLine, SizeOf( zglTEmitterLine ) );
+                EMITTER_RECTANGLE: mem_Read( emitter2dMem, AsRect, SizeOf( zglTEmitterRect ) );
+                EMITTER_CIRCLE: mem_Read( emitter2dMem, AsCircle, SizeOf( zglTEmitterCircle ) );
+              else
+                emitter2dMem.Position := emitter2dMem.Position + size - 1;
+              end;
+            end;
+          ZEF_CHUNK_PARAMS:
+            begin
+              mem_Read( emitter2dMem, Params, size );
+            end;
+          ZEF_CHUNK_BLENDMODE:
+            begin
+              mem_Read( emitter2dMem, ParParams.BlendMode, 1 );
+            end;
+          ZEF_CHUNK_COLORMODE:
+            begin
+              mem_Read( emitter2dMem, ParParams.ColorMode, 1 );
+            end;
+          ZEF_CHUNK_LIFETIME:
+            begin
+              mem_Read( emitter2dMem, ParParams.LifeTimeS, 4 );
+              mem_Read( emitter2dMem, ParParams.LifeTimeV, 4 );
+            end;
+          ZEF_CHUNK_FRAME:
+            begin
+              mem_Read( emitter2dMem, ParParams.Frame[ 0 ], 8 );
+            end;
+          ZEF_CHUNK_COLOR:
+            begin
+              mem_Read( emitter2dMem, c, 4 );
+              SetLength( ParParams.Color, c );
+              mem_Read( emitter2dMem, ParParams.Color[ 0 ], SizeOf( TDiagramLW ) * c );
+
+              mem_Read( emitter2dMem, c, 4 );
+              SetLength( ParParams.Alpha, c );
+              mem_Read( emitter2dMem, ParParams.Alpha[ 0 ], SizeOf( TDiagramByte ) * c );
+            end;
+          ZEF_CHUNK_SIZEXY:
+            begin
+              mem_Read( emitter2dMem, ParParams.SizeXS, 4 );
+              mem_Read( emitter2dMem, ParParams.SizeYS, 4 );
+              mem_Read( emitter2dMem, ParParams.SizeXV, 4 );
+              mem_Read( emitter2dMem, ParParams.SizeYV, 4 );
+
+              mem_Read( emitter2dMem, c, 4 );
+              SetLength( ParParams.SizeXD, c );
+              mem_Read( emitter2dMem, ParParams.SizeXD[ 0 ], SizeOf( TDiagramSingle ) * c );
+
+              mem_Read( emitter2dMem, c, 4 );
+              SetLength( ParParams.SizeYD, c );
+              mem_Read( emitter2dMem, ParParams.SizeYD[ 0 ], SizeOf( TDiagramSingle ) * c );
+            end;
+          ZEF_CHUNK_ANGLE:
+            begin
+              mem_Read( emitter2dMem, ParParams.AngleS, 4 );
+              mem_Read( emitter2dMem, ParParams.AngleV, 4 );
+            end;
+          ZEF_CHUNK_VELOCITY:
+            begin
+              mem_Read( emitter2dMem, ParParams.VelocityS, 4 );
+              mem_Read( emitter2dMem, ParParams.VelocityV, 4 );
+
+              mem_Read( emitter2dMem, c, 4 );
+              SetLength( ParParams.VelocityD, c );
+              mem_Read( emitter2dMem, ParParams.VelocityD[ 0 ], SizeOf( TDiagramSingle ) * c );
+            end;
+          ZEF_CHUNK_AVELOCITY:
+            begin
+              mem_Read( emitter2dMem, ParParams.aVelocityS, 4 );
+              mem_Read( emitter2dMem, ParParams.aVelocityV, 4 );
+
+              mem_Read( emitter2dMem, c, 4 );
+              SetLength( ParParams.aVelocityD, c );
+              mem_Read( emitter2dMem, ParParams.aVelocityD[ 0 ], SizeOf( TDiagramSingle ) * c );
+            end;
+          ZEF_CHUNK_SPIN:
+            begin
+              mem_Read( emitter2dMem, ParParams.SpinS, 4 );
+              mem_Read( emitter2dMem, ParParams.SpinV, 4 );
+
+              mem_Read( emitter2dMem, c, 4 );
+              SetLength( ParParams.SpinD, c );
+              mem_Read( emitter2dMem, ParParams.SpinD[ 0 ], SizeOf( TDiagramSingle ) * c );
+            end;
+        else
+          emitter2dMem.Position := emitter2dMem.Position + size;
+        end;
+      end;
+end;
+
+function emitter2d_LoadFromFile( const FileName : String ) : zglPEmitter2D;
+begin
+  Result := nil;
+  if not file_Exists( FileName ) Then
+    begin
+      log_Add( 'Cannot read "' + FileName + '"' );
+      exit;
+    end;
+
+  mem_LoadFromFile( emitter2dMem, FileName );
+  mem_Read( emitter2dMem, emitter2dID, 14 );
+  if emitter2dID <> ZGL_EMITTER_2D Then
+    log_Add( FileName + ' - it''s not a ZenGL Emitter 2D file' )
+  else
+    Result := emitter2d_Load();
+  mem_Free( emitter2dMem );
+end;
+
+function emitter2d_LoadFromMemory( const Memory : zglTMemory ) : zglPEmitter2D;
+begin
+  emitter2dMem.Size     := Memory.Size;
+  emitter2dMem.Memory   := Memory.Memory;
+  emitter2dMem.Position := Memory.Position;
+
+  mem_Read( emitter2dMem, emitter2dID, 14 );
+  if emitter2dID <> ZGL_EMITTER_2D Then
+    begin
+      Result := nil;
+      log_Add( 'Unable to determinate ZenGL Emitter 2D: From Memory' );
+    end else
+      Result := emitter2d_Load();
+end;
+
+procedure emitter2d_SaveToFile( Emitter : zglPEmitter2D; const FileName : String );
+  var
+    i : Integer;
+    c : LongWord;
+    f : zglTFile;
+    chunk : Word;
+    size  : LongWord;
+begin
+  if not Assigned( Emitter ) Then exit;
+
+  file_Open( f, FileName, FOM_CREATE );
+  file_Write( f, ZGL_EMITTER_2D, 14 );
+  with Emitter^ do
+    begin
+      // ZEF_CHUNK_TYPE
+      chunk := ZEF_CHUNK_TYPE;
+      case _type of
+        EMITTER_POINT: size := SizeOf( zglTEmitterPoint ) + 1;
+        EMITTER_LINE: size := SizeOf( zglTEmitterLine ) + 1;
+        EMITTER_RECTANGLE: size := SizeOf( zglTEmitterRect ) + 1;
+        EMITTER_CIRCLE: size := SizeOf( zglTEmitterCircle ) + 1;
+      end;
+      file_Write( f, chunk, 2 );
+      file_Write( f, size, 4 );
+
+      file_Write( f, _type, 1 );
+      file_Write( f, PByte( @AsPoint )^, size - 1 );
+
+      // ZEF_CHUNK_PARAMS
+      chunk := ZEF_CHUNK_PARAMS;
+      size  := SizeOf( Params );
+      file_Write( f, chunk, 2 );
+      file_Write( f, size, 4 );
+
+      file_Write( f, Params, SizeOf( Params ) );
+
+      with ParParams do
+        begin
+          // ZEF_CHUNK_BLENDMODE
+          chunk := ZEF_CHUNK_BLENDMODE;
+          size  := 1;
+          file_Write( f, chunk, 2 );
+          file_Write( f, size, 4 );
+
+          file_Write( f, BlendMode, 1 );
+
+          // ZEF_CHUNK_COLORMODE
+          chunk := ZEF_CHUNK_COLORMODE;
+          size  := 1;
+          file_Write( f, chunk, 2 );
+          file_Write( f, size, 4 );
+
+          file_Write( f, ColorMode, 1 );
+
+          // ZEF_CHUNK_LIFETIME
+          chunk := ZEF_CHUNK_LIFETIME;
+          size  := 4 + 4;
+          file_Write( f, chunk, 2 );
+          file_Write( f, size, 4 );
+
+          file_Write( f, LifeTimeS, 4 );
+          file_Write( f, LifeTimeV, 4 );
+
+          // ZEF_CHUNK_FRAME
+          chunk := ZEF_CHUNK_FRAME;
+          size  := 8;
+          file_Write( f, chunk, 2 );
+          file_Write( f, size, 4 );
+
+          file_Write( f, Frame, 8 );
+
+          // ZEF_CHUNK_COLOR
+          chunk := ZEF_CHUNK_COLOR;
+          size  := 4 + length( Color ) * SizeOf( TDiagramLW ) + 4 + length( Alpha ) * SizeOf( TDiagramByte );
+          file_Write( f, chunk, 2 );
+          file_Write( f, size, 4 );
+
+          c := length( Color );
+          file_Write( f, c, 4 );
+          file_Write( f, Color[ 0 ], SizeOf( TDiagramLW ) * c );
+
+          c := length( Alpha );
+          file_Write( f, c, 4 );
+          file_Write( f, Alpha[ 0 ], SizeOf( TDiagramByte ) * c );
+
+          // ZEF_CHUNK_SIZEXY
+          chunk := ZEF_CHUNK_SIZEXY;
+          size  := 4 + 4 + 4 + 4 + ( 4 + length( SizeXD ) * SizeOf( TDiagramSingle ) + 4 + length( SizeYD ) * SizeOf( TDiagramSingle ) );
+          file_Write( f, chunk, 2 );
+          file_Write( f, size, 4 );
+
+          file_Write( f, SizeXS, 4 );
+          file_Write( f, SizeYS, 4 );
+          file_Write( f, SizeXV, 4 );
+          file_Write( f, SizeYV, 4 );
+
+          c := length( SizeXD );
+          file_Write( f, c, 4 );
+          file_Write( f, SizeXD[ 0 ], SizeOf( TDiagramSingle ) * c );
+
+          c := length( SizeYD );
+          file_Write( f, c, 4 );
+          file_Write( f, SizeYD[ 0 ], SizeOf( TDiagramSingle ) * c );
+
+          // ZEF_CHUNK_ANGLE
+          chunk := ZEF_CHUNK_ANGLE;
+          size  := 4 + 4;
+          file_Write( f, chunk, 2 );
+          file_Write( f, size, 4 );
+
+          file_Write( f, AngleS, 4 );
+          file_Write( f, AngleV, 4 );
+
+          // ZEF_CHUNK_VELOCITY
+          chunk := ZEF_CHUNK_VELOCITY;
+          size  := 4 + 4 + ( 4 + length( VelocityD ) * SizeOf( TDiagramSingle ) );
+          file_Write( f, chunk, 2 );
+          file_Write( f, size, 4 );
+
+          file_Write( f, VelocityS, 4 );
+          file_Write( f, VelocityV, 4 );
+
+          c := length( VelocityD );
+          file_Write( f, c, 4 );
+          file_Write( f, VelocityD[ 0 ], SizeOf( TDiagramSingle ) * c );
+
+          // ZEF_CHUNK_AVELOCITY
+          chunk := ZEF_CHUNK_AVELOCITY;
+          size  := 4 + 4 + ( 4 + length( aVelocityD ) * SizeOf( TDiagramSingle ) );
+          file_Write( f, chunk, 2 );
+          file_Write( f, size, 4 );
+
+          file_Write( f, aVelocityS, 4 );
+          file_Write( f, aVelocityV, 4 );
+
+          c := length( aVelocityD );
+          file_Write( f, c, 4 );
+          file_Write( f, aVelocityD[ 0 ], SizeOf( TDiagramSingle ) * c );
+
+          // ZEF_CHUNK_SPIN
+          chunk := ZEF_CHUNK_SPIN;
+          size  := 4 + 4 + ( 4 + length( SpinD ) * SizeOf( TDiagramSingle ) );
+          file_Write( f, chunk, 2 );
+          file_Write( f, size, 4 );
+
+          file_Write( f, SpinS, 4 );
+          file_Write( f, SpinV, 4 );
+
+          c := length( SpinD );
+          file_Write( f, c, 4 );
+          file_Write( f, SpinD[ 0 ], SizeOf( TDiagramSingle ) * c );
+        end;
+    end;
+
+    file_Close( f );
+end;
+
 procedure emitter2d_Init( Emitter : zglPEmitter2D );
   var
     i : Integer;
@@ -481,7 +848,7 @@ begin
       end;
 end;
 
-procedure emitter2d_Free( Emitter : zglPEmitter2D );
+procedure emitter2d_Free( var Emitter : zglPEmitter2D );
 begin
   with Emitter.ParParams do
     begin
@@ -493,6 +860,8 @@ begin
       SetLength( aVelocityD, 0 );
       SetLength( SpinD, 0 );
     end;
+  FreeMem( Emitter );
+  Emitter := nil;
 end;
 
 procedure emitter2d_Draw( Emitter : zglPEmitter2D );
