@@ -62,7 +62,7 @@ const
   APP_PAUSED         = 2;
   APP_DIRECTORY      = 3;
   APP_WND_HANDLE     = 4;
-  APP_OGL_CONTEXT    = 5;
+  APP_D3D_DEVICE     = 5;
   USR_HOMEDIR        = 6;
   LOG_FILENAME       = 7;
   ZGL_VERSION        = 8;
