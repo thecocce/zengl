@@ -6,7 +6,7 @@ ZenGL supports two main Pascal compilers - FreePascal and Delphi. On this page y
 
 === FreePascal ===
 
-Supported versions are 2.4.x and 2.2.x. If you use some version from 2.2.x series it's strongly recommended to use the latest one - 2.2.4.
+Supported versions are 2.4.x and 2.2.x. If you use some version from 2.2.x series it's strongly recommended to use the latest one - 2.2.4. The same recommendation is for 2.4.x series - to use FreePascal 2.4.2.
 
 === Delphi ===
 
