@@ -142,9 +142,12 @@ end;
 function timer_GetTicks : Double;
   var
     t : int64;
+    m : LongWord;
 begin
+  m := SetThreadAffinityMask( GetCurrentThread(), 1 );
   QueryPerformanceCounter( t );
   Result := 1000 * T * t_freq - t_start;
+  SetThreadAffinityMask( GetCurrentThread(), m );
 end;
 
 procedure timer_Reset;
