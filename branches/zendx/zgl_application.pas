@@ -114,14 +114,7 @@ begin
 end;
 
 procedure app_Init;
-  var
-    sysInfo : _SYSTEM_INFO;
 begin
-  // Багнутое MS-поделко требует патча :)
-  // Вешаем все на одно ядро
-  GetSystemInfo( sysInfo );
-  SetProcessAffinityMask( GetCurrentProcess(), sysInfo.dwActiveProcessorMask );
-
   scr_Clear();
   app_PLoad();
   scr_Flush();

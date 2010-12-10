@@ -161,6 +161,7 @@ begin
 end;
 
 initialization
+  SetThreadAffinityMask( GetCurrentThread(), 1 );
   QueryPerformanceFrequency( t_frequency );
   t_freq  := 1 / t_frequency;
   t_start := timer_GetTicks();
