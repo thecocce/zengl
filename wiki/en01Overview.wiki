@@ -58,4 +58,4 @@ Cross-platform game development library.
     * reading and writing ini-files
     * functions for work with files and memory
 
-[http://andru-kun.inf.ua/zengl/screens/screen01.jpg http://andru-kun.inf.ua/zengl/screens/screen01s.jpg] [http://andru-kun.inf.ua/zengl/screens/screen02.jpg http://andru-kun.inf.ua/zengl/screens/screen02s.jpg] [http://andru-kun.inf.ua/zengl/screens/screen03.jpg http://andru-kun.inf.ua/zengl/screens/screen03s.jpg] [http://andru-kun.inf.ua/zengl/screens/screen04.png http://andru-kun.inf.ua/zengl/screens/screen04s.png]
+[http://zengl.org/screens/screen01.jpg http://zengl.org/screens/screen01s.jpg] [http://zengl.org/screens/screen02.jpg http://zengl.org/screens/screen02s.jpg] [http://zengl.org/screens/screen03.jpg http://zengl.org/screens/screen03s.jpg] [http://zengl.org/screens/screen04.png http://zengl.org/screens/screen04s.png]
