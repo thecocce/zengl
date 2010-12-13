@@ -239,8 +239,8 @@ begin
     Target.next.prev := Target.prev;
 
   Target.Handle.Depth := nil;
-  FreeMemory( Target.Handle );
-  FreeMemory( Target );
+  FreeMem( Target.Handle );
+  FreeMem( Target );
   Target := nil;
 
   DEC( managerRTarget.Count );

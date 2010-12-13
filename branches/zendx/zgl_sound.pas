@@ -377,9 +377,9 @@ begin
       begin
         sfStream[ i ]._decoder.Close( sfStream[ i ] );
         if Assigned( sfStream[ i ].Buffer ) Then
-          FreeMemory( sfStream[ i ].Buffer );
+          FreeMem( sfStream[ i ].Buffer );
         if Assigned( sfStream[ i ]._data ) Then
-          FreeMemory( sfStream[ i ]._data );
+          FreeMem( sfStream[ i ]._data );
       end;
 
 {$IFDEF USE_OPENAL}
@@ -454,7 +454,7 @@ begin
 {$IFDEF USE_OPENAL}
   alDeleteBuffers( 1, @Sound.Buffer );
 {$ELSE}
-  FreeMemory( Sound.Data );
+  FreeMem( Sound.Data );
   for i := 0 to Sound.SourceCount - 1 do
     Sound.Channel[ i ].Source := nil;
 {$ENDIF}
@@ -465,7 +465,7 @@ begin
   if Assigned( Sound.next ) Then
     Sound.next.prev := Sound.prev;
 
-  FreeMemory( Sound );
+  FreeMem( Sound );
   Sound := nil;
 
   DEC( managerSound.Count.Items );
@@ -504,7 +504,7 @@ begin
 
 {$IFDEF USE_OPENAL}
   alBufferData( Result.Buffer, f, Result.Data, Result.Size, Result.Frequency );
-  FreeMemory( Result.Data );
+  FreeMem( Result.Data );
 {$ELSE}
   dsu_CreateBuffer( Result.Channel[ 0 ].Source, Result.Size, Pointer( f ) );
   dsu_FillData( Result.Channel[ 0 ].Source, Result.Data, Result.Size );
@@ -539,7 +539,7 @@ begin
 
 {$IFDEF USE_OPENAL}
   alBufferData( Result.Buffer, f, Result.Data, Result.Size, Result.Frequency );
-  FreeMemory( Result.Data );
+  FreeMem( Result.Data );
 {$ELSE}
   dsu_CreateBuffer( Result.Channel[ 0 ].Source, Result.Size, Pointer( f ) );
   dsu_FillData( Result.Channel[ 0 ].Source, Result.Data, Result.Size );
@@ -959,9 +959,9 @@ begin
     begin
       sfStream[ Result ]._decoder.Close( sfStream[ Result ] );
       if Assigned( sfStream[ Result ].Buffer ) Then
-        FreeMemory( sfStream[ Result ].Buffer );
+        FreeMem( sfStream[ Result ].Buffer );
       if Assigned( sfStream[ Result ]._data ) Then
-        FreeMemory( sfStream[ Result ]._data );
+        FreeMem( sfStream[ Result ]._data );
     end;
 
   if not file_Exists( FileName ) Then

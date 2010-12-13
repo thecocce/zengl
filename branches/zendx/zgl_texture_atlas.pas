@@ -313,8 +313,8 @@ begin
   d3d_FillTexture( pData, pABGR, tex.Width, tex.Height );
   atals_InsertDataToNode( Result, pABGR, tex.Width, tex.Width, tex.Height );
 
-  FreeMemory( pData );
-  FreeMemory( pABGR );
+  FreeMem( pData );
+  FreeMem( pABGR );
 end;
 
 function atlas_InsertFromMemory( Atlas : zglPAtlas; const Memory : zglTMemory; const Extension : String; TransparentColor, Flags : LongWord ) : zglPAtlasNode;
@@ -358,8 +358,8 @@ begin
   d3d_FillTexture( pData, pABGR, tex.Width, tex.Height );
   atals_InsertDataToNode( Result, pABGR, tex.Width, tex.Width, tex.Height );
 
-  FreeMemory( pData );
-  FreeMemory( pABGR );
+  FreeMem( pData );
+  FreeMem( pABGR );
 end;
 
 procedure atals_InsertDataToNode( var Node : zglPAtlasNode; pData : Pointer; RowLength, Width, Height : Word );
