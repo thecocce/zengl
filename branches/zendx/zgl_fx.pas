@@ -44,7 +44,7 @@ const
   FX_BLEND        = $100000;
   FX_COLOR        = $200000;
 
-procedure fx_SetBlendMode( Mode : Byte );
+procedure fx_SetBlendMode( Mode : Byte; SeparateAlpha : Boolean = TRUE );
 procedure fx_SetColorMode( Mode : Byte );
 procedure fx_SetColorMask( R, G, B, Alpha : Boolean );
 
@@ -75,23 +75,55 @@ var
 
 implementation
 uses
+  zgl_direct3d,
   zgl_direct3d_all,
   zgl_render_2d;
 
-procedure fx_SetBlendMode( Mode : Byte );
+procedure fx_SetBlendMode( Mode : Byte; SeparateAlpha : Boolean = TRUE );
+  var
+    srcBlend : LongWord;
+    dstBlend : LongWord;
 begin
-  if b2d_Started and ( Mode <> b2dcur_Blend ) Then
+  if b2d_Started and ( Mode + LongWord( SeparateAlpha ) shl 8 <> b2dcur_Blend ) Then
     batch2d_Flush();
 
-  b2dcur_Blend := Mode;
+  b2dcur_Blend := Mode + LongWord( SeparateAlpha ) shl 8;
   case Mode of
-    FX_BLEND_NORMAL : glBlendFunc( GL_SRC_ALPHA,           GL_ONE_MINUS_SRC_ALPHA );
-    FX_BLEND_ADD    : glBlendFunc( GL_SRC_ALPHA,           GL_ONE                 );
-    FX_BLEND_MULT   : glBlendFunc( GL_ZERO,                GL_SRC_COLOR           );
-    FX_BLEND_BLACK  : glBlendFunc( GL_SRC_COLOR,           GL_ONE_MINUS_SRC_COLOR );
-    FX_BLEND_WHITE  : glBlendFunc( GL_ONE_MINUS_SRC_COLOR, GL_SRC_COLOR           );
-    FX_BLEND_MASK   : glBlendFunc( GL_ZERO,                GL_SRC_COLOR           );
+    FX_BLEND_NORMAL:
+      begin
+        srcBlend := GL_SRC_ALPHA;
+        dstBlend := GL_ONE_MINUS_SRC_ALPHA;
+      end;
+    FX_BLEND_ADD:
+      begin
+        srcBlend := GL_SRC_ALPHA;
+        dstBlend := GL_ONE;
+      end;
+    FX_BLEND_MULT:
+      begin
+        srcBlend := GL_ZERO;
+        dstBlend := GL_SRC_COLOR;
+      end;
+    FX_BLEND_BLACK:
+      begin
+        srcBlend := GL_SRC_COLOR;
+        dstBlend := GL_ONE_MINUS_SRC_COLOR;
+      end;
+    FX_BLEND_WHITE:
+      begin
+        srcBlend := GL_ONE_MINUS_SRC_COLOR;
+        dstBlend := GL_SRC_COLOR;
+      end;
+    FX_BLEND_MASK:
+      begin
+        srcBlend := GL_ZERO;
+        dstBlend := GL_SRC_COLOR;
+      end;
   end;
+  if SeparateAlpha and ogl_Separate Then
+    glBlendFuncSeparateEXT( srcBlend, dstBlend, GL_ONE, GL_ONE_MINUS_SRC_ALPHA )
+  else
+    glBlendFunc( srcBlend, dstBlend );
 end;
 
 procedure fx_SetColorMode( Mode : Byte );
