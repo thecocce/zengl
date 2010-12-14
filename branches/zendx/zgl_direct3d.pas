@@ -101,7 +101,6 @@ var
   ogl_zFar       : Single = 100;
   ogl_MTexActive : array[ 0..8 ] of Boolean;
   ogl_MTexture   : array[ 0..8 ] of DWORD;
-  ogl_Separate   : Boolean;
 
   ogl_Mode   : Integer = 3; // 2D/3D Modes
   ogl_Target : Integer = TARGET_SCREEN;
@@ -117,6 +116,8 @@ var
   ogl_CanCompress   : Boolean;
   ogl_MaxTexSize    : Integer;
   ogl_MaxAnisotropy : Integer;
+  ogl_MaxTexUnits   : Integer;
+  ogl_Separate      : Boolean;
 
 implementation
 uses
@@ -168,6 +169,7 @@ begin
   d3d.GetDeviceCaps( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, d3d_Caps );
   ogl_MaxTexSize    := d3d_Caps.MaxTextureWidth;
   ogl_MaxAnisotropy := d3d_Caps.MaxAnisotropy;
+  ogl_MaxTexUnits   := d3d_Caps.MaxSimultaneousTextures;
   {$IFDEF USE_DIRECT3D8}
   log_Add( 'D3D8_MAX_TEXTURE_SIZE: ' + u_IntToStr( ogl_MaxTexSize ) );
   log_Add( 'D3D8_MAX_TEXTURE_ANISOTROPY: ' + u_IntToStr( ogl_MaxAnisotropy ) );
