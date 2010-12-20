@@ -6,9 +6,6 @@ RU:
 - нет поддержки сжатых текстур
 - tex_SetData не работает для текстур используемых в качестве Render Target'а
 
-Delphi  - файлы для сборки библиотеки в Delphi
-PasZLib - модули более компактной версии PasZLib для Delphi
-
 EN:
 This is modified version of ZenGL, that use Direct3D 8/9 as graphics API
 Version of Direct3D can be set by defines in zgl_config.cfg
