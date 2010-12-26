@@ -308,12 +308,10 @@ begin
         d3d_Device.SetDepthStencilSurface( Target.Handle.Depth );
       {$ENDIF}
 
+      lCam2D  := cam2dApply;
+      lPCam2D := cam2DGlobal^;
       if cam2dApply Then
-        begin
-          lCam2D  := cam2dApply;
-          lPCam2D := cam2DGlobal^;
-          glPopMatrix();
-        end;
+        glPopMatrix();
 
       if Target.Flags and RT_FULL_SCREEN > 0 Then
         begin
