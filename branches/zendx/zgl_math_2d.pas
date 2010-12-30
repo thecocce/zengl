@@ -99,7 +99,7 @@ var
   tessVCount  : Integer;
   tessVerts   : array of zglTPoint2D;
 
-function ArcTan2( const dx, dy : Single ) : Single;
+function ArcTan2( dx, dy : Single ) : Single;
 begin
   Result := abs( ArcTan( dy / dx ) * ( 180 / pi ) );
 end;
