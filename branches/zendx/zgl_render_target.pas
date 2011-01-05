@@ -86,9 +86,6 @@ procedure rtarget_Restore( Target : zglPTexture );
 
 var
   managerRTarget : zglTRenderTargetManager;
-  lRTarget  : zglPRenderTarget;
-  rtWidth  : Integer;
-  rtHeight : Integer;
 
 implementation
 uses
@@ -101,8 +98,7 @@ uses
 
 var
   lCanDraw : Boolean;
-  lCam2D   : Boolean;
-  lPCam2D  : zglTCamera2D;
+  lRTarget : zglPRenderTarget;
   {$IFDEF USE_DIRECT3D8}
   lSurface : IDirect3DSurface8;
   {$ENDIF}
@@ -308,11 +304,6 @@ begin
         d3d_Device.SetDepthStencilSurface( Target.Handle.Depth );
       {$ENDIF}
 
-      lCam2D  := cam2dApply;
-      lPCam2D := cam2DGlobal^;
-      if cam2dApply Then
-        glPopMatrix();
-
       if Target.Flags and RT_FULL_SCREEN > 0 Then
         begin
           if app_Flags and CORRECT_RESOLUTION > 0 Then
@@ -336,8 +327,6 @@ begin
       glScalef( 1, -1, 1 );
       glTranslatef( 0, -ogl_Height, 0 );
       glViewport( 0, 0, Target.Surface.Width, Target.Surface.Height );
-      if lCam2D Then
-        cam2d_Apply( @lPCam2D );
 
       if Target.Flags and RT_CLEAR_COLOR > 0 Then
         d3d_Device.Clear( 0, nil, D3DCLEAR_TARGET, D3DCOLOR_ARGB( 0, 0, 0, 0 ), 1, 0 );
@@ -360,8 +349,6 @@ begin
           if lRTarget.Flags and RT_SAVE_CONTENT > 0 Then
             rtarget_Save( lRTarget.Surface );
 
-          lCam2D     := cam2dApply;
-          lPCam2D    := cam2DGlobal^;
           ogl_Target := TARGET_SCREEN;
           ogl_Width  := lGLW;
           ogl_Height := lGLH;
@@ -375,8 +362,6 @@ begin
 
           lRTarget := nil;
           SetCurrentMode();
-          if lCam2D Then
-            cam2d_Apply( @lPCam2D );
           if not lCanDraw then
             d3d_EndScene();
         end;
@@ -401,7 +386,6 @@ begin
         glBlendFunc( GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
         glColorMask( GL_FALSE, GL_FALSE, GL_FALSE, GL_TRUE );
         RenderCallback( Data );
-        batch2d_Flush;
 
         rtarget_Set( nil );
 

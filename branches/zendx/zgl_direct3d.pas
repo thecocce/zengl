@@ -305,7 +305,7 @@ begin
   gl_TexCoord2f  := @glTexCoord2f;
   gl_TexCoord2fv := @glTexCoord2fv;
 
-  d3d_ResetState;
+  d3d_ResetState();
 
   Result := TRUE;
 end;
@@ -515,7 +515,7 @@ begin
             d3d_ParamsW.BackBufferFormat := d3d_Mode.Format;
           end;
 
-        d3d_Restore;
+        d3d_Restore();
         exit;
       end;
   end;
@@ -529,18 +529,18 @@ end;
 procedure d3d_EndScene;
 begin
   d3d_CanDraw := FALSE;
-  d3d_Device.EndScene;
+  d3d_Device.EndScene();
   d3d_Device.Present( nil, nil, 0, nil );
 end;
 
 procedure Set2DMode;
 begin
   ogl_Mode := 2;
-  if cam2dApply Then cam2d_Apply( nil );
+  batch2d_Flush();
 
   glDisable( GL_DEPTH_TEST );
   glMatrixMode( GL_PROJECTION );
-  glLoadIdentity;
+  glLoadIdentity();
   if ogl_Target = TARGET_SCREEN Then
     begin
       if app_Flags and CORRECT_RESOLUTION > 0 Then
@@ -550,31 +550,34 @@ begin
     end else
       glOrtho( 0, ogl_Width, ogl_Height, 0, -1, 1 );
   glMatrixMode( GL_MODELVIEW );
-  glLoadIdentity;
-  scr_SetViewPort;
+  glLoadIdentity();
+  scr_SetViewPort();
+
+  if ( cam2dApply ) and ( ogl_Target = TARGET_SCREEN ) Then
+    cam2d_Apply( cam2dGlobal );
 end;
 
 procedure Set3DMode( FOVY : Single = 45 );
 begin
   ogl_Mode := 3;
   ogl_FOVY := FOVY;
-  if cam2dApply Then cam2d_Apply( nil );
+  batch2d_Flush();
 
   glColor4ub( 255, 255, 255, 255 );
 
   glEnable( GL_DEPTH_TEST );
   glMatrixMode( GL_PROJECTION );
-  glLoadIdentity;
+  glLoadIdentity();
   gluPerspective( ogl_FOVY, ogl_Width / ogl_Height, ogl_zNear, ogl_zFar );
   glMatrixMode( GL_MODELVIEW );
-  glLoadIdentity;
-  scr_SetViewPort;
+  glLoadIdentity();
+  scr_SetViewPort();
 end;
 
 procedure SetCurrentMode;
 begin
   if ogl_Mode = 2 Then
-    Set2DMode
+    Set2DMode()
   else
     Set3DMode( ogl_FOVY );
 end;
@@ -587,15 +590,15 @@ end;
 
 procedure zbuffer_Clear;
 begin
+  batch2d_Flush();
   glClear( GL_DEPTH_BUFFER_BIT );
 end;
 
 procedure scissor_Begin( X, Y, Width, Height : Integer );
 begin
-  if b2d_Started Then
-    batch2d_Flush;
-  if ( Width < 0 ) or ( Height < 0 ) Then
-    exit;
+  batch2d_Flush();
+
+  if ( Width < 0 ) or ( Height < 0 ) Then exit;
   if cam2DGlobal <> @constCamera2D Then
     begin
       X      := Trunc( ( X - cam2dGlobal.X ) * cam2dGlobal.Zoom.X + ( ( ogl_Width  / 2 ) - ( ogl_Width  / 2 ) * cam2dGlobal.Zoom.X ) );
@@ -628,10 +631,9 @@ end;
 
 procedure scissor_End;
 begin
-  if b2d_Started Then
-    batch2d_Flush;
-  if tSCount - 1 < 0 Then
-    exit;
+  batch2d_Flush();
+
+  if tSCount - 1 < 0 Then exit;
   DEC( tSCount );
   ogl_ClipX := tScissor[ tSCount ][ 0 ];
   ogl_ClipY := tScissor[ tSCount ][ 1 ];

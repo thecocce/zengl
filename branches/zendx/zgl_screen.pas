@@ -182,12 +182,14 @@ end;
 
 procedure scr_Clear;
 begin
+  batch2d_Flush();
   glClear( GL_COLOR_BUFFER_BIT * Byte( app_Flags and COLOR_BUFFER_CLEAR > 0 ) or GL_DEPTH_BUFFER_BIT * Byte( app_Flags and DEPTH_BUFFER_CLEAR > 0 ) or
            GL_STENCIL_BUFFER_BIT * Byte( app_Flags and STENCIL_BUFFER_CLEAR > 0 ) );
 end;
 
 procedure scr_Flush;
 begin
+  batch2d_Flush();
 end;
 
 procedure scr_SetOptions( Width, Height, Refresh : Word; FullScreen, VSync : Boolean );
@@ -320,7 +322,7 @@ begin
     log_Add( 'FSAA changed to: off' );
 
   if wnd_Handle <> 0 Then
-    wnd_Update;
+    wnd_Update();
 end;
 
 procedure scr_ReadPixels( var pData : Pointer; X, Y, Width, Height : Word );
