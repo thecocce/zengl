@@ -259,7 +259,6 @@ begin
       lClipH     := ogl_ClipH;
       lResCX     := scr_ResCX;
       lResCY     := scr_ResCY;
-      ogl_Target := TARGET_TEXTURE;
 
       if Target.Surface <> Target.Handle.Old Then
         begin
@@ -304,6 +303,9 @@ begin
         d3d_Device.SetDepthStencilSurface( Target.Handle.Depth );
       {$ENDIF}
 
+      ogl_Target  := TARGET_TEXTURE;
+      ogl_TargetW := Target.Surface.Width;
+      ogl_TargetH := Target.Surface.Height;
       if Target.Flags and RT_FULL_SCREEN > 0 Then
         begin
           if app_Flags and CORRECT_RESOLUTION > 0 Then
@@ -315,10 +317,6 @@ begin
           begin
             ogl_Width  := Target.Surface.Width;
             ogl_Height := Target.Surface.Height;
-            ogl_ClipX  := 0;
-            ogl_ClipY  := 0;
-            ogl_ClipW  := ogl_Width;
-            ogl_ClipH  := ogl_Height;
             scr_ResCX  := 1;
             scr_ResCY  := 1;
           end;
@@ -349,9 +347,11 @@ begin
           if lRTarget.Flags and RT_SAVE_CONTENT > 0 Then
             rtarget_Save( lRTarget.Surface );
 
-          ogl_Target := TARGET_SCREEN;
-          ogl_Width  := lGLW;
-          ogl_Height := lGLH;
+          ogl_Target  := TARGET_SCREEN;
+          ogl_Width   := lGLW;
+          ogl_Height  := lGLH;
+          ogl_TargetW := ogl_Width;
+          ogl_TargetH := ogl_Height;
           if lRTarget.Flags and RT_FULL_SCREEN = 0 Then
             begin
               ogl_ClipW := lClipW;
@@ -381,7 +381,7 @@ begin
         glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
         glColorMask( GL_TRUE, GL_TRUE, GL_TRUE, GL_FALSE );
         RenderCallback( Data );
-        batch2d_Flush;
+        batch2d_Flush();
 
         glBlendFunc( GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
         glColorMask( GL_FALSE, GL_FALSE, GL_FALSE, GL_TRUE );

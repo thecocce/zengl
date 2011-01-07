@@ -102,8 +102,10 @@ var
   ogl_MTexActive : array[ 0..8 ] of Boolean;
   ogl_MTexture   : array[ 0..8 ] of DWORD;
 
-  ogl_Mode   : Integer = 3; // 2D/3D Modes
-  ogl_Target : Integer = TARGET_SCREEN;
+  ogl_Mode    : Integer = 2; // 2D/3D Modes
+  ogl_Target  : Integer = TARGET_SCREEN;
+  ogl_TargetW : Integer;
+  ogl_TargetH : Integer;
 
   ogl_Width  : Integer;
   ogl_Height : Integer;
@@ -298,12 +300,6 @@ begin
             end else log_Add( 'D3DCREATE_PUREDEVICE' );
         end else log_Add( 'D3DCREATE_SOFTWARE_VERTEXPROCESSING' );
     end else log_Add( 'D3DCREATE_HARDWARE_VERTEXPROCESSING' );
-
-  //
-  gl_Vertex2f    := @glVertex2f;
-  gl_Vertex2fv   := @glVertex2fv;
-  gl_TexCoord2f  := @glTexCoord2f;
-  gl_TexCoord2fv := @glTexCoord2fv;
 
   d3d_ResetState();
 
@@ -554,7 +550,7 @@ begin
   scr_SetViewPort();
 
   if ( cam2dApply ) and ( ogl_Target = TARGET_SCREEN ) Then
-    cam2d_Apply( cam2dGlobal )
+    cam2d_Set( cam2dGlobal )
   else
     sprite2d_InScreen := sprite2d_InScreenSimple;
 end;

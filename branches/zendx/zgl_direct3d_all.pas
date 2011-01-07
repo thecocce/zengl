@@ -304,21 +304,17 @@ procedure gluTessVertex(tess: Integer; vertex: PDouble; data: Pointer); stdcall 
 procedure d3d_FillTexture( const Src, Dst : Pointer; const Width, Height : Integer; const DstStride : Integer = 0 );
 
 var
-  gl_TexCoord2f   : procedure( U, V : Single );
-  gl_TexCoord2fv  : procedure( Coord : PSingle );
-  gl_Vertex2f     : procedure( X, Y : Single );
-  gl_Vertex2fv    : procedure( v : PSingle );
-  d3d_texCount    : Integer;
-  d3d_texArray    : array of zglD3DTexture;
+  d3d_texCount   : Integer;
+  d3d_texArray   : array of zglD3DTexture;
   {$IFDEF USE_DIRECT3D8}
-  d3d_resArray    : array of IDirect3DTexture8;
+  d3d_resArray   : array of IDirect3DTexture8;
   {$ENDIF}
   {$IFDEF USE_DIRECT3D9}
-  d3d_resArray    : array of IDirect3DSurface9;
+  d3d_resArray   : array of IDirect3DSurface9;
   {$ENDIF}
-  d3d_Matrices    : array[ 0..23 ] of TD3DMatrix;
-  d3d_MatrixMode  : {$IFDEF USE_DIRECT3D8} LongWord {$ENDIF}
-                    {$IFDEF USE_DIRECT3D9} TD3DTransformStateType {$ENDIF};
+  d3d_Matrices   : array[ 0..23 ] of TD3DMatrix;
+  d3d_MatrixMode : {$IFDEF USE_DIRECT3D8} LongWord {$ENDIF}
+                   {$IFDEF USE_DIRECT3D9} TD3DTransformStateType {$ENDIF};
 
 implementation
 uses
