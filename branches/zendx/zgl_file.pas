@@ -207,7 +207,7 @@ begin
   if ( len > 0 ) and ( Path[ len ] <> '/' ) and ( Path[ len ] <> '\' ) Then
     filePath := Path + '/'
   else
-    filePath := PChar( @Path[ 1 ] );
+    filePath := Path + #0;
 end;
 
 end.

@@ -185,7 +185,7 @@ procedure wnd_SetCaption( const NewCaption : String );
   var
     i,len : Integer;
 begin
-  wnd_Caption := PChar( @NewCaption[ 1 ] );
+  wnd_Caption := NewCaption + #0;
 
   {$IFNDEF FPC}
   if SizeOf( Char ) = 2 Then
@@ -198,7 +198,7 @@ begin
   if len = 1 Then
     begin
       if app_Flags and APP_USE_UTF8 = 0 Then
-        wnd_Caption := AnsiToUtf8( PChar( @NewCaption[ 1 ] ) );
+        wnd_Caption := AnsiToUtf8( wnd_Caption );
       len := MultiByteToWideChar( CP_UTF8, 0, @wnd_Caption[ 1 ], length( wnd_Caption ), nil, 0 );
       if Assigned( wnd_CaptionW ) Then
         FreeMem( wnd_CaptionW );
