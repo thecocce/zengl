@@ -43,9 +43,9 @@ const
   FSM_CUR    = $02;
   FSM_END    = $03;
 
-procedure file_Open( var FileHandle : zglTFile; const FileName : String; Mode : Byte );
+function  file_Open( var FileHandle : zglTFile; const FileName : String; Mode : Byte ) : Boolean;
 function  file_MakeDir( const Directory : String ) : Boolean;
-function  file_Exists( const FileName : String ) : Boolean;
+function  file_Exists( const FileName : String; Directory : Boolean = FALSE ) : Boolean;
 function  file_Seek( FileHandle : zglTFile; Offset, Mode : Integer ) : LongWord;
 function  file_GetPos( FileHandle : zglTFile ) : LongWord;
 function  file_Read( FileHandle : zglTFile; var Buffer; Bytes : LongWord ) : LongWord;
@@ -66,13 +66,14 @@ uses
 var
   filePath : String = '';
 
-procedure file_Open( var FileHandle : zglTFile; const FileName : String; Mode : Byte );
+function file_Open( var FileHandle : zglTFile; const FileName : String; Mode : Byte ) : Boolean;
 begin
   case Mode of
     FOM_CREATE: FileHandle := CreateFile( PChar( filePath + FileName ), GENERIC_ALL, 0, nil, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0 );
     FOM_OPENR:  FileHandle := CreateFile( PChar( filePath + FileName ), GENERIC_READ, FILE_SHARE_READ, nil, OPEN_EXISTING, 0, 0 );
     FOM_OPENRW: FileHandle := CreateFile( PChar( filePath + FileName ), GENERIC_READ or GENERIC_WRITE, FILE_SHARE_READ or FILE_SHARE_WRITE, nil, OPEN_EXISTING, 0, 0 );
   end;
+  Result := FileHandle <> FILE_ERROR;
 end;
 
 function file_MakeDir( const Directory : String ) : Boolean;
@@ -80,14 +81,21 @@ begin
   Result := CreateDirectory( PChar( Directory ), nil );
 end;
 
-function file_Exists( const FileName : String ) : Boolean;
+function file_Exists( const FileName : String; Directory : Boolean = FALSE ) : Boolean;
   var
     fileHandle : zglTFile;
+    attr       : LongWord;
 begin
-  file_Open( fileHandle, filePath + FileName, FOM_OPENR );
-  Result := fileHandle <> INVALID_HANDLE_VALUE;
-  if Result Then
-    file_Close( fileHandle );
+  if not Directory Then
+    begin
+      Result := file_Open( fileHandle, filePath + FileName, FOM_OPENR );
+      if Result Then
+        file_Close( fileHandle );
+    end else
+      begin
+        attr   := GetFileAttributes( PChar( filePath + FileName ) );
+        Result := ( attr <> $FFFFFFFF ) and ( attr and FILE_ATTRIBUTE_DIRECTORY <> 0 );
+      end;
 end;
 
 function file_Seek( FileHandle : zglTFile; Offset, Mode : Integer ) : LongWord;
