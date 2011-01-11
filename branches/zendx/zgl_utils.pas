@@ -29,7 +29,6 @@ uses
 
 const
   LIB_ERROR  = 0;
-  FILE_ERROR = 0;
 
 function u_IntToStr( Value : Integer ) : String;
 function u_StrToInt( const Value : String ) : Integer;

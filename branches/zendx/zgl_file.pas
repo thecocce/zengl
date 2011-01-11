@@ -33,6 +33,8 @@ type zglTFile = THandle;
 type zglTFileList = zglTStringList;
 
 const
+  FILE_ERROR = LongWord( -1 );
+
   // Open Mode
   FOM_CREATE = $01; // Create
   FOM_OPENR  = $02; // Read
