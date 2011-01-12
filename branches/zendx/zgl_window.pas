@@ -185,7 +185,7 @@ procedure wnd_SetCaption( const NewCaption : String );
   var
     i,len : Integer;
 begin
-  wnd_Caption := NewCaption + #0;
+  wnd_Caption := u_CopyStr( NewCaption );
 
   {$IFNDEF FPC}
   if SizeOf( Char ) = 2 Then
