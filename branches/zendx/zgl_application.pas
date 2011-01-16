@@ -212,7 +212,7 @@ begin
         if app_Focus Then
           begin
             app_Pause := FALSE;
-            app_PActivate( TRUE );
+            if app_Work Then app_PActivate( TRUE );
             FillChar( keysDown[ 0 ], 256, 0 );
             key_ClearState();
             FillChar( mouseDown[ 0 ], 3, 0 );
@@ -220,7 +220,7 @@ begin
           end else
             begin
               if app_AutoPause Then app_Pause := TRUE;
-              app_PActivate( FALSE );
+              if app_Work Then app_PActivate( FALSE );
             end;
       end;
     WM_NCHITTEST:
