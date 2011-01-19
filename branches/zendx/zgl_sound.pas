@@ -490,8 +490,8 @@ begin
 
   for i := managerSound.Count.Formats - 1 downto 0 do
     begin
-      file_GetExtension( FileName, ext );
-      if u_StrUp( ext ) = managerSound.Formats[ i ].Extension Then
+      ext := u_StrUp( file_GetExtension( FileName ) );
+      if ext = managerSound.Formats[ i ].Extension Then
         managerSound.Formats[ i ].FileLoader( FileName, Result.Data, Result.Size, f, Result.Frequency );
     end;
 
@@ -972,8 +972,8 @@ begin
 
   for i := managerSound.Count.Formats - 1 downto 0 do
     begin
-      file_GetExtension( FileName, ext );
-      if u_StrUp( ext ) = managerSound.Formats[ i ].Extension Then
+      ext := u_StrUp( file_GetExtension( FileName ) );
+      if ext = managerSound.Formats[ i ].Extension Then
         sfStream[ Result ]._decoder := managerSound.Formats[ i ].Decoder;
     end;
 
