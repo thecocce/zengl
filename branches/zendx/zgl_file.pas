@@ -156,6 +156,8 @@ begin
     List.Items[ List.Count ] := FList.cFileName;
     INC( List.Count );
   until not FindNextFile( First, FList );
+
+  u_SortList( List, 0, List.Count - 1 );
 end;
 
 procedure GetStr( const Str : String; var Result : String; const d : Char; const b : Boolean );
