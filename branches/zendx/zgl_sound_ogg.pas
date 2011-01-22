@@ -72,12 +72,9 @@ uses
 const
   OGG_EXTENSION : array[ 0..3 ] of Char = ( 'O', 'G', 'G', #0 );
 
-  libogg         = 'libogg.dll';
-  libvorbis      = 'libvorbis.dll';
-  libvorbisfile  = 'libvorbisfile.dll';
-  libogg0        = 'libogg-0.dll';
-  libvorbis0     = 'libvorbis-0.dll';
-  libvorbisfile3 = 'libvorbisfile-3.dll';
+  libogg        = 'libogg-0.dll';
+  libvorbis     = 'libvorbis-0.dll';
+  libvorbisfile = 'libvorbisfile-3.dll';
 
 type
   ppcfloat     = ^pcfloat;
@@ -322,12 +319,6 @@ begin
   ogg_Library        := dlopen( libogg );
   vorbis_Library     := dlopen( libvorbis );
   vorbisfile_Library := dlopen( libvorbisfile );
-  if ( ogg_Library = LIB_ERROR ) and ( vorbis_Library = LIB_ERROR ) and ( vorbisfile_Library = LIB_ERROR ) Then
-    begin
-      ogg_Library        := dlopen( libogg0 );
-      vorbis_Library     := dlopen( libvorbis0 );
-      vorbisfile_Library := dlopen( libvorbisfile3 );
-    end;
 
   if ( ogg_Library <> LIB_ERROR ) and ( vorbis_Library <> LIB_ERROR ) and ( vorbisfile_Library <> LIB_ERROR ) Then
     begin
