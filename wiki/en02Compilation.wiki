@@ -30,8 +30,6 @@ There are two ways to compile ZenGL under Windows - using Delphi and Lazarus. Pr
 
 As for GNU/Linux under MacOS X there is also Makefile. But for compilation under MacOS X must be used command *make macos* instead of *make*. After that will be compiled universal dylib for architectures x86 and PowerPC.
 
-*Possible problems:* there is a problem with XCode linker that available for MacOS X 10.6. So any application compiled under MacOS X 10.6 can crash under early versions of MacOS X(like 10.5 and 10.4). Compilation under MacOS X 10.5 and 10.4 doesn't cause this problem.
-
 == Configuration of ZenGL ==
 
 There are two files for configuration of ZenGL - *zgl_config.cfg* и *zgl_fpc.cfg*. The second one intended only for FreePascal. All "options" can be simply turned on/off by uncommenting/commenting of defines.
