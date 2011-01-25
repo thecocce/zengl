@@ -814,32 +814,25 @@ begin
         bJ := Round( ogl_ClipH / scr_ResCY ) div j - Round( tY ) div j;
       end;
 
-  if ( cam2dGlobal.Zoom.X <> 1 ) or ( cam2dGlobal.Zoom.Y <> 1 ) or ( cam2dGlobal.Angle <> 0 ) Then
+  if not cam2d.OnlyXY Then
     begin
-      if ( cam2dZoomX <> cam2dGlobal.Zoom.X ) or ( cam2dZoomY <> cam2dGlobal.Zoom.Y ) Then
-        begin
-          cam2dZoomX := cam2dGlobal.Zoom.X;
-          cam2dZoomY := cam2dGlobal.Zoom.Y;
-          ogl_ClipR  := Round( sqrt( sqr( ogl_ClipW / cam2dZoomX ) + sqr( ogl_ClipH / cam2dZoomY ) ) ) div 2;
-        end;
-
-      tI := ogl_ClipR div i - Round( ogl_ClipW / scr_ResCX ) div i div 2 + 3;
-      tJ := ogl_ClipR div j - Round( ogl_ClipH / scr_ResCY ) div j div 2 + 3;
+      tI := ogl_ClipR div i - Round( ogl_Width / scr_ResCX ) div i div 2 + 3;
+      tJ := ogl_ClipR div j - Round( ogl_Height / scr_ResCY ) div j div 2 + 3;
       DEC( aI, tI );
       INC( bI, tI );
       DEC( aJ, tJ );
       INC( bJ, tJ );
     end;
   if tX >= 0 Then
-    INC( aI, Round( ( cam2dGlobal.X - tX ) / i ) - 1 )
+    INC( aI, Round( ( cam2d.Global.X - tX ) / i ) - 1 )
   else
-    INC( aI, Round( cam2dGlobal.X / i ) - 1 );
-  INC( bI, Round( ( cam2dGlobal.X ) / i ) + 1 );
+    INC( aI, Round( cam2d.Global.X / i ) - 1 );
+  INC( bI, Round( ( cam2d.Global.X ) / i ) + 1 );
   if tY >= 0 Then
-    INC( aJ, Round( ( cam2dGlobal.Y - tY ) / j ) - 1 )
+    INC( aJ, Round( ( cam2d.Global.Y - tY ) / j ) - 1 )
   else
-    INC( aJ, Round( cam2dGlobal.Y / j ) - 1 );
-  INC( bJ, Round( cam2dGlobal.Y / j ) + 1 );
+    INC( aJ, Round( cam2d.Global.Y / j ) - 1 );
+  INC( bJ, Round( cam2d.Global.Y / j ) + 1 );
   if aI < 0 Then aI := 0;
   if aJ < 0 Then aJ := 0;
   if bI >= Tiles.Count.X Then bI := Tiles.Count.X - 1;

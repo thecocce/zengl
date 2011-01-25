@@ -322,10 +322,6 @@ begin
           end;
       SetCurrentMode();
 
-      glScalef( 1, -1, 1 );
-      glTranslatef( 0, -ogl_Height, 0 );
-      glViewport( 0, 0, Target.Surface.Width, Target.Surface.Height );
-
       if Target.Flags and RT_CLEAR_COLOR > 0 Then
         d3d_Device.Clear( 0, nil, D3DCLEAR_TARGET, D3DCOLOR_ARGB( 0, 0, 0, 0 ), 1, 0 );
       if Target.Flags and RT_CLEAR_DEPTH > 0 Then
