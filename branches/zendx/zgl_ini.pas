@@ -58,7 +58,7 @@ procedure ini_Del( const Section, Key : AnsiString );
 procedure ini_Clear( const Section : AnsiString );
 function  ini_IsSection( const Section : AnsiString ) : Boolean;
 function  ini_IsKey( const Section, Key : AnsiString ) : Boolean;
-procedure ini_ReadKeyStr( const Section, Key : AnsiString; var Result : AnsiString );
+function  ini_ReadKeyStr( const Section, Key : AnsiString ) : AnsiString;
 function  ini_ReadKeyInt( const Section, Key : AnsiString ) : Integer;
 function  ini_ReadKeyFloat( const Section, Key : AnsiString ) : Single;
 function  ini_ReadKeyBool( const Section, Key : AnsiString ) : Boolean;
@@ -72,6 +72,8 @@ procedure ini_CopySection( var s1, s2 : zglTINISection );
 function  ini_GetID( const S, K : AnsiString; var idS, idK : Integer ) : Boolean;
 procedure ini_Process;
 procedure ini_Free;
+
+function _ini_ReadKeyStr( const Section, Key : AnsiString ) : PAnsiChar;
 
 var
   iniRec : zglTINI;
@@ -302,7 +304,7 @@ begin
   Result := ini_GetID( s, k, i, j );
 end;
 
-procedure ini_ReadKeyStr( const Section, Key : AnsiString; var Result : AnsiString );
+function ini_ReadKeyStr( const Section, Key : AnsiString ) : AnsiString;
   var
     s, k : AnsiString;
     i, j : Integer;
@@ -504,6 +506,11 @@ procedure ini_Free;
 begin
   iniRec.Sections := 0;
   SetLength( iniRec.Section, 0 );
+end;
+
+function _ini_ReadKeyStr( const Section, Key : AnsiString ) : PAnsiChar;
+begin
+  Result := u_GetPAnsiChar( ini_ReadKeyStr( Section, Key ) );
 end;
 
 end.

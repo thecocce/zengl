@@ -59,6 +59,7 @@ const
   K_SHIFT      = $FF - $03;
   K_SHIFT_L    = $2A;
   K_SHIFT_R    = $36;
+  K_SUPER      = $FF - $04;
   K_SUPER_L    = $DB;
   K_SUPER_R    = $DC;
   K_APP_MENU   = $DD;
@@ -164,6 +165,8 @@ function  scancode_to_utf8( ScanCode : Byte ) : Byte;
 function  winkey_to_scancode( WinKey : Integer ) : Byte;
 function  SCA( KeyCode : DWORD ) : DWORD;
 procedure DoKeyPress( KeyCode : DWORD );
+
+function _key_GetText : PChar;
 
 var
   keysDown     : array[ 0..255 ] of Boolean;
@@ -380,6 +383,11 @@ begin
       keysPress   [ KeyCode ] := TRUE;
       keysCanPress[ KeyCode ] := FALSE;
     end;
+end;
+
+function _key_GetText : PChar;
+begin
+  Result := u_GetPChar( key_GetText() );
 end;
 
 end.

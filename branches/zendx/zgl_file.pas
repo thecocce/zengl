@@ -61,6 +61,10 @@ function  file_GetExtension( const FileName : String ) : String;
 function  file_GetDirectory( const FileName : String ) : String;
 procedure file_SetPath( const Path : String );
 
+function _file_GetName( const FileName : String ) : PChar;
+function _file_GetExtension( const FileName : String ) : PChar;
+function _file_GetDirectory( const FileName : String ) : PChar;
+
 implementation
 uses
   zgl_utils;
@@ -210,6 +214,21 @@ begin
     filePath := Path + '/'
   else
     filePath := u_CopyStr( Path );
+end;
+
+function _file_GetName( const FileName : String ) : PChar;
+begin
+  Result := u_GetPChar( file_GetName( FileName ) );
+end;
+
+function _file_GetExtension( const FileName : String ) : PChar;
+begin
+  Result := u_GetPChar( file_GetExtension( FileName ) );
+end;
+
+function _file_GetDirectory( const FileName : String ) : PChar;
+begin
+  Result := u_GetPChar( file_GetDirectory( FileName ) );
 end;
 
 end.
