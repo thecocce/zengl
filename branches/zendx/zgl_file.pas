@@ -149,6 +149,7 @@ procedure file_Find( const Directory : String; var List : zglTFileList; FindDir 
     First : THandle;
     FList : {$IFDEF FPC} WIN32FINDDATAA {$ELSE} WIN32_FIND_DATA {$ENDIF};
 begin
+  List.Count := 0;
   First := FindFirstFile( PChar( Directory + '*' ), FList );
   repeat
     if FindDir Then
