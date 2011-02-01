@@ -47,7 +47,8 @@ const
 
 function  file_Open( var FileHandle : zglTFile; const FileName : String; Mode : Byte ) : Boolean;
 function  file_MakeDir( const Directory : String ) : Boolean;
-function  file_Exists( const FileName : String; Directory : Boolean = FALSE ) : Boolean;
+function  file_Remove( const Name : String ) : Boolean;
+function  file_Exists( const Name : String ) : Boolean;
 function  file_Seek( FileHandle : zglTFile; Offset, Mode : Integer ) : LongWord;
 function  file_GetPos( FileHandle : zglTFile ) : LongWord;
 function  file_Read( FileHandle : zglTFile; var Buffer; Bytes : LongWord ) : LongWord;
@@ -72,6 +73,17 @@ uses
 var
   filePath : String = '';
 
+function GetDir( const Path : String ) : String;
+  var
+    len : Integer;
+begin
+  len := length( Path );
+  if ( len > 0 ) and ( Path[ len ] <> '/' ) {$IFDEF WINDOWS} and ( Path[ len ] <> '\' ) {$ENDIF} Then
+    Result := Path + '/'
+  else
+    Result := u_CopyStr( Path );
+end;
+
 function file_Open( var FileHandle : zglTFile; const FileName : String; Mode : Byte ) : Boolean;
 begin
   case Mode of
@@ -87,21 +99,45 @@ begin
   Result := CreateDirectory( PChar( Directory ), nil );
 end;
 
-function file_Exists( const FileName : String; Directory : Boolean = FALSE ) : Boolean;
+function file_Remove( const Name : String ) : Boolean;
   var
-    fileHandle : zglTFile;
-    attr       : LongWord;
+    attr : LongWord;
+    i    : Integer;
+    dir  : Boolean;
+    path : String;
+    list : zglTFileList;
 begin
-  if not Directory Then
+  if not file_Exists( Name ) Then
     begin
-      Result := file_Open( fileHandle, filePath + FileName, FOM_OPENR );
-      if Result Then
-        file_Close( fileHandle );
+      Result := FALSE;
+      exit;
+    end;
+
+  attr := GetFileAttributes( PChar( filePath + Name ) );
+  dir  := attr and FILE_ATTRIBUTE_DIRECTORY > 0;
+
+  if dir Then
+    begin
+      path := GetDir( Name );
+
+      file_Find( path, list, FALSE );
+      for i := 0 to list.Count - 1 do
+        file_Remove( path + list.Items[ i ] );
+
+      file_Find( path, list, TRUE );
+      for i := 2 to list.Count - 1 do
+        file_Remove( path + list.Items[ i ] );
+
+      Result := RemoveDirectory( PChar( filePath + Name ) );
     end else
-      begin
-        attr   := GetFileAttributes( PChar( filePath + FileName ) );
-        Result := ( attr <> $FFFFFFFF ) and ( attr and FILE_ATTRIBUTE_DIRECTORY <> 0 );
-      end;
+      Result := DeleteFile( PChar( filePath + Name ) );
+end;
+
+function file_Exists( const Name : String ) : Boolean;
+  var
+    attr : LongWord;
+begin
+  Result := GetFileAttributes( PChar( filePath + Name ) ) <> $FFFFFFFF;
 end;
 
 function file_Seek( FileHandle : zglTFile; Offset, Mode : Integer ) : LongWord;
@@ -150,7 +186,7 @@ procedure file_Find( const Directory : String; var List : zglTFileList; FindDir 
     FList : {$IFDEF FPC} WIN32FINDDATAA {$ELSE} WIN32_FIND_DATA {$ENDIF};
 begin
   List.Count := 0;
-  First := FindFirstFile( PChar( Directory + '*' ), FList );
+  First := FindFirstFile( PChar( GetDir( filePath + Directory ) + '*' ), FList );
   repeat
     if FindDir Then
       begin
@@ -161,8 +197,10 @@ begin
     List.Items[ List.Count ] := FList.cFileName;
     INC( List.Count );
   until not FindNextFile( First, FList );
+  FindClose( First );
 
-  u_SortList( List, 0, List.Count - 1 );
+  if List.Count > 2 Then
+    u_SortList( List, 0, List.Count - 1 );
 end;
 
 procedure GetStr( const Str : String; var Result : String; const d : Char; const b : Boolean );
@@ -207,14 +245,8 @@ begin
 end;
 
 procedure file_SetPath( const Path : String );
-  var
-    len : Integer;
 begin
-  len := length( Path );
-  if ( len > 0 ) and ( Path[ len ] <> '/' ) and ( Path[ len ] <> '\' ) Then
-    filePath := Path + '/'
-  else
-    filePath := u_CopyStr( Path );
+  filePath := GetDir( Path );
 end;
 
 function _file_GetName( const FileName : String ) : PChar;
