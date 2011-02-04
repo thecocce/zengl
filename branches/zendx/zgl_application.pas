@@ -41,17 +41,17 @@ function  app_ProcessMessages( hWnd : HWND; Msg : UINT; wParam : WPARAM; lParam 
 procedure app_CalcFPS;
 
 var
-  app_Initialized  : Boolean;
-  app_GetSysDirs   : Boolean;
-  app_Work         : Boolean;
-  app_WorkTime     : LongWord;
-  app_Pause        : Boolean;
-  app_AutoPause    : Boolean = TRUE;
-  app_Focus        : Boolean = TRUE;
-  app_Log          : Boolean;
-  app_InitToHandle : Boolean;
-  app_WorkDir      : String;
-  app_HomeDir      : String;
+  appInitialized    : Boolean;
+  appGotSysDirs     : Boolean;
+  appWork           : Boolean;
+  appWorkTime       : LongWord;
+  appPause          : Boolean;
+  appAutoPause      : Boolean = TRUE;
+  appFocus          : Boolean = TRUE;
+  appLog            : Boolean;
+  appInitedToHandle : Boolean;
+  appWorkDir        : String;
+  appHomeDir        : String;
 
   // call-back
   app_PInit     : procedure = app_Init;
@@ -61,16 +61,17 @@ var
   app_PExit     : procedure = zero;
   app_PUpdate   : procedure( dt : Double ) = zerou;
   app_PActivate : procedure( activate : Boolean ) = zeroa;
-  app_Timer      : LongWord;
-  app_ShowCursor : Boolean;
 
-  app_dt : Double;
+  appTimer      : LongWord;
+  appShowCursor : Boolean;
 
-  app_FPS      : LongWord;
-  app_FPSCount : LongWord;
-  app_FPSAll   : LongWord;
+  appdt : Double;
 
-  app_Flags : LongWord;
+  appFPS      : LongWord;
+  appFPSCount : LongWord;
+  appFPSAll   : LongWord;
+
+  appFlags : LongWord;
 
 implementation
 uses
@@ -102,16 +103,16 @@ begin
   app_PDraw();
   scr_Flush();
   d3d_EndScene();
-  if not app_Pause Then
-    INC( app_FPSCount );
+  if not appPause Then
+    INC( appFPSCount );
 end;
 
 procedure app_CalcFPS;
 begin
-  app_FPS      := app_FPSCount;
-  app_FPSAll   := app_FPSAll + app_FPSCount;
-  app_FPSCount := 0;
-  INC( app_WorkTime );
+  appFPS      := appFPSCount;
+  appFPSAll   := appFPSAll + appFPSCount;
+  appFPSCount := 0;
+  INC( appWorkTime );
 end;
 
 procedure app_Init;
@@ -120,7 +121,7 @@ begin
   app_PLoad();
   scr_Flush();
 
-  app_dt := timer_GetTicks();
+  appdt := timer_GetTicks();
   timer_Reset();
   timer_Add( @app_CalcFPS, 1000 );
 end;
@@ -129,7 +130,7 @@ procedure app_MainLoop;
   var
     t : Double;
 begin
-  while app_Work do
+  while appWork do
     begin
       app_ProcessOS();
       {$IFDEF USE_JOYSTICK}
@@ -139,10 +140,10 @@ begin
       snd_MainLoop();
       {$ENDIF}
 
-      if app_Pause Then
+      if appPause Then
         begin
           timer_Reset();
-          app_dt := timer_GetTicks();
+          appdt := timer_GetTicks();
           u_Sleep( 10 );
           continue;
         end else
@@ -152,8 +153,8 @@ begin
             continue;
 
       t := timer_GetTicks();
-      app_PUpdate( timer_GetTicks() - app_dt );
-      app_dt := t;
+      app_PUpdate( timer_GetTicks() - appdt );
+      appdt := t;
 
       app_Draw();
     end;
@@ -179,74 +180,74 @@ function app_ProcessMessages( hWnd : HWND; Msg : UINT; wParam : WPARAM; lParam :
     key : LongWord;
 begin
   Result := 0;
-  if ( not app_Work ) and ( Msg <> WM_ACTIVATE ) Then
+  if ( not appWork ) and ( Msg <> WM_ACTIVATE ) Then
     begin
       Result := DefWindowProcW( hWnd, Msg, wParam, lParam );
       exit;
     end;
   case Msg of
     WM_CLOSE, WM_DESTROY, WM_QUIT:
-      app_Work := FALSE;
+      appWork := FALSE;
 
     WM_PAINT:
       begin
         app_Draw();
-        ValidateRect( wnd_Handle, nil );
+        ValidateRect( wndHandle, nil );
       end;
     WM_DISPLAYCHANGE:
       begin
-        if scr_Changing Then
+        if scrChanging Then
           begin
-            scr_Changing := FALSE;
+            scrChanging := FALSE;
             exit;
           end;
         scr_Init();
-        scr_Width  := scr_Desktop.dmPelsWidth;
-        scr_Height := scr_Desktop.dmPelsHeight;
-        if ( not wnd_FullScreen ) and ( scr_Create() ) Then
+        scrWidth  := scrDesktop.dmPelsWidth;
+        scrHeight := scrDesktop.dmPelsHeight;
+        if ( not wndFullScreen ) and ( scr_Create() ) Then
           wnd_Update();
       end;
     WM_ACTIVATE:
       begin
-        app_Focus := ( LOWORD( wParam ) <> WA_INACTIVE );
-        if app_Focus Then
+        appFocus := ( LOWORD( wParam ) <> WA_INACTIVE );
+        if appFocus Then
           begin
-            app_Pause := FALSE;
-            if app_Work Then app_PActivate( TRUE );
+            appPause := FALSE;
+            if appWork Then app_PActivate( TRUE );
             FillChar( keysDown[ 0 ], 256, 0 );
             key_ClearState();
             FillChar( mouseDown[ 0 ], 3, 0 );
             mouse_ClearState();
           end else
             begin
-              if app_AutoPause Then app_Pause := TRUE;
-              if app_Work Then app_PActivate( FALSE );
+              if appAutoPause Then appPause := TRUE;
+              if appWork Then app_PActivate( FALSE );
             end;
       end;
     WM_NCHITTEST:
       begin
         Result := DefWindowProcW( hWnd, Msg, wParam, lParam );
-        if ( not app_Focus ) and ( Result = HTCAPTION ) Then
+        if ( not appFocus ) and ( Result = HTCAPTION ) Then
           Result := HTCLIENT;
       end;
     WM_ENTERSIZEMOVE:
       begin
-        if not app_AutoPause Then
-          app_Timer := SetTimer( wnd_Handle, 1, 1, nil );
+        if not appAutoPause Then
+          appTimer := SetTimer( wndHandle, 1, 1, nil );
       end;
     WM_EXITSIZEMOVE:
       begin
-        if app_Timer > 0 Then
+        if appTimer > 0 Then
           begin
-            KillTimer( wnd_Handle, app_Timer );
-            app_Timer := 0;
+            KillTimer( wndHandle, appTimer );
+            appTimer := 0;
           end;
       end;
     WM_MOVING:
       begin
-        wnd_X := PRect( lParam ).Left;
-        wnd_Y := PRect( lParam ).Top;
-        if app_AutoPause Then
+        wndX := PRect( lParam ).Left;
+        wndY := PRect( lParam ).Top;
+        if appAutoPause Then
           timer_Reset();
       end;
     WM_TIMER:
@@ -256,7 +257,7 @@ begin
       end;
     WM_SETCURSOR:
       begin
-        if ( app_Focus ) and ( LOWORD ( lparam ) = HTCLIENT ) and ( not app_ShowCursor ) Then
+        if ( appFocus ) and ( LOWORD ( lparam ) = HTCLIENT ) and ( not appShowCursor ) Then
           SetCursor( 0 )
         else
           SetCursor( LoadCursor( 0, IDC_ARROW ) );
@@ -340,7 +341,7 @@ begin
         doKeyPress( key );
 
         if ( Msg = WM_SYSKEYDOWN ) and ( key = K_F4 ) Then
-          app_Work := FALSE;
+          appWork := FALSE;
       end;
     WM_KEYUP, WM_SYSKEYUP:
       begin
@@ -360,7 +361,7 @@ begin
           K_BACKSPACE: u_Backspace( keysText );
           K_TAB:       key_InputText( '  ' );
         else
-          if app_Flags and APP_USE_UTF8 > 0 Then
+          if appFlags and APP_USE_UTF8 > 0 Then
             begin
               len := WideCharToMultiByte( CP_UTF8, 0, @wParam, 1, nil, 0, nil, nil );
               WideCharToMultiByte( CP_UTF8, 0, @wParam, 1, @c[ 0 ], 5, nil, nil );
@@ -387,6 +388,6 @@ begin
 end;
 
 initialization
-  app_Flags := WND_USE_AUTOCENTER or APP_USE_LOG or COLOR_BUFFER_CLEAR or CLIP_INVISIBLE;
+  appFlags := WND_USE_AUTOCENTER or APP_USE_LOG or COLOR_BUFFER_CLEAR or CLIP_INVISIBLE;
 
 end.

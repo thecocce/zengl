@@ -39,23 +39,23 @@ procedure wnd_ShowCursor( Show : Boolean );
 procedure wnd_Select;
 
 var
-  wnd_X          : Integer;
-  wnd_Y          : Integer;
-  wnd_Width      : Integer = 800;
-  wnd_Height     : Integer = 600;
-  wnd_FullScreen : Boolean;
-  wnd_Caption    : String;
+  wndX          : Integer;
+  wndY          : Integer;
+  wndWidth      : Integer = 800;
+  wndHeight     : Integer = 600;
+  wndFullScreen : Boolean;
+  wndCaption    : String;
 
-  wnd_Handle    : HWND;
-  wnd_DC        : HDC;
-  wnd_INST      : HINST;
-  wnd_Class     : TWndClassExW;
-  wnd_ClassName : PWideChar = 'ZenGL';
-  wnd_Style     : LongWord;
-  wnd_CpnSize   : Integer;
-  wnd_BrdSizeX  : Integer;
-  wnd_BrdSizeY  : Integer;
-  wnd_CaptionW  : PWideChar;
+  wndHandle    : HWND;
+  //wndDC        : HDC;
+  wndINST      : HINST;
+  wndClass     : TWndClassExW;
+  wndClassName : PWideChar = 'ZenGL';
+  wndStyle     : LongWord;
+  wndCpnSize   : Integer;
+  wndBrdSizeX  : Integer;
+  wndBrdSizeY  : Integer;
+  wndCaptionW  : PWideChar;
 
 implementation
 uses
@@ -71,88 +71,88 @@ function LoadCursorW(hInstance: HINST; lpCursorName: PWideChar): HCURSOR; stdcal
 
 function wnd_Create( Width, Height : Integer ) : Boolean;
 begin
-  Result     := FALSE;
-  wnd_Width  := Width;
-  wnd_Height := Height;
+  Result    := FALSE;
+  wndWidth  := Width;
+  wndHeight := Height;
 
-  if app_Flags and WND_USE_AUTOCENTER > 0 Then
+  if appFlags and WND_USE_AUTOCENTER > 0 Then
     begin
-      wnd_X := ( zgl_Get( DESKTOP_WIDTH ) - wnd_Width ) div 2;
-      wnd_Y := ( zgl_Get( DESKTOP_HEIGHT ) - wnd_Height ) div 2;
+      wndX := ( zgl_Get( DESKTOP_WIDTH ) - wndWidth ) div 2;
+      wndY := ( zgl_Get( DESKTOP_HEIGHT ) - wndHeight ) div 2;
     end;
 
-  wnd_CpnSize  := GetSystemMetrics( SM_CYCAPTION  );
-  wnd_BrdSizeX := GetSystemMetrics( SM_CXDLGFRAME );
-  wnd_BrdSizeY := GetSystemMetrics( SM_CYDLGFRAME );
+  wndCpnSize  := GetSystemMetrics( SM_CYCAPTION  );
+  wndBrdSizeX := GetSystemMetrics( SM_CXDLGFRAME );
+  wndBrdSizeY := GetSystemMetrics( SM_CYDLGFRAME );
 
-  with wnd_Class do
+  with wndClass do
     begin
       cbSize        := SizeOf( TWndClassExW );
       style         := CS_DBLCLKS or CS_OWNDC;
       lpfnWndProc   := @app_ProcessMessages;
       cbClsExtra    := 0;
       cbWndExtra    := 0;
-      hInstance     := wnd_INST;
-      hIcon         := LoadIconW  ( wnd_INST, 'MAINICON' );
-      hIconSm       := LoadIconW  ( wnd_INST, 'MAINICON' );
-      hCursor       := LoadCursorW( wnd_INST, PWideChar( IDC_ARROW ) );
+      hInstance     := wndINST;
+      hIcon         := LoadIconW  ( wndINST, 'MAINICON' );
+      hIconSm       := LoadIconW  ( wndINST, 'MAINICON' );
+      hCursor       := LoadCursorW( wndINST, PWideChar( IDC_ARROW ) );
       lpszMenuName  := nil;
       hbrBackGround := GetStockObject( BLACK_BRUSH );
-      lpszClassName := wnd_ClassName;
+      lpszClassName := wndClassName;
     end;
 
-  if RegisterClassExW( wnd_Class ) = 0 Then
+  if RegisterClassExW( wndClass ) = 0 Then
     begin
       u_Error( 'Cannot register window class' );
       exit;
     end;
 
-  if wnd_FullScreen Then
+  if wndFullScreen Then
     begin
-      wnd_X     := 0;
-      wnd_Y     := 0;
-      wnd_Style := WS_POPUP or WS_VISIBLE or WS_SYSMENU;
+      wndX     := 0;
+      wndY     := 0;
+      wndStyle := WS_POPUP or WS_VISIBLE or WS_SYSMENU;
     end else
-      wnd_Style := WS_CAPTION or WS_MINIMIZEBOX or WS_SYSMENU or WS_VISIBLE;
-  wnd_Handle := CreateWindowExW( WS_EX_APPWINDOW or WS_EX_TOPMOST * Byte( wnd_FullScreen ), wnd_ClassName, wnd_CaptionW, wnd_Style, wnd_X, wnd_Y,
-                                 wnd_Width  + ( wnd_BrdSizeX * 2 ) * Byte( not wnd_FullScreen ),
-                                 wnd_Height + ( wnd_BrdSizeY * 2 + wnd_CpnSize ) * Byte( not wnd_FullScreen ), 0, 0, wnd_INST, nil );
+      wndStyle := WS_CAPTION or WS_MINIMIZEBOX or WS_SYSMENU or WS_VISIBLE;
+  wndHandle := CreateWindowExW( WS_EX_APPWINDOW or WS_EX_TOPMOST * Byte( wndFullScreen ), wndClassName, wndCaptionW, wndStyle, wndX, wndY,
+                                wndWidth  + ( wndBrdSizeX * 2 ) * Byte( not wndFullScreen ),
+                                wndHeight + ( wndBrdSizeY * 2 + wndCpnSize ) * Byte( not wndFullScreen ), 0, 0, wndINST, nil );
 
-  if wnd_Handle = 0 Then
+  if wndHandle = 0 Then
     begin
       u_Error( 'Cannot create window' );
       exit;
     end;
 
-  wnd_DC := GetDC( wnd_Handle );
-  if wnd_DC = 0 Then
-    begin
-      u_Error( 'Cannot get device context' );
-      exit;
-    end;
-  wnd_Select;
+  //wndDC := GetDC( wndHandle );
+  //if wndDC = 0 Then
+  //  begin
+  //    u_Error( 'Cannot get device context' );
+  //    exit;
+  //  end;
+  wnd_Select();
 
   Result := TRUE;
 end;
 
 procedure wnd_Destroy;
 begin
-  if ( wnd_DC > 0 ) and ( ReleaseDC( wnd_Handle, wnd_DC ) = 0 ) Then
-    begin
-      u_Error( 'Cannot release device context' );
-      wnd_DC := 0;
-    end;
+  //if ( wndDC > 0 ) and ( ReleaseDC( wndHandle, wndDC ) = 0 ) Then
+  //  begin
+  //    u_Error( 'Cannot release device context' );
+  //    wndDC := 0;
+  //  end;
 
-  if ( wnd_Handle <> 0 ) and ( not DestroyWindow( wnd_Handle ) ) Then
+  if ( wndHandle <> 0 ) and ( not DestroyWindow( wndHandle ) ) Then
     begin
       u_Error( 'Cannot destroy window' );
-      wnd_Handle := 0;
+      wndHandle := 0;
     end;
 
-  if not UnRegisterClassW( wnd_ClassName, wnd_INST ) Then
+  if not UnRegisterClassW( wndClassName, wndINST ) Then
     begin
       u_Error( 'Cannot unregister window class' );
-      wnd_INST := 0;
+      wndINST := 0;
     end;
 end;
 
@@ -160,32 +160,32 @@ procedure wnd_Update;
   var
     FullScreen : Boolean;
 begin
-  if app_Focus Then
-    FullScreen := wnd_FullScreen
+  if appFocus Then
+    FullScreen := wndFullScreen
   else
     FullScreen := FALSE;
 
   if FullScreen Then
-    wnd_Style := WS_POPUP or WS_VISIBLE or WS_SYSMENU
+    wndStyle := WS_POPUP or WS_VISIBLE or WS_SYSMENU
   else
-    wnd_Style := WS_CAPTION or WS_MINIMIZEBOX or WS_SYSMENU or WS_VISIBLE;
+    wndStyle := WS_CAPTION or WS_MINIMIZEBOX or WS_SYSMENU or WS_VISIBLE;
 
-  SetWindowLongW( wnd_Handle, GWL_STYLE, wnd_Style );
-  SetWindowLongW( wnd_Handle, GWL_EXSTYLE, WS_EX_APPWINDOW or WS_EX_TOPMOST * Byte( FullScreen ) );
+  SetWindowLongW( wndHandle, GWL_STYLE, wndStyle );
+  SetWindowLongW( wndHandle, GWL_EXSTYLE, WS_EX_APPWINDOW or WS_EX_TOPMOST * Byte( FullScreen ) );
 
-  app_Work := TRUE;
-  wnd_SetCaption( wnd_Caption );
-  wnd_SetSize( wnd_Width, wnd_Height );
+  appWork := TRUE;
+  wnd_SetCaption( wndCaption );
+  wnd_SetSize( wndWidth, wndHeight );
 
-  if app_Flags and WND_USE_AUTOCENTER > 0 Then
-    wnd_SetPos( ( zgl_Get( DESKTOP_WIDTH ) - wnd_Width ) div 2, ( zgl_Get( DESKTOP_HEIGHT ) - wnd_Height ) div 2 );
+  if appFlags and WND_USE_AUTOCENTER > 0 Then
+    wnd_SetPos( ( zgl_Get( DESKTOP_WIDTH ) - wndWidth ) div 2, ( zgl_Get( DESKTOP_HEIGHT ) - wndHeight ) div 2 );
 end;
 
 procedure wnd_SetCaption( const NewCaption : String );
   var
-    i,len : Integer;
+    len : Integer;
 begin
-  wnd_Caption := u_CopyStr( NewCaption );
+  wndCaption := u_CopyStr( NewCaption );
 
   {$IFNDEF FPC}
   if SizeOf( Char ) = 2 Then
@@ -197,63 +197,63 @@ begin
   len := 1;
   if len = 1 Then
     begin
-      if app_Flags and APP_USE_UTF8 = 0 Then
-        wnd_Caption := AnsiToUtf8( wnd_Caption );
-      len := MultiByteToWideChar( CP_UTF8, 0, @wnd_Caption[ 1 ], length( wnd_Caption ), nil, 0 );
-      if Assigned( wnd_CaptionW ) Then
-        FreeMem( wnd_CaptionW );
-      GetMem( wnd_CaptionW, len * 2 + 2 );
-      wnd_CaptionW[ len ] := #0;
-      MultiByteToWideChar( CP_UTF8, 0, @wnd_Caption[ 1 ], length( wnd_Caption ), wnd_CaptionW, len );
-      if app_Flags and APP_USE_UTF8 = 0 Then
-        wnd_Caption := wnd_CaptionW;
+      if appFlags and APP_USE_UTF8 = 0 Then
+        wndCaption := AnsiToUtf8( wndCaption );
+      len := MultiByteToWideChar( CP_UTF8, 0, @wndCaption[ 1 ], length( wndCaption ), nil, 0 );
+      if Assigned( wndCaptionW ) Then
+        FreeMem( wndCaptionW );
+      GetMem( wndCaptionW, len * 2 + 2 );
+      wndCaptionW[ len ] := #0;
+      MultiByteToWideChar( CP_UTF8, 0, @wndCaption[ 1 ], length( wndCaption ), wndCaptionW, len );
+      if appFlags and APP_USE_UTF8 = 0 Then
+        wndCaption := wndCaptionW;
     end;
 
-  if wnd_Handle <> 0 Then
-    SetWindowTextW( wnd_Handle, wnd_CaptionW );
+  if wndHandle <> 0 Then
+    SetWindowTextW( wndHandle, wndCaptionW );
 end;
 
 procedure wnd_SetSize( Width, Height : Integer );
 begin
-  wnd_Width  := Width;
-  wnd_Height := Height;
+  wndWidth  := Width;
+  wndHeight := Height;
 
-  if not app_InitToHandle Then
-    wnd_SetPos( wnd_X, wnd_Y );
+  if not appInitedToHandle Then
+    wnd_SetPos( wndX, wndY );
 
   d3d_Restore();
 
-  ogl_Width  := Width;
-  ogl_Height := Height;
-  if app_Flags and CORRECT_RESOLUTION > 0 Then
-    scr_CorrectResolution( scr_ResW, scr_ResH )
+  oglWidth  := Width;
+  oglHeight := Height;
+  if appFlags and CORRECT_RESOLUTION > 0 Then
+    scr_CorrectResolution( scrResW, scrResH )
   else
     SetCurrentMode();
 end;
 
 procedure wnd_SetPos( X, Y : Integer );
 begin
-  wnd_X := X;
-  wnd_Y := Y;
+  wndX := X;
+  wndY := Y;
 
-  if wnd_Handle <> 0 Then
-    if ( not wnd_FullScreen ) or ( not app_Focus ) Then
-      SetWindowPos( wnd_Handle, HWND_NOTOPMOST, wnd_X, wnd_Y, wnd_Width + ( wnd_BrdSizeX * 2 ), wnd_Height + ( wnd_BrdSizeY * 2 + wnd_CpnSize ), SWP_NOACTIVATE )
+  if wndHandle <> 0 Then
+    if ( not wndFullScreen ) or ( not appFocus ) Then
+      SetWindowPos( wndHandle, HWND_NOTOPMOST, wndX, wndY, wndWidth + ( wndBrdSizeX * 2 ), wndHeight + ( wndBrdSizeY * 2 + wndCpnSize ), SWP_NOACTIVATE )
     else
-      SetWindowPos( wnd_Handle, HWND_TOPMOST, 0, 0, wnd_Width, wnd_Height, SWP_NOACTIVATE );
+      SetWindowPos( wndHandle, HWND_TOPMOST, 0, 0, wndWidth, wndHeight, SWP_NOACTIVATE );
 end;
 
 procedure wnd_ShowCursor( Show : Boolean );
 begin
-  app_ShowCursor := Show;
+  appShowCursor := Show;
 end;
 
 procedure wnd_Select;
 begin
-  BringWindowToTop( wnd_Handle );
+  BringWindowToTop( wndHandle );
 end;
 
 initialization
-  wnd_Caption := cs_ZenGL;
+  wndCaption := cs_ZenGL;
 
 end.

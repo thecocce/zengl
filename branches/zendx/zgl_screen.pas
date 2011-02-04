@@ -56,26 +56,26 @@ type
 end;
 
 var
-  scr_Width   : Integer = 800;
-  scr_Height  : Integer = 600;
-  scr_Refresh : Integer;
-  scr_VSync   : Boolean;
-  scr_ResList : zglTResolutionList;
-  scr_Initialized : Boolean;
-  scr_Changing : Boolean;
+  scrWidth   : Integer = 800;
+  scrHeight  : Integer = 600;
+  scrRefresh : Integer;
+  scrVSync   : Boolean;
+  scrResList : zglTResolutionList;
+  scrInitialized : Boolean;
+  scrChanging : Boolean;
 
   // Resolution Correct
-  scr_ResW  : Integer;
-  scr_ResH  : Integer;
-  scr_ResCX : Single  = 1;
-  scr_ResCY : Single  = 1;
-  scr_AddCX : Integer = 0;
-  scr_AddCY : Integer = 0;
-  scr_SubCX : Integer = 0;
-  scr_SubCY : Integer = 0;
+  scrResW  : Integer;
+  scrResH  : Integer;
+  scrResCX : Single  = 1;
+  scrResCY : Single  = 1;
+  scrAddCX : Integer = 0;
+  scrAddCY : Integer = 0;
+  scrSubCX : Integer = 0;
+  scrSubCY : Integer = 0;
 
-  scr_Settings : DEVMODE;
-  scr_Desktop  : DEVMODE;
+  scrSettings : DEVMODE;
+  scrDesktop  : DEVMODE;
 
 implementation
 uses
@@ -108,8 +108,8 @@ end;
 
 procedure scr_Init;
 begin
-  scr_Initialized := TRUE;
-  with scr_Desktop do
+  scrInitialized := TRUE;
+  with scrDesktop do
     begin
       dmSize             := SizeOf( DEVMODE );
       dmPelsWidth        := GetSystemMetrics( SM_CXSCREEN );
@@ -126,9 +126,9 @@ function scr_Create : Boolean;
 begin
   Result := FALSE;
   scr_Init();
-  if scr_Desktop.dmBitsPerPel <> 32 Then
+  if scrDesktop.dmBitsPerPel <> 32 Then
     begin
-      settings              := scr_Desktop;
+      settings              := scrDesktop;
       settings.dmBitsPerPel := 32;
 
       if ChangeDisplaySettings( settings, CDS_TEST or CDS_FULLSCREEN ) <> DISP_CHANGE_SUCCESSFUL Then
@@ -146,26 +146,26 @@ end;
 procedure scr_GetResList;
   var
     i : Integer;
-    tmp_Settings : DEVMODE;
+    tmpSettings : DEVMODE;
   function Already( Width, Height : Integer ) : Boolean;
     var
       j : Integer;
   begin
     Result := FALSE;
-    for j := 0 to scr_ResList.Count - 1 do
-      if ( scr_ResList.Width[ j ] = Width ) and ( scr_ResList.Height[ j ] = Height ) Then Result := TRUE;
+    for j := 0 to scrResList.Count - 1 do
+      if ( scrResList.Width[ j ] = Width ) and ( scrResList.Height[ j ] = Height ) Then Result := TRUE;
   end;
 begin
   i := 0;
-  while EnumDisplaySettings( nil, i, tmp_Settings ) <> FALSE do
+  while EnumDisplaySettings( nil, i, tmpSettings ) <> FALSE do
     begin
-      if not Already( tmp_Settings.dmPelsWidth, tmp_Settings.dmPelsHeight ) Then
+      if not Already( tmpSettings.dmPelsWidth, tmpSettings.dmPelsHeight ) Then
         begin
-          INC( scr_ResList.Count );
-          SetLength( scr_ResList.Width, scr_ResList.Count );
-          SetLength( scr_ResList.Height, scr_ResList.Count );
-          scr_ResList.Width[ scr_ResList.Count - 1 ]  := tmp_Settings.dmPelsWidth;
-          scr_ResList.Height[ scr_ResList.Count - 1 ] := tmp_Settings.dmPelsHeight;
+          INC( scrResList.Count );
+          SetLength( scrResList.Width, scrResList.Count );
+          SetLength( scrResList.Height, scrResList.Count );
+          scrResList.Width[ scrResList.Count - 1 ]  := tmpSettings.dmPelsWidth;
+          scrResList.Height[ scrResList.Count - 1 ] := tmpSettings.dmPelsHeight;
         end;
       INC( i );
     end;
@@ -183,8 +183,8 @@ end;
 procedure scr_Clear;
 begin
   batch2d_Flush();
-  glClear( GL_COLOR_BUFFER_BIT * Byte( app_Flags and COLOR_BUFFER_CLEAR > 0 ) or GL_DEPTH_BUFFER_BIT * Byte( app_Flags and DEPTH_BUFFER_CLEAR > 0 ) or
-           GL_STENCIL_BUFFER_BIT * Byte( app_Flags and STENCIL_BUFFER_CLEAR > 0 ) );
+  glClear( GL_COLOR_BUFFER_BIT * Byte( appFlags and COLOR_BUFFER_CLEAR > 0 ) or GL_DEPTH_BUFFER_BIT * Byte( appFlags and DEPTH_BUFFER_CLEAR > 0 ) or
+           GL_STENCIL_BUFFER_BIT * Byte( appFlags and STENCIL_BUFFER_CLEAR > 0 ) );
 end;
 
 procedure scr_Flush;
@@ -194,127 +194,127 @@ end;
 
 procedure scr_SetOptions( Width, Height, Refresh : Word; FullScreen, VSync : Boolean );
 begin
-  scr_Changing   := TRUE;
-  ogl_Width      := Width;
-  ogl_Height     := Height;
-  ogl_TargetW    := Width;
-  ogl_TargetH    := Height;
-  wnd_Width      := Width;
-  wnd_Height     := Height;
-  wnd_FullScreen := FullScreen;
-  scr_Vsync      := VSync;
+  scrChanging   := TRUE;
+  oglWidth      := Width;
+  oglHeight     := Height;
+  oglTargetW    := Width;
+  oglTargetH    := Height;
+  wndWidth      := Width;
+  wndHeight     := Height;
+  wndFullScreen := FullScreen;
+  scrVsync      := VSync;
 
   if Height >= zgl_Get( DESKTOP_HEIGHT ) Then
-    wnd_FullScreen := TRUE;
-  if wnd_FullScreen Then
+    wndFullScreen := TRUE;
+  if wndFullScreen Then
     begin
-      scr_Width  := Width;
-      scr_Height := Height;
+      scrWidth  := Width;
+      scrHeight := Height;
     end else
       begin
-        scr_Width   := zgl_Get( DESKTOP_WIDTH );
-        scr_Height  := zgl_Get( DESKTOP_HEIGHT );
-        scr_Refresh := GetDisplayRefresh;
+        scrWidth   := zgl_Get( DESKTOP_WIDTH );
+        scrHeight  := zgl_Get( DESKTOP_HEIGHT );
+        scrRefresh := GetDisplayRefresh();
       end;
 
-  if not app_Initialized Then exit;
-  scr_SetVSync( scr_VSync );
+  if not appInitialized Then exit;
+  scr_SetVSync( scrVSync );
 
-  if Assigned( d3d_Device ) Then
+  if Assigned( d3dDevice ) Then
     glClear( GL_COLOR_BUFFER_BIT );
 
-  if wnd_FullScreen Then
-    log_Add( 'Screen options changed to: ' + u_IntToStr( scr_Width ) + ' x ' + u_IntToStr( scr_Height ) + ' fullscreen' )
+  if wndFullScreen Then
+    log_Add( 'Screen options changed to: ' + u_IntToStr( scrWidth ) + ' x ' + u_IntToStr( scrHeight ) + ' fullscreen' )
   else
-    log_Add( 'Screen options changed to: ' + u_IntToStr( wnd_Width ) + ' x ' + u_IntToStr( wnd_Height ) + ' windowed' );
-  if app_Work Then
+    log_Add( 'Screen options changed to: ' + u_IntToStr( wndWidth ) + ' x ' + u_IntToStr( wndHeight ) + ' windowed' );
+  if appWork Then
     wnd_Update();
 end;
 
 procedure scr_CorrectResolution( Width, Height : Word );
 begin
-  scr_ResW  := Width;
-  scr_ResH  := Height;
-  scr_ResCX := wnd_Width  / Width;
-  scr_ResCY := wnd_Height / Height;
+  scrResW  := Width;
+  scrResH  := Height;
+  scrResCX := wndWidth  / Width;
+  scrResCY := wndHeight / Height;
 
-  if scr_ResCX < scr_ResCY Then
+  if scrResCX < scrResCY Then
     begin
-      scr_AddCX := 0;
-      scr_AddCY := Round( ( wnd_Height - Height * scr_ResCX ) / 2 );
-      scr_ResCY := scr_ResCX;
+      scrAddCX := 0;
+      scrAddCY := Round( ( wndHeight - Height * scrResCX ) / 2 );
+      scrResCY := scrResCX;
     end else
       begin
-        scr_AddCX := Round( ( wnd_Width - Width * scr_ResCY ) / 2 );
-        scr_AddCY := 0;
-        scr_ResCX := scr_ResCY;
+        scrAddCX := Round( ( wndWidth - Width * scrResCY ) / 2 );
+        scrAddCY := 0;
+        scrResCX := scrResCY;
       end;
 
-  if app_Flags and CORRECT_HEIGHT = 0 Then
+  if appFlags and CORRECT_HEIGHT = 0 Then
     begin
-      scr_ResCY := wnd_Height / Height;
-      scr_AddCY := 0;
+      scrResCY := wndHeight / Height;
+      scrAddCY := 0;
     end;
-  if app_Flags and CORRECT_WIDTH = 0 Then
+  if appFlags and CORRECT_WIDTH = 0 Then
     begin
-      scr_ResCX := wnd_Width / Width;
-      scr_AddCX := 0;
+      scrResCX := wndWidth / Width;
+      scrAddCX := 0;
     end;
 
-  ogl_Width  := Round( wnd_Width / scr_ResCX );
-  ogl_Height := Round( wnd_Height / scr_ResCY );
-  scr_SubCX  := ogl_Width - Width;
-  scr_SubCY  := ogl_Height - Height;
+  oglWidth  := Round( wndWidth / scrResCX );
+  oglHeight := Round( wndHeight / scrResCY );
+  scrSubCX  := oglWidth - Width;
+  scrSubCY  := oglHeight - Height;
   SetCurrentMode();
 end;
 
 procedure scr_SetViewPort;
 begin
-  if ogl_Target = TARGET_SCREEN Then
+  if oglTarget = TARGET_SCREEN Then
     begin
-      if ( app_Flags and CORRECT_RESOLUTION > 0 ) and ( ogl_Mode = 2 ) Then
+      if ( appFlags and CORRECT_RESOLUTION > 0 ) and ( oglMode = 2 ) Then
         begin
-          ogl_ClipX := 0;
-          ogl_ClipY := 0;
-          ogl_ClipW := wnd_Width - scr_AddCX * 2;
-          ogl_ClipH := wnd_Height - scr_AddCY * 2;
-          glViewPort( scr_AddCX, scr_AddCY, ogl_ClipW, ogl_ClipH );
+          oglClipX := 0;
+          oglClipY := 0;
+          oglClipW := wndWidth - scrAddCX * 2;
+          oglClipH := wndHeight - scrAddCY * 2;
+          glViewPort( scrAddCX, scrAddCY, oglClipW, oglClipH );
         end else
           begin
-            ogl_ClipX := 0;
-            ogl_ClipY := 0;
-            ogl_ClipW := wnd_Width;
-            ogl_ClipH := wnd_Height;
-            glViewPort( 0, 0, ogl_ClipW, ogl_ClipH );
+            oglClipX := 0;
+            oglClipY := 0;
+            oglClipW := wndWidth;
+            oglClipH := wndHeight;
+            glViewPort( 0, 0, oglClipW, oglClipH );
           end;
     end else
       begin
-        ogl_ClipX := 0;
-        ogl_ClipY := 0;
-        ogl_ClipW := ogl_Width;
-        ogl_ClipH := ogl_Height;
-        glViewPort( 0, 0, ogl_TargetW, ogl_TargetH );
+        oglClipX := 0;
+        oglClipY := 0;
+        oglClipW := oglWidth;
+        oglClipH := oglHeight;
+        glViewPort( 0, 0, oglTargetW, oglTargetH );
       end;
 end;
 
 procedure scr_SetVSync( VSync : Boolean );
 begin
-  scr_VSync := VSync;
-  if wnd_Handle <> 0 Then
+  scrVSync := VSync;
+  if wndHandle <> 0 Then
     wnd_Update();
 end;
 
 procedure scr_SetFSAA( FSAA : Byte );
 begin
-  if ogl_FSAA = FSAA Then exit;
-  ogl_FSAA := FSAA;
+  if oglFSAA = FSAA Then exit;
+  oglFSAA := FSAA;
 
-  if ogl_FSAA <> 0 Then
-    log_Add( 'FSAA changed to: ' + u_IntToStr( ogl_FSAA ) + 'x' )
+  if oglFSAA <> 0 Then
+    log_Add( 'FSAA changed to: ' + u_IntToStr( oglFSAA ) + 'x' )
   else
     log_Add( 'FSAA changed to: off' );
 
-  if wnd_Handle <> 0 Then
+  if wndHandle <> 0 Then
     wnd_Update();
 end;
 
@@ -322,7 +322,7 @@ procedure scr_ReadPixels( var pData : Pointer; X, Y, Width, Height : Word );
 begin
   batch2d_Flush();
   GetMem( pData, Width * Height * 4 );
-  glReadPixels( X, ogl_ClipH - Height - Y, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, pData );
+  glReadPixels( X, oglClipH - Height - Y, Width, Height, GL_RGBA, GL_UNSIGNED_BYTE, pData );
 end;
 
 end.

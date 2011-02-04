@@ -154,7 +154,7 @@ procedure timer_Reset;
   var
     currTimer : zglPTimer;
 begin
-  app_dt := timer_GetTicks();
+  appdt := timer_GetTicks();
   currTimer := @managerTimer.First;
   while Assigned( currTimer ) do
     begin

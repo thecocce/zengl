@@ -231,15 +231,15 @@ begin
           sfStream[ i ]._lastTime := timer_GetTicks();
         end;
 
-  if app_Focus Then
+  if appFocus Then
     begin
       if sndAutoPaused Then
         begin
           sndAutoPaused := FALSE;
           {$IFDEF USE_OPENAL}
-          for i := 0 to length( oal_Sources ) - 1 do
-            if oal_SrcState[ i ] = AL_PLAYING Then
-              alSourcePlay( oal_Sources[ i ] );
+          for i := 0 to length( oalSources ) - 1 do
+            if oalSrcState[ i ] = AL_PLAYING Then
+              alSourcePlay( oalSources[ i ] );
           {$ELSE}
           {$ENDIF}
         end;
@@ -255,12 +255,12 @@ begin
           begin
             sndAutoPaused := TRUE;
             {$IFDEF USE_OPENAL}
-            for i := 0 to length( oal_Sources ) - 1 do
+            for i := 0 to length( oalSources ) - 1 do
               begin
-                alGetSourcei( oal_Sources[ i ], AL_SOURCE_STATE, z );
+                alGetSourcei( oalSources[ i ], AL_SOURCE_STATE, z );
                 if z = AL_PLAYING Then
-                  alSourcePause( oal_Sources[ i ] );
-                oal_SrcState[ i ] := z;
+                  alSourcePause( oalSources[ i ] );
+                oalSrcState[ i ] := z;
               end;
             {$ELSE}
             {$ENDIF}
@@ -289,27 +289,27 @@ begin
 
 
   log_Add( 'OpenAL: opening "Generic Software"' );
-  oal_Device := alcOpenDevice( 'Generic Software' );
-  if not Assigned( oal_Device ) Then
+  oalDevice := alcOpenDevice( 'Generic Software' );
+  if not Assigned( oalDevice ) Then
     begin
-      oal_Device := alcOpenDevice( nil );
+      oalDevice := alcOpenDevice( nil );
       log_Add( 'OpenAL: opening default device - "' + alcGetString( nil, ALC_DEFAULT_DEVICE_SPECIFIER ) + '"' );
     end;
-  if not Assigned( oal_Device ) Then
+  if not Assigned( oalDevice ) Then
     begin
       log_Add( 'Cannot open sound device' );
       exit;
     end;
 
   log_Add( 'OpenAL: creating context' );
-  oal_Context := alcCreateContext( oal_Device, nil );
-  if not Assigned( oal_Context ) Then
+  oalContext := alcCreateContext( oalDevice, nil );
+  if not Assigned( oalContext ) Then
     begin
       log_Add( 'Cannot create sound context' );
       exit;
     end;
 
-  if alcMakeContextCurrent( oal_Context ) Then
+  if alcMakeContextCurrent( oalContext ) Then
     log_Add( 'OpenAL: sound system initialized' )
   else
     begin
@@ -317,9 +317,9 @@ begin
       exit;
     end;
 
-  alListenerfv( AL_POSITION,    @oal_Position );
-  alListenerfv( AL_VELOCITY,    @oal_Velocity );
-  alListenerfv( AL_ORIENTATION, @oal_Orientation );
+  alListenerfv( AL_POSITION,    @oalPosition );
+  alListenerfv( AL_VELOCITY,    @oalVelocity );
+  alListenerfv( AL_ORIENTATION, @oalOrientation );
 
   for i := 1 to SND_MAX do
     begin
@@ -328,32 +328,32 @@ begin
     end;
 
   i := 64;
-  SetLength( oal_Sources, i );
-  alGenSources( i, @oal_Sources[ 0 ] );
+  SetLength( oalSources, i );
+  alGenSources( i, @oalSources[ 0 ] );
   while alGetError( nil ) <> AL_NO_ERROR do
     begin
       DEC( i, 8 );
       if i = 0 Then break;
-      SetLength( oal_Sources, i );
-      alGenSources( i, @oal_Sources[ 0 ] );
+      SetLength( oalSources, i );
+      alGenSources( i, @oalSources[ 0 ] );
     end;
-  SetLength( oal_SrcPtrs, i );
-  SetLength( oal_SrcState, i );
+  SetLength( oalSrcPtrs, i );
+  SetLength( oalSrcState, i );
 
-  log_Add( 'OpenAL: generated ' + u_IntToStr( length( oal_Sources ) ) + ' source' );
+  log_Add( 'OpenAL: generated ' + u_IntToStr( length( oalSources ) ) + ' source' );
 {$ELSE}
   log_Add( 'DirectSound: loading DSound.dll' );
   if not InitDSound() Then
     log_Add( 'DirectSound: Error while loading libraries' );
 
-  if DirectSoundCreate( nil, ds_Device, nil ) <> DS_OK Then
+  if DirectSoundCreate( nil, dsDevice, nil ) <> DS_OK Then
     begin
       FreeDSound();
       log_Add( 'DirectSound: Error while calling DirectSoundCreate' );
       exit;
     end;
 
-  if ds_Device.SetCooperativeLevel( wnd_Handle, DSSCL_PRIORITY ) <> DS_OK Then
+  if dsDevice.SetCooperativeLevel( wndHandle, DSSCL_PRIORITY ) <> DS_OK Then
     log_Add( 'DirectSound: Can''t SetCooperativeLevel' );
 
   log_Add( 'DirectSound: sound system initialized' );
@@ -388,15 +388,15 @@ begin
       alDeleteSources( 1, @sfSource[ i ] );
       alDeleteBuffers( sfBufCount, @sfBuffers[ i ] );
     end;
-  alDeleteSources( length( oal_Sources ), @oal_Sources[ 0 ] );
-  SetLength( oal_Sources, 0 );
-  SetLength( oal_SrcPtrs, 0 );
-  SetLength( oal_SrcState, 0 );
+  alDeleteSources( length( oalSources ), @oalSources[ 0 ] );
+  SetLength( oalSources, 0 );
+  SetLength( oalSrcPtrs, 0 );
+  SetLength( oalSrcState, 0 );
 
   log_Add( 'OpenAL: destroying current sound context' );
-  alcDestroyContext( oal_Context );
+  alcDestroyContext( oalContext );
   log_Add( 'OpenAL: closing sound device' );
-  alcCloseDevice( oal_Device );
+  alcCloseDevice( oalDevice );
   log_Add( 'OpenAL: sound system finalized' );
   FreeOpenAL();
 {$ELSE}
@@ -406,7 +406,7 @@ begin
       sfNotify[ i ] := nil;
       sfSource[ i ] := nil;
     end;
-  ds_Device := nil;
+  dsDevice := nil;
 
   FreeDSound();
   log_Add( 'DirectSound: sound system finalized' );
@@ -434,11 +434,11 @@ begin
 
   Result.SourceCount := SourceCount;
   SetLength( Result.Channel, SourceCount );
-  {$IFDEF USE_OPENAL}
+{$IFDEF USE_OPENAL}
   alGenBuffers( 1, @Result.Buffer );
   for i := 0 to SourceCount - 1 do
     FillChar( Result.Channel[ i ], SizeOf( zglTSoundChannel ), 0 );
-  {$ENDIF}
+{$ENDIF}
 
   INC( managerSound.Count.Items );
 end;
@@ -509,7 +509,7 @@ begin
   dsu_CreateBuffer( Result.Channel[ 0 ].Source, Result.Size, Pointer( f ) );
   dsu_FillData( Result.Channel[ 0 ].Source, Result.Data, Result.Size );
   for i := 1 to Result.SourceCount - 1 do
-    ds_Device.DuplicateSoundBuffer( Result.Channel[ 0 ].Source, Result.Channel[ i ].Source );
+    dsDevice.DuplicateSoundBuffer( Result.Channel[ 0 ].Source, Result.Channel[ i ].Source );
 {$ENDIF}
 
   log_Add( 'Sound loaded: "' + FileName + '"' );
@@ -544,7 +544,7 @@ begin
   dsu_CreateBuffer( Result.Channel[ 0 ].Source, Result.Size, Pointer( f ) );
   dsu_FillData( Result.Channel[ 0 ].Source, Result.Data, Result.Size );
   for i := 1 to Result.SourceCount - 1 do
-    ds_Device.DuplicateSoundBuffer( Result.Channel[ 0 ].Source, Result.Channel[ i ].Source );
+    dsDevice.DuplicateSoundBuffer( Result.Channel[ 0 ].Source, Result.Channel[ i ].Source );
 {$ENDIF}
 end;
 
@@ -587,7 +587,7 @@ begin
 
   alSourcei ( Sound.Channel[ Result ].Source, AL_BUFFER,    Sound.Buffer );
   alSourcefv( Sound.Channel[ Result ].Source, AL_POSITION,  @Sound.Channel[ Result ].Position );
-  alSourcefv( Sound.Channel[ Result ].Source, AL_VELOCITY,  @oal_Velocity[ 0 ] );
+  alSourcefv( Sound.Channel[ Result ].Source, AL_VELOCITY,  @oalVelocity[ 0 ] );
   alSourcef ( Sound.Channel[ Result ].Source, AL_GAIN,      sndVolume );
   alSourcei ( Sound.Channel[ Result ].Source, AL_FREQUENCY, Sound.Frequency );
 
@@ -610,7 +610,7 @@ begin
               if i = 0 Then
                 dsu_FillData( Sound.Channel[ i ].Source, Sound.Data, Sound.Size )
               else
-                ds_Device.DuplicateSoundBuffer( Sound.Channel[ 0 ].Source, Sound.Channel[ i ].Source );
+                dsDevice.DuplicateSoundBuffer( Sound.Channel[ 0 ].Source, Sound.Channel[ i ].Source );
             end;
           Result := i;
           break;
@@ -1108,20 +1108,20 @@ begin
   Result := 0;
   id := LongWord( data );
 
-  {$IFDEF USE_OPENAL}
+{$IFDEF USE_OPENAL}
   processed := 0;
   while ( processed < 1 ) and sfStream[ id ]._playing do
     alGetSourcei( sfSource[ id ], AL_BUFFERS_PROCESSED, processed );
-  {$ENDIF}
-  while app_Work and sfStream[ id ]._playing do
+{$ENDIF}
+  while appWork and sfStream[ id ]._playing do
     begin
       if not sndInitialized Then break;
 
       u_Sleep( 100 );
-      if ( not app_Work ) or ( not sfStream[ id ]._playing ) Then break;
+      if ( not appWork ) or ( not sfStream[ id ]._playing ) Then break;
       {$IFDEF USE_OPENAL}
       alGetSourcei( sfSource[ id ], AL_BUFFERS_PROCESSED, processed );
-      while app_Work and ( processed > 0 ) and sfStream[ id ]._playing do
+      while appWork and ( processed > 0 ) and sfStream[ id ]._playing do
         begin
           alSourceUnQueueBuffers( sfSource[ id ], 1, @buffer );
 

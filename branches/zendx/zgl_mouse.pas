@@ -72,11 +72,11 @@ begin
       getcurpos := FALSE;
       GetCursorPos( cursorpos );
     end;
-  if wnd_FullScreen Then
+  if wndFullScreen Then
     Result := cursorpos.X
   else
-    Result := cursorpos.X - wnd_X - wnd_BrdSizeX;
-  Result := Round( ( Result - scr_AddCX ) / scr_ResCX );
+    Result := cursorpos.X - wndX - wndBrdSizeX;
+  Result := Round( ( Result - scrAddCX ) / scrResCX );
 end;
 
 function mouse_Y : Integer;
@@ -86,23 +86,23 @@ begin
       getcurpos := FALSE;
       GetCursorPos( cursorpos );
     end;
-  if wnd_FullScreen Then
+  if wndFullScreen Then
     Result := cursorpos.Y
   else
-    Result := cursorpos.Y - wnd_Y - wnd_BrdSizeY - wnd_CpnSize;
-  Result := Round( ( Result - scr_AddCY ) / scr_ResCY );
+    Result := cursorpos.Y - wndY - wndBrdSizeY - wndCpnSize;
+  Result := Round( ( Result - scrAddCY ) / scrResCY );
 end;
 
 function mouse_DX : Integer;
 begin
   getcurpos := TRUE;
-  Result := mouse_X() - wnd_Width div 2;
+  Result := mouse_X() - wndWidth div 2;
 end;
 
 function mouse_DY : Integer;
 begin
   getcurpos := TRUE;
-  Result := mouse_Y() - wnd_Height div 2;
+  Result := mouse_Y() - wndHeight div 2;
 end;
 
 function mouse_Down( Button : Byte ) : Boolean;
@@ -146,10 +146,10 @@ end;
 
 procedure mouse_Lock;
 begin
-  if wnd_FullScreen Then
-    SetCursorPos( wnd_Width div 2, wnd_Height div 2 )
+  if wndFullScreen Then
+    SetCursorPos( wndWidth div 2, wndHeight div 2 )
   else
-    SetCursorPos( wnd_X + wnd_BrdSizeX + wnd_Width div 2, wnd_Y + wnd_BrdSizeY + wnd_CpnSize + wnd_Height div 2 );
+    SetCursorPos( wndX + wndBrdSizeX + wndWidth div 2, wndY + wndBrdSizeY + wndCpnSize + wndHeight div 2 );
 end;
 
 end.

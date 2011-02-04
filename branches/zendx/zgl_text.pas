@@ -107,7 +107,7 @@ begin
   c := font_GetCID( Text, 1, @i );
   s := 1;
   i := 1;
-  if not b2d_Started Then
+  if not b2dStarted Then
     begin
       if Assigned( Font.CharDesc[ c ] ) Then
         begin
@@ -156,7 +156,7 @@ begin
         begin
           lastPage := charDesc.Page;
 
-          if ( not b2d_Started ) Then
+          if ( not b2dStarted ) Then
             begin
               glEnd();
 
@@ -217,7 +217,7 @@ begin
       X := X + ( charDesc.ShiftP + textStep ) * textScale;
     end;
 
-  if not b2d_Started Then
+  if not b2dStarted Then
     begin
       glEnd();
 

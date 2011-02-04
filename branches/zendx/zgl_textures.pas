@@ -163,7 +163,7 @@ procedure tex_Create( var Texture : zglTTexture; var pData : Pointer );
 begin
   tex_CalcFlags( Texture, pData );
   if Texture.Flags and TEX_COMPRESS >= 1 Then
-    if not ogl_CanCompress Then
+    if not oglCanCompress Then
       Texture.Flags := Texture.Flags xor TEX_COMPRESS;
 
   glEnable( GL_TEXTURE_2D );
@@ -470,7 +470,7 @@ begin
                           Texture.Flags := Texture.Flags or TEX_FILTER_ANISOTROPY;
                           glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
                           glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-                          glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, ogl_Anisotropy );
+                          glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, oglAnisotropy );
                         end;
     end else
       begin
@@ -491,10 +491,10 @@ end;
 
 procedure tex_SetAnisotropy( Level : Byte );
 begin
-  if Level > ogl_MaxAnisotropy Then
-    ogl_Anisotropy := ogl_MaxAnisotropy
+  if Level > oglMaxAnisotropy Then
+    oglAnisotropy := oglMaxAnisotropy
   else
-    ogl_Anisotropy := Level;
+    oglAnisotropy := Level;
 end;
 
 procedure tex_CalcFlags( var Texture : zglTTexture; var pData : Pointer );
