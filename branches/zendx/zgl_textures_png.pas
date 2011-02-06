@@ -558,6 +558,12 @@ begin
 
 _exit:
   begin
+    if pngFail Then
+      begin
+        FreeMem( Data );
+        Data := nil;
+      end;
+
     pngFail     := FALSE;
     pngHasIDAT  := FALSE;
     pngHastRNS  := FALSE;
