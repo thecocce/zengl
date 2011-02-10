@@ -69,7 +69,7 @@ type
 type
   zglPRenderTargetManager = ^zglTRenderTargetManager;
   zglTRenderTargetManager = record
-    Count : DWORD;
+    Count : Integer;
     First : zglTRenderTarget;
   end;
 

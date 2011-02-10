@@ -68,7 +68,7 @@ type
 
   zglTSound = record
     Buffer      : LongWord;
-    SourceCount : LongWord;
+    SourceCount : Integer;
     Channel     : array of zglTSoundChannel;
 
     Data        : Pointer;
@@ -116,8 +116,8 @@ type
 
   zglTSoundManager = record
     Count   : record
-      Items   : LongWord;
-      Formats : LongWord;
+      Items   : Integer;
+      Formats : Integer;
               end;
     First   : zglTSound;
     Formats : array of zglTSoundFormat;
