@@ -145,6 +145,7 @@ type
     Frame      : array[ 0..1 ] of LongWord;
     Color      : array of TDiagramLW;
     Alpha      : array of TDiagramByte;
+    SizeXYBind : Boolean;
     SizeXS     : Single;
     SizeYS     : Single;
     SizeXV     : Single;
@@ -201,14 +202,14 @@ type
 
   zglTPEngine2D = record
     Count : record
-      Emitters  : LongWord;
-      Particles : LongWord;
+      Emitters  : Integer;
+      Particles : Integer;
             end;
     List  : array of zglPEmitter2D;
   end;
 
   zglTEmitter2DManager = record
-    Count : LongWord;
+    Count : Integer;
     List  : array of zglPEmitter2D;
   end;
 
@@ -384,6 +385,7 @@ begin
           SetLength( Alpha, len );
           Move( Emitter.ParParams.Alpha[ 0 ], Alpha[ 0 ], len * SizeOf( Alpha[ 0 ] ) );
 
+          SizeXYBind := Emitter.ParParams.SizeXYBind;
           SizeXS := Emitter.ParParams.SizeXS;
           SizeYS := Emitter.ParParams.SizeYS;
           SizeXV := Emitter.ParParams.SizeXV;
@@ -622,6 +624,7 @@ begin
             end;
           ZEF_CHUNK_SIZEXY:
             begin
+              mem_Read( emitter2dMem, ParParams.SizeXYBind, 1 );
               mem_Read( emitter2dMem, ParParams.SizeXS, 4 );
               mem_Read( emitter2dMem, ParParams.SizeYS, 4 );
               mem_Read( emitter2dMem, ParParams.SizeXV, 4 );
@@ -800,10 +803,11 @@ begin
 
           // ZEF_CHUNK_SIZEXY
           chunk := ZEF_CHUNK_SIZEXY;
-          size  := 4 + 4 + 4 + 4 + ( 4 + length( SizeXD ) * SizeOf( TDiagramSingle ) + 4 + length( SizeYD ) * SizeOf( TDiagramSingle ) );
+          size  := 1 + 4 + 4 + 4 + 4 + ( 4 + length( SizeXD ) * SizeOf( TDiagramSingle ) + 4 + length( SizeYD ) * SizeOf( TDiagramSingle ) );
           file_Write( f, chunk, 2 );
           file_Write( f, size, 4 );
 
+          file_Write( f, SizeXYBind, 1 );
           file_Write( f, SizeXS, 4 );
           file_Write( f, SizeYS, 4 );
           file_Write( f, SizeXV, 4 );
@@ -1135,7 +1139,10 @@ begin
             p.Color    := $FFFFFF;
           p.Alpha      := ParParams.Alpha[ 0 ].Value;
           p.SizeS.X    := ParParams.SizeXS + Random( Round( ParParams.SizeXV * 1000 ) ) / 1000 - ParParams.SizeXV / 2;
-          p.SizeS.Y    := ParParams.SizeYS + Random( Round( ParParams.SizeYV * 1000 ) ) / 1000 - ParParams.SizeYV / 2;
+          if ParParams.SizeXYBind Then
+            p.SizeS.Y  := p.SizeS.X
+          else
+            p.SizeS.Y  := ParParams.SizeYS + Random( Round( ParParams.SizeYV * 1000 ) ) / 1000 - ParParams.SizeYV / 2;
           p.Size.X     := p.SizeS.X;
           p.Size.Y     := p.SizeS.Y;
           p.Angle      := ParParams.AngleS + Random( Round( ParParams.AngleV * 1000 ) ) / 1000 - ParParams.AngleV / 2;
