@@ -229,7 +229,8 @@ begin
   if Result = FileName Then
     GetStr( FileName, Result, '\', FALSE );
   GetStr( Result, tmp, '.', FALSE );
-  Result := copy( Result, 1, length( Result ) - length( tmp ) - 1 );
+  if Result <> tmp Then
+    Result := copy( Result, 1, length( Result ) - length( tmp ) - 1 );
 end;
 
 function file_GetExtension( const FileName : String ) : String;
