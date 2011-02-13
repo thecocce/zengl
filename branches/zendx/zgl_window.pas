@@ -72,10 +72,12 @@ function LoadCursorW(hInstance: HINST; lpCursorName: PWideChar): HCURSOR; stdcal
 function wnd_Create( Width, Height : Integer ) : Boolean;
 begin
   Result    := FALSE;
+  wndX      := 0;
+  wndY      := 0;
   wndWidth  := Width;
   wndHeight := Height;
 
-  if appFlags and WND_USE_AUTOCENTER > 0 Then
+  if ( not wndFullScreen ) and ( appFlags and WND_USE_AUTOCENTER > 0 ) Then
     begin
       wndX := ( zgl_Get( DESKTOP_WIDTH ) - wndWidth ) div 2;
       wndY := ( zgl_Get( DESKTOP_HEIGHT ) - wndHeight ) div 2;
@@ -108,12 +110,9 @@ begin
     end;
 
   if wndFullScreen Then
-    begin
-      wndX     := 0;
-      wndY     := 0;
-      wndStyle := WS_POPUP or WS_VISIBLE or WS_SYSMENU;
-    end else
-      wndStyle := WS_CAPTION or WS_MINIMIZEBOX or WS_SYSMENU or WS_VISIBLE;
+    wndStyle := WS_POPUP or WS_VISIBLE or WS_SYSMENU
+  else
+    wndStyle := WS_CAPTION or WS_MINIMIZEBOX or WS_SYSMENU or WS_VISIBLE;
   wndHandle := CreateWindowExW( WS_EX_APPWINDOW or WS_EX_TOPMOST * Byte( wndFullScreen ), wndClassName, wndCaptionW, wndStyle, wndX, wndY,
                                 wndWidth  + ( wndBrdSizeX * 2 ) * Byte( not wndFullScreen ),
                                 wndHeight + ( wndBrdSizeY * 2 + wndCpnSize ) * Byte( not wndFullScreen ), 0, 0, wndINST, nil );
@@ -177,7 +176,7 @@ begin
   wnd_SetCaption( wndCaption );
   wnd_SetSize( wndWidth, wndHeight );
 
-  if appFlags and WND_USE_AUTOCENTER > 0 Then
+  if ( not wndFullScreen ) and ( appFlags and WND_USE_AUTOCENTER > 0 ) Then
     wnd_SetPos( ( zgl_Get( DESKTOP_WIDTH ) - wndWidth ) div 2, ( zgl_Get( DESKTOP_HEIGHT ) - wndHeight ) div 2 );
 end;
 
