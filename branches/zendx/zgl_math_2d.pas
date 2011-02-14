@@ -76,9 +76,11 @@ function  m_FDistance( x1, y1, x2, y2 : Single ) : Single;
 function  m_Angle( x1, y1, x2, y2 : Single ) : Single;
 function  m_Orientation( x, y, x1, y1, x2, y2 : Single ) : Integer;
 
+{$IFDEF USE_TRIANGULATION}
 procedure tess_Triangulate( Contour : zglPPoints2D; iLo, iHi : Integer; AddHoles : Boolean = FALSE );
 procedure tess_AddHole( Contour : zglPPoints2D; iLo, iHi : Integer; LastHole : Boolean = TRUE );
 function  tess_GetData( var TriPoints : zglPPoints2D ) : Integer;
+{$ENDIF}
 
 var
   cosTable : array[ 0..360 ] of Single;
@@ -117,10 +119,12 @@ end;
 function m_SinCos( Angle : Single; var s, c : Single ) : Single; {$IFDEF USE_ASM} assembler; {$ELSE} {$IFDEF USE_INLINE} inline; {$ENDIF} {$ENDIF}
 {$IFDEF USE_ASM}
 asm
+{$IFDEF CPUi386}
   FLD Angle
   FSINCOS
   FSTP [EDX]
   FSTP [EAX]
+{$ENDIF}
 end;
 {$ELSE}
 begin
@@ -225,6 +229,7 @@ begin
 end;
 
 // GLU Triangulation
+{$IFDEF USE_TRIANGULATION}
 procedure tessBegin( Mode : Integer ); stdcall;
 begin
   tessMode    := Mode;
@@ -337,14 +342,19 @@ begin
     end else
       Result := 0;
 end;
+{$ENDIF}
 
 initialization
   InitCosSinTables();
+  {$IFDEF USE_TRIANGULATION}
   tess := gluNewTess();
   gluTessCallBack( tess, GLU_TESS_BEGIN,  @tessBegin    );
   gluTessCallBack( tess, GLU_TESS_VERTEX, @tessVertex2f );
+  {$ENDIF}
 
 finalization
+  {$IFDEF USE_TRIANGULATION}
   gluDeleteTess( tess );
+  {$ENDIF}
 
 end.

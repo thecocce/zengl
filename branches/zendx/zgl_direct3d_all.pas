@@ -291,6 +291,7 @@ function  gluBuild2DMipmaps(target: GLenum; components, width, height: GLint; fo
 procedure glTexCoord2f(s, t: GLfloat);
 procedure glTexCoord2fv(v: PGLfloat);
 // Triangulation
+{$IFDEF USE_TRIANGULATION}
 procedure gluDeleteTess(tess: Integer); stdcall external libGLU;
 function  gluErrorString(error: Integer): PChar; stdcall external libGLU;
 function  gluNewTess: Integer; stdcall external libGLU;
@@ -300,6 +301,7 @@ procedure gluTessCallback(tess: Integer; which: Integer; fn: Pointer); stdcall e
 procedure gluTessEndContour(tess: Integer); stdcall external libGLU;
 procedure gluTessEndPolygon(tess: Integer); stdcall external libGLU;
 procedure gluTessVertex(tess: Integer; vertex: PDouble; data: Pointer); stdcall external libGLU;
+{$ENDIF}
 
 procedure d3d_FillTexture( const Src, Dst : Pointer; const Width, Height : Integer; const DstStride : Integer = 0 );
 
