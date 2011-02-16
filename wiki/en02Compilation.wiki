@@ -67,3 +67,6 @@ Next group of defines are providing ability to disable some functionality:
   * *USE_SENGINE* - procedural sprite engine
   * *USE_PARTICLES* - particles subsytem
   * *USE_SOUND* - sound subsystem
+
+*USE_LOG_FLUSH* will enable/disable immediately writing to log-file. This needed only in critical cases and only for Windows. Enabling this will slowdown writing to logfile.
+Another available define is <b>USE_OGG_STATIC</b>. It intended only for FreePascal. With it ZenGL can be builded statically with libogg, libvorbis and libvorbisfile, which needed for playing ogg audio files.
