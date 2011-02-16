@@ -57,8 +57,6 @@ var
   mouseDblCInt  : Integer = 250;
   mouseWheel    : array[ 0..1 ] of Boolean;
   mouseLock     : Boolean;
-  cursorpos : TPoint;
-  getcurpos : Boolean;
 
 implementation
 uses
@@ -67,41 +65,21 @@ uses
 
 function mouse_X : Integer;
 begin
-  if getcurpos Then
-    begin
-      getcurpos := FALSE;
-      GetCursorPos( cursorpos );
-    end;
-  if wndFullScreen Then
-    Result := cursorpos.X
-  else
-    Result := cursorpos.X - wndX - wndBrdSizeX;
-  Result := Round( ( Result - scrAddCX ) / scrResCX );
+  Result := Round( ( mouseX - scrAddCX ) / scrResCX );
 end;
 
 function mouse_Y : Integer;
 begin
-  if getcurpos Then
-    begin
-      getcurpos := FALSE;
-      GetCursorPos( cursorpos );
-    end;
-  if wndFullScreen Then
-    Result := cursorpos.Y
-  else
-    Result := cursorpos.Y - wndY - wndBrdSizeY - wndCpnSize;
-  Result := Round( ( Result - scrAddCY ) / scrResCY );
+  Result := Round( ( mouseY - scrAddCY ) / scrResCY );
 end;
 
 function mouse_DX : Integer;
 begin
-  getcurpos := TRUE;
   Result := mouse_X() - wndWidth div 2;
 end;
 
 function mouse_DY : Integer;
 begin
-  getcurpos := TRUE;
   Result := mouse_Y() - wndHeight div 2;
 end;
 
@@ -136,7 +114,6 @@ end;
 
 procedure mouse_ClearState;
 begin
-  getcurpos := TRUE;
   FillChar( mouseUp[ 0 ], 3, 0 );
   FillChar( mouseClick[ 0 ], 3, 0 );
   FillChar( mouseDblClick[ 0 ], 3, 0 );

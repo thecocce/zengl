@@ -162,8 +162,20 @@ end;
 
 procedure app_ProcessOS;
   var
-    m : tagMsg;
+    m         : tagMsg;
+    cursorpos : TPoint;
 begin
+  GetCursorPos( cursorpos );
+  if wndFullScreen Then
+    begin
+      mouseX := cursorpos.X;
+      mouseY := cursorpos.Y;
+    end else
+      begin
+        mouseX := cursorpos.X - wndX - wndBrdSizeX;
+        mouseY := cursorpos.Y - wndY - wndBrdSizeY - wndCpnSize;
+      end;
+
   while PeekMessageW( m, 0{wnd_Handle}, 0, 0, PM_REMOVE ) do
     begin
       TranslateMessage( m );
