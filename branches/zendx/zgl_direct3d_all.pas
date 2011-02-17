@@ -251,6 +251,9 @@ procedure glDisable(cap: GLenum);
 procedure glViewport(x, y: GLint; width, height: GLsizei);
 procedure glOrtho(left, right, bottom, top, zNear, zFar: GLdouble);
 procedure glScissor(x, y: GLint; width, height: GLsizei);
+// Depth Buffer
+procedure glDepthFunc(func: GLenum);
+procedure glDepthMask(flag: GLboolean);
 // Color
 procedure glColor4ub(red, green, blue, alpha: GLubyte); {$IFDEF USE_INLINE} inline; {$ENDIF}
 procedure glColor4ubv(v: PGLubyte); {$IFDEF USE_INLINE} inline; {$ENDIF}
@@ -274,6 +277,7 @@ procedure glTranslatef(x, y, z: GLfloat);
 // Vertex
 procedure glVertex2f(x, y: GLfloat);
 procedure glVertex2fv(v: PGLfloat);
+procedure glVertex3f(x, y, z: GLfloat);
 // Texture
 procedure glBindTexture(target: GLenum; texture: GLuint);
 procedure glGenTextures(n: GLsizei; textures: PGLuint);
@@ -441,6 +445,7 @@ begin
     GL_LINES: RenderMode := D3DPT_LINELIST;
     GL_TRIANGLES: RenderMode := D3DPT_TRIANGLELIST;
     GL_TRIANGLE_STRIP: RenderMode := D3DPT_TRIANGLESTRIP;
+    GL_TRIANGLE_FAN: RenderMode := D3DPT_TRIANGLEFAN;
     GL_QUADS:
       begin
         RenderQuad := TRUE;
@@ -480,7 +485,7 @@ begin
     D3DPT_LINELIST: Count := Count div 2;
     D3DPT_TRIANGLELIST: Count := Count div 3;
     D3DPT_TRIANGLESTRIP:;
-    D3DPT_TRIANGLEFAN:;
+    D3DPT_TRIANGLEFAN: Count := Count - 2;
   end;
 
   {$IFDEF USE_DIRECT3D8}
@@ -621,6 +626,16 @@ begin
   glViewPort( 0, 0, 0, 0 );
 end;
 
+procedure glDepthFunc(func: GLenum);
+begin
+  d3dDevice.SetRenderState( D3DRS_ZFUNC, func - $01FF );
+end;
+
+procedure glDepthMask(flag: GLboolean);
+begin
+  d3dDevice.SetRenderState( D3DRS_ZWRITEENABLE, flag );
+end;
+
 procedure glColor4ub(red, green, blue, alpha: GLubyte); {$IFDEF USE_INLINE} inline; {$ENDIF}
 begin
   bColor := D3DCOLOR_ARGB( alpha, red, green, blue );
@@ -645,22 +660,9 @@ begin
 end;
 
 procedure glAlphaFunc(func: GLenum; ref: GLclampf);
-  var
-    value : LongWord;
 begin
-  case func of
-    GL_NEVER:    value := D3DCMP_NEVER;
-    GL_LESS:     value := D3DCMP_LESS;
-    GL_EQUAL:    value := D3DCMP_EQUAL;
-    GL_LEQUAL:   value := D3DCMP_LESSEQUAL;
-    GL_GREATER:  value := D3DCMP_GREATER;
-    GL_NOTEQUAL: value := D3DCMP_NOTEQUAL;
-    GL_GEQUAL:   value := D3DCMP_GREATEREQUAL;
-    GL_ALWAYS:   value := D3DCMP_ALWAYS;
-  end;
-
   d3dDevice.SetRenderState( D3DRS_ALPHAREF,  Trunc( ref * 255 ) );
-  d3dDevice.SetRenderState( D3DRS_ALPHAFUNC, value );
+  d3dDevice.SetRenderState( D3DRS_ALPHAFUNC, func - $01FF );
 end;
 
 function d3d_GetBlendFactor( factor : GLenum ) : LongWord;
@@ -964,6 +966,62 @@ begin
         bPVertices[ bPVCount ].c := bColor;
         bPVertices[ bPVCount ].x := zglPPoint2D( v ).X;
         bPVertices[ bPVCount ].y := zglPPoint2D( v ).Y;
+        INC( bPVCount );
+        if RenderQuad Then
+          begin
+            INC( newTriangleC );
+            if newTriangleC = 3 Then newTriangle := TRUE;
+            if newTriangle Then
+              begin
+                INC( bPVCount );
+                if bPVCount + 1 > length( bPVertices ) Then SetLength(  bPVertices, bPVCount + 1 );
+                bPVertices[ bPVCount - 1 ] :=  bPVertices[ bPVCount - 2 ];
+                newTriangle := FALSE;
+              end;
+            if newTriangleC = 4 Then
+              begin
+                newTriangleC := 0;
+                INC( bPVCount );
+                if bPVCount + 1 > length( bPVertices ) Then SetLength( bPVertices, bPVCount + 1 );
+                bPVertices[ bPVCount - 1 ] := bPVertices[ bPVCount - 6 ];
+              end;
+          end;
+      end;
+end;
+
+procedure glVertex3f(x, y, z: GLfloat);
+begin
+  z := -( z + 1 );
+  if RenderTextured Then
+    begin
+      bTVertices[ bTVCount - 1 ].z := z;
+      bTVertices[ bTVCount - 1 ].c := bColor;
+      bTVertices[ bTVCount - 1 ].x := x;
+      bTVertices[ bTVCount - 1 ].y := y;
+      if RenderQuad Then
+        begin
+          if newTriangle Then
+            begin
+              INC( bTVCount );
+              if bTVCount + 1 > length( bTVertices ) Then SetLength(  bTVertices, bTVCount + 1 );
+              bTVertices[ bTVCount - 1 ] :=  bTVertices[ bTVCount - 2 ];
+              newTriangle := FALSE;
+            end;
+          if newTriangleC = 4 Then
+            begin
+              newTriangleC := 0;
+              INC( bTVCount );
+              if bTVCount + 1 > length( bTVertices ) Then SetLength( bTVertices, bTVCount + 1 );
+              bTVertices[ bTVCount - 1 ] := bTVertices[ bTVCount - 6 ];
+            end;
+        end;
+    end else
+      begin
+        if bPVCount + 1 > length( bPVertices ) Then SetLength( bPVertices, bPVCount + 1 );
+        bPVertices[ bPVCount ].z := z;
+        bPVertices[ bPVCount ].c := bColor;
+        bPVertices[ bPVCount ].x := x;
+        bPVertices[ bPVCount ].y := y;
         INC( bPVCount );
         if RenderQuad Then
           begin

@@ -506,8 +506,8 @@ begin
   if What and DEPTH_BUFFER > 0 Then
     glEnable( GL_DEPTH_TEST );
 
-  {if What and DEPTH_MASK > 0 Then
-    glDepthMask( GL_TRUE );}
+  if What and DEPTH_MASK > 0 Then
+    glDepthMask( GL_TRUE );
 
   if What and CORRECT_RESOLUTION > 0 Then
     appFlags := appFlags or CORRECT_WIDTH or CORRECT_HEIGHT;
@@ -548,8 +548,8 @@ begin
   if What and DEPTH_BUFFER > 0 Then
     glDisable( GL_DEPTH_TEST );
 
-  {if What and DEPTH_MASK > 0 Then
-    glDepthMask( GL_FALSE );}
+  if What and DEPTH_MASK > 0 Then
+    glDepthMask( GL_FALSE );
 
   if What and CORRECT_RESOLUTION > 0 Then
     begin
