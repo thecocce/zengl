@@ -598,7 +598,7 @@ begin
   batch2d_Flush();
 
   if ( Width < 0 ) or ( Height < 0 ) Then exit;
-  if cam2d.Global <> @constCamera2D Then
+  if not cam2d.OnlyXY Then
     begin
       X      := Trunc( ( X - cam2d.Global.X ) * cam2d.Global.Zoom.X + ( ( oglWidth  / 2 ) - ( oglWidth  / 2 ) * cam2d.Global.Zoom.X ) );
       Y      := Trunc( ( Y - cam2d.Global.Y ) * cam2d.Global.Zoom.Y + ( ( oglHeight / 2 ) - ( oglHeight / 2 ) * cam2d.Global.Zoom.Y ) );
