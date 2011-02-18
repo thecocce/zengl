@@ -59,11 +59,6 @@ uses
   zgl_types,
   zgl_application,
   zgl_sound,
-  {$IFDEF USE_OPENAL}
-  zgl_sound_openal,
-  {$ELSE}
-  zgl_sound_dsound,
-  {$ENDIF}
   zgl_file,
   zgl_memory,
   zgl_log,
@@ -258,9 +253,6 @@ var
   oggInit    : Boolean;
   oggMemory  : zglTMemory;
   oggDecoder : zglTSoundDecoder;
-  {$IFNDEF USE_OPENAL}
-  oggBufferDesc : zglTBufferDesc;
-  {$ENDIF}
 
   oggLibrary        : HMODULE;
   vorbisLibrary     : HMODULE;
@@ -359,6 +351,7 @@ begin
       if ov_open_callbacks( @Stream._file, vf, nil, 0, vc ) >= 0 Then
         begin
           vi                := ov_info( vf, -1 );
+          Stream.Bits       := 16;
           Stream.Frequency  := vi.rate;
           Stream.Channels   := vi.channels;
           Stream.Length     := ov_pcm_total( vf, -1 ) / vi.rate * 1000;
@@ -433,24 +426,10 @@ begin
     begin
       _vi       := ov_info( _vf, -1 );
       Frequency := _vi.rate;
-      {$IFDEF USE_OPENAL}
       case _vi.channels of
-        1: format := AL_FORMAT_MONO16;
-        2: format := AL_FORMAT_STEREO16;
+        1: format := SND_FORMAT_MONO16;
+        2: format := SND_FORMAT_STEREO16;
       end;
-      {$ELSE}
-      with oggBufferDesc do
-        begin
-          FormatCode     := $0001;
-          ChannelNumber  := _vi.channels;
-          SampleRate     := _vi.rate;
-          BitsPerSample  := 16;
-          BytesPerSample := ( BitsPerSample div 8 ) * ChannelNumber;
-          BytesPerSecond := SampleRate * BytesPerSample;
-          cbSize         := SizeOf( zglTBufferDesc );
-        end;
-      Format := Ptr( @oggBufferDesc.Formatcode );
-      {$ENDIF}
 
       Size := 0;
       zgl_GetMem( Buffer, 64 * 1024 );

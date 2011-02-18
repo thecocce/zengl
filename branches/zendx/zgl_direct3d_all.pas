@@ -596,8 +596,34 @@ end;
 
 procedure glOrtho(left, right, bottom, top, zNear, zFar: GLdouble);
 begin
-  glFrustum( -left - 0.5, -right - 0.5, -bottom - 0.5, -top - 0.5, zNear, zFar );
-  d3dDevice.SetTransform( d3dMatrixMode, d3dMatrices[ LongWord( d3dMatrixMode ) ] );
+  left   := left + 0.5;
+  right  := right + 0.5;
+  top    := top - 0.5;
+  bottom := bottom - 0.5;
+
+  with d3dMatrices[ LongWord( d3dMatrixMode ) ] do
+    begin
+      _11 := 2 / ( right - left );
+      _12 := 0;
+      _13 := 0;
+      _14 := 0;
+
+      _21 := 0;
+      _22 := 2 / ( top - bottom );
+      _23 := 0;
+      _24 := 0;
+
+      _31 := 0;
+      _32 := 0;
+      _33 := 2 / ( zFar - znear );
+      _34 := 0;
+
+      _41 := -( right + left ) / ( right - left );
+      _42 := -( top + bottom ) / ( top - bottom );
+      _43 := -( zFar + zNear ) / ( zFar - znear );
+      _44 := 1;
+    end;
+  d3dDevice.MultiplyTransform( d3dMatrixMode, d3dMatrices[ LongWord( d3dMatrixMode ) ] );
 end;
 
 procedure glScissor(x, y: GLint; width, height: GLsizei);
@@ -757,20 +783,40 @@ end;
 
 procedure gluPerspective(fovy, aspect, zNear, zFar: GLdouble);
   var
-    xmax, ymax : Single;
+    f : Single;
 begin
-  ymax := zNear * tan( FOVY * pi / 360 );
-  xmax := ymax * aspect;
+  f := 1 / tan( FOVY * pi / 360 );
 
-  glFrustum( -xmax, xmax, -ymax, ymax, zNear, zFar );
-  d3dDevice.SetTransform( d3dMatrixMode, d3dMatrices[ LongWord( d3dMatrixMode ) ] );
+  with d3dMatrices[ LongWord( d3dMatrixMode ) ] do
+    begin
+      _11 := f / aspect;
+      _12 := 0;
+      _13 := 0;
+      _14 := 0;
+
+      _21 := 0;
+      _22 := f;
+      _23 := 0;
+      _24 := 0;
+
+      _31 := 0;
+      _32 := 0;
+      _33 := ( zFar + zNear ) / ( zNear - zFar );
+      _34 := -1;
+
+      _41 := 0;
+      _42 := 0;
+      _43 := 2 * zFar * zNear / ( zNear - zFar );
+      _44 := 0;
+    end;
+  d3dDevice.MultiplyTransform( d3dMatrixMode, d3dMatrices[ LongWord( d3dMatrixMode ) ] );
 end;
 
 procedure glFrustum(left, right, bottom, top, zNear, zFar: GLdouble);
 begin
   with d3dMatrices[ LongWord( d3dMatrixMode ) ] do
     begin
-      _11 := ( zNear * 2 ) / ( Right - Left );
+      _11 := ( zNear * 2 ) / ( right - left );
       _12 := 0;
       _13 := 0;
       _14 := 0;
@@ -780,8 +826,8 @@ begin
       _23 := 0;
       _24 := 0;
 
-      _31 := ( Right + Left ) / ( Right - Left );
-      _32 := ( Top + Bottom ) / ( Top - Bottom );
+      _31 := ( right + left ) / ( right - left );
+      _32 := ( top + bottom ) / ( top - bottom );
       _33 := -( zFar + zNear ) / ( zFar - zNear );
       _34 := -1;
 
@@ -790,6 +836,7 @@ begin
       _43 := -( zFar * zNear * 2 ) / ( zFar - zNear );
       _44 := 0;
     end;
+  d3dDevice.MultiplyTransform( d3dMatrixMode, d3dMatrices[ LongWord( d3dMatrixMode ) ] );
 end;
 
 procedure glRotatef(angle, x, y, z: GLfloat);
@@ -883,7 +930,7 @@ procedure glVertex2f(x, y: GLfloat);
 begin
   if RenderTextured Then
     begin
-      bTVertices[ bTVCount - 1 ].z := -1;
+      bTVertices[ bTVCount - 1 ].z := 0;
       bTVertices[ bTVCount - 1 ].c := bColor;
       bTVertices[ bTVCount - 1 ].x := x;
       bTVertices[ bTVCount - 1 ].y := y;
@@ -907,7 +954,7 @@ begin
     end else
       begin
         if bPVCount + 1 > length( bPVertices ) Then SetLength( bPVertices, bPVCount + 1 );
-        bPVertices[ bPVCount ].z := -1;
+        bPVertices[ bPVCount ].z := 0;
         bPVertices[ bPVCount ].c := bColor;
         bPVertices[ bPVCount ].x := x;
         bPVertices[ bPVCount ].y := y;
@@ -938,7 +985,7 @@ procedure glVertex2fv(v: PGLfloat);
 begin
   if RenderTextured Then
     begin
-      bTVertices[ bTVCount - 1 ].z := -1;
+      bTVertices[ bTVCount - 1 ].z := 0;
       bTVertices[ bTVCount - 1 ].c := bColor;
       bTVertices[ bTVCount - 1 ].x := zglPPoint2D( v ).X;
       bTVertices[ bTVCount - 1 ].y := zglPPoint2D( v ).Y;
@@ -962,7 +1009,7 @@ begin
     end else
       begin
         if bPVCount + 1 > length( bPVertices ) Then SetLength( bPVertices, bPVCount + 1 );
-        bPVertices[ bPVCount ].z := -1;
+        bPVertices[ bPVCount ].z := 0;
         bPVertices[ bPVCount ].c := bColor;
         bPVertices[ bPVCount ].x := zglPPoint2D( v ).X;
         bPVertices[ bPVCount ].y := zglPPoint2D( v ).Y;
@@ -991,7 +1038,6 @@ end;
 
 procedure glVertex3f(x, y, z: GLfloat);
 begin
-  z := -( z + 1 );
   if RenderTextured Then
     begin
       bTVertices[ bTVCount - 1 ].z := z;
