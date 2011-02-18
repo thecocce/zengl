@@ -252,18 +252,18 @@ procedure glViewport(x, y: GLint; width, height: GLsizei);
 procedure glOrtho(left, right, bottom, top, zNear, zFar: GLdouble);
 procedure glScissor(x, y: GLint; width, height: GLsizei);
 // Depth Buffer
-procedure glDepthFunc(func: GLenum);
-procedure glDepthMask(flag: GLboolean);
+procedure glDepthFunc(func: GLenum); {$IFDEF USE_INLINE} inline; {$ENDIF}
+procedure glDepthMask(flag: GLboolean); {$IFDEF USE_INLINE} inline; {$ENDIF}
 // Color
 procedure glColor4ub(red, green, blue, alpha: GLubyte); {$IFDEF USE_INLINE} inline; {$ENDIF}
 procedure glColor4ubv(v: PGLubyte); {$IFDEF USE_INLINE} inline; {$ENDIF}
 procedure glColor4f(red, green, blue, alpha: GLfloat); {$IFDEF USE_INLINE} inline; {$ENDIF}
 procedure glColorMask(red, green, blue, alpha: GLboolean); {$IFDEF USE_INLINE} inline; {$ENDIF}
 // Alpha
-procedure glAlphaFunc(func: GLenum; ref: GLclampf);
-procedure glBlendFunc(sfactor, dfactor: GLenum);
+procedure glAlphaFunc(func: GLenum; ref: GLclampf); {$IFDEF USE_INLINE} inline; {$ENDIF}
+procedure glBlendFunc(sfactor, dfactor: GLenum); {$IFDEF USE_INLINE} inline; {$ENDIF}
 //procedure glBlendEquationEXT(mode: GLenum);
-procedure glBlendFuncSeparateEXT(sfactorRGB: GLenum; dfactorRGB: GLenum; sfactorAlpha: GLenum; dfactorAlpha: GLenum);
+procedure glBlendFuncSeparateEXT(sfactorRGB: GLenum; dfactorRGB: GLenum; sfactorAlpha: GLenum; dfactorAlpha: GLenum); {$IFDEF USE_INLINE} inline; {$ENDIF}
 // Matrix
 procedure glPushMatrix;
 procedure glPopMatrix;
@@ -652,12 +652,12 @@ begin
   glViewPort( 0, 0, 0, 0 );
 end;
 
-procedure glDepthFunc(func: GLenum);
+procedure glDepthFunc(func: GLenum); {$IFDEF USE_INLINE} inline; {$ENDIF}
 begin
   d3dDevice.SetRenderState( D3DRS_ZFUNC, func - $01FF );
 end;
 
-procedure glDepthMask(flag: GLboolean);
+procedure glDepthMask(flag: GLboolean); {$IFDEF USE_INLINE} inline; {$ENDIF}
 begin
   d3dDevice.SetRenderState( D3DRS_ZWRITEENABLE, flag );
 end;
@@ -685,7 +685,7 @@ begin
                                                     D3DCOLORWRITEENABLE_ALPHA * alpha );
 end;
 
-procedure glAlphaFunc(func: GLenum; ref: GLclampf);
+procedure glAlphaFunc(func: GLenum; ref: GLclampf); {$IFDEF USE_INLINE} inline; {$ENDIF}
 begin
   d3dDevice.SetRenderState( D3DRS_ALPHAREF,  Trunc( ref * 255 ) );
   d3dDevice.SetRenderState( D3DRS_ALPHAFUNC, func - $01FF );
@@ -694,21 +694,14 @@ end;
 function d3d_GetBlendFactor( factor : GLenum ) : LongWord;
 begin
   case factor of
-    GL_ZERO:                Result := D3DBLEND_ZERO;
-    GL_ONE:                 Result := D3DBLEND_ONE;
-    GL_SRC_COLOR:           Result := D3DBLEND_SRCCOLOR;
-    GL_ONE_MINUS_SRC_COLOR: Result := D3DBLEND_INVSRCCOLOR;
-    GL_SRC_ALPHA:           Result := D3DBLEND_SRCALPHA;
-    GL_ONE_MINUS_SRC_ALPHA: Result := D3DBLEND_INVSRCALPHA;
-    GL_DST_ALPHA:           Result := D3DBLEND_DESTALPHA;
-    GL_ONE_MINUS_DST_ALPHA: Result := D3DBLEND_INVDESTALPHA;
-    GL_DST_COLOR:           Result := D3DBLEND_DESTCOLOR;
-    GL_ONE_MINUS_DST_COLOR: Result := D3DBLEND_INVDESTCOLOR;
-    GL_SRC_ALPHA_SATURATE:  Result := D3DBLEND_SRCALPHASAT;
+    GL_ZERO: Result := D3DBLEND_ZERO;
+    GL_ONE:  Result := D3DBLEND_ONE;
+  else
+    Result := factor - $02FD;
   end;
 end;
 
-procedure glBlendFunc(sfactor, dfactor: GLenum);
+procedure glBlendFunc(sfactor, dfactor: GLenum); {$IFDEF USE_INLINE} inline; {$ENDIF}
 begin
   {$IFDEF USE_DIRECT3D9}
   d3dDevice.SetRenderState( D3DRS_SEPARATEALPHABLENDENABLE, iFALSE );
@@ -717,7 +710,7 @@ begin
   d3dDevice.SetRenderState( D3DRS_DESTBLEND, d3d_GetBlendFactor( dfactor ) );
 end;
 
-procedure glBlendFuncSeparateEXT(sfactorRGB: GLenum; dfactorRGB: GLenum; sfactorAlpha: GLenum; dfactorAlpha: GLenum);
+procedure glBlendFuncSeparateEXT(sfactorRGB: GLenum; dfactorRGB: GLenum; sfactorAlpha: GLenum; dfactorAlpha: GLenum); {$IFDEF USE_INLINE} inline; {$ENDIF}
 begin
   d3dDevice.SetRenderState( D3DRS_SRCBLEND,  d3d_GetBlendFactor( sfactorRGB ) );
   d3dDevice.SetRenderState( D3DRS_DESTBLEND, d3d_GetBlendFactor( dfactorRGB ) );
