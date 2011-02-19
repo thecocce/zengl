@@ -225,7 +225,6 @@ function tex_LoadFromFile( const FileName : String; TransparentColor, Flags : Lo
     i     : Integer;
     pData : Pointer;
     w, h  : Word;
-    ext   : String;
 begin
   Result := nil;
   pData  := nil;
@@ -241,11 +240,8 @@ begin
     end;
 
   for i := managerTexture.Count.Formats - 1 downto 0 do
-    begin
-      ext := u_StrUp( file_GetExtension( FileName ) );
-      if ext = managerTexture.Formats[ i ].Extension Then
-        managerTexture.Formats[ i ].FileLoader( FileName, pData, w, h );
-    end;
+    if u_StrUp( file_GetExtension( FileName ) ) = managerTexture.Formats[ i ].Extension Then
+      managerTexture.Formats[ i ].FileLoader( FileName, pData, w, h );
 
   if not Assigned( pData ) Then
     begin
