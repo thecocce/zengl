@@ -601,8 +601,15 @@ procedure glOrtho(left, right, bottom, top, zNear, zFar: GLdouble);
 begin
   left   := left + 0.5;
   right  := right + 0.5;
-  top    := top + 0.5;
-  bottom := bottom + 0.5;
+  if oglTarget = TARGET_SCREEN Then
+    begin
+      top    := top + 0.5;
+      bottom := bottom + 0.5;
+    end else
+      begin
+        top    := top - 0.5;
+        bottom := bottom - 0.5;
+      end;
 
   with d3dMatrices[ LongWord( d3dMatrixMode ) ] do
     begin
