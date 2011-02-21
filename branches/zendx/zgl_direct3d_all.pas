@@ -266,7 +266,7 @@ procedure glColorMask(red, green, blue, alpha: GLboolean); {$IFDEF USE_INLINE} i
 procedure glAlphaFunc(func: GLenum; ref: GLclampf); {$IFDEF USE_INLINE} inline; {$ENDIF}
 procedure glBlendFunc(sfactor, dfactor: GLenum); {$IFDEF USE_INLINE} inline; {$ENDIF}
 //procedure glBlendEquationEXT(mode: GLenum);
-procedure glBlendFuncSeparateEXT(sfactorRGB: GLenum; dfactorRGB: GLenum; sfactorAlpha: GLenum; dfactorAlpha: GLenum); {$IFDEF USE_INLINE} inline; {$ENDIF}
+procedure glBlendFuncSeparate(sfactorRGB: GLenum; dfactorRGB: GLenum; sfactorAlpha: GLenum; dfactorAlpha: GLenum); {$IFDEF USE_INLINE} inline; {$ENDIF}
 // Matrix
 procedure glPushMatrix;
 procedure glPopMatrix;
@@ -720,7 +720,7 @@ begin
   d3dDevice.SetRenderState( D3DRS_DESTBLEND, d3d_GetBlendFactor( dfactor ) );
 end;
 
-procedure glBlendFuncSeparateEXT(sfactorRGB: GLenum; dfactorRGB: GLenum; sfactorAlpha: GLenum; dfactorAlpha: GLenum); {$IFDEF USE_INLINE} inline; {$ENDIF}
+procedure glBlendFuncSeparate(sfactorRGB: GLenum; dfactorRGB: GLenum; sfactorAlpha: GLenum; dfactorAlpha: GLenum); {$IFDEF USE_INLINE} inline; {$ENDIF}
 begin
   d3dDevice.SetRenderState( D3DRS_SRCBLEND,  d3d_GetBlendFactor( sfactorRGB ) );
   d3dDevice.SetRenderState( D3DRS_DESTBLEND, d3d_GetBlendFactor( dfactorRGB ) );

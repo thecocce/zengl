@@ -428,7 +428,10 @@ begin
 
   {$IFDEF USE_DIRECT3D9}
   if oglSeparate Then
-    d3dDevice.SetRenderState( D3DRS_BLENDOP, D3DBLENDOP_ADD );
+    begin
+      d3dDevice.SetRenderState( D3DRS_BLENDOP, D3DBLENDOP_ADD );
+      glBlendFuncSeparate( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
+    end;
   {$ENDIF}
 
   glDisable( GL_BLEND );
