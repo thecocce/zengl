@@ -115,6 +115,8 @@ const
   GL_TEXTURE_ENV_COLOR              = $2201;
   // Texture Env Target
   GL_TEXTURE_ENV                    = $2300;
+  // Mipmaps
+  GL_GENERATE_MIPMAP                = $8191;
   // Texture Mag Filter
   GL_NEAREST                        = $2600;
   GL_LINEAR                         = $2601;
@@ -233,6 +235,7 @@ type
     Texture    : {$IFDEF USE_DIRECT3D8} IDirect3DTexture8 {$ENDIF}
                  {$IFDEF USE_DIRECT3D9} IDirect3DTexture9 {$ENDIF};
     Pool       : TD3DPool;
+    AutoMipMap : Byte;
     MagFilter  : LongWord;
     MinFilter  : LongWord;
     MipFilter  : LongWord;
@@ -598,8 +601,8 @@ procedure glOrtho(left, right, bottom, top, zNear, zFar: GLdouble);
 begin
   left   := left + 0.5;
   right  := right + 0.5;
-  top    := top - 0.5;
-  bottom := bottom - 0.5;
+  top    := top + 0.5;
+  bottom := bottom + 0.5;
 
   with d3dMatrices[ LongWord( d3dMatrixMode ) ] do
     begin
@@ -1260,6 +1263,12 @@ begin
     {$IFDEF USE_DIRECT3D9}
     GL_TEXTURE_WRAP_S: _type := D3DSAMP_ADDRESSU;
     GL_TEXTURE_WRAP_T: _type := D3DSAMP_ADDRESSV;
+    GL_GENERATE_MIPMAP:
+      begin
+        if RenderTexID <> -1 Then
+          d3dTexArray[ RenderTexID ].AutoMipMap := param;
+        exit;
+      end;
     {$ENDIF}
   end;
 
@@ -1333,7 +1342,8 @@ begin
       if d3dDevice.CreateTexture( width, height, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, d3dTexArray[ RenderTexID ].Texture ) <> D3D_OK Then
       {$ENDIF}
       {$IFDEF USE_DIRECT3D9}
-      if d3dDevice.CreateTexture( width, height, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, d3dTexArray[ RenderTexID ].Texture, nil ) <> D3D_OK Then
+      if d3dDevice.CreateTexture( width, height, 1, D3DUSAGE_AUTOGENMIPMAP * d3dTexArray[ RenderTexID ].AutoMipMap, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED,
+                                  d3dTexArray[ RenderTexID ].Texture, nil ) <> D3D_OK Then
       {$ENDIF}
         begin
           log_Add( 'Can''t CreateTexture' );

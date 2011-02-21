@@ -116,6 +116,7 @@ var
   oglClipR  : Integer;
 
   oglCanCompress   : Boolean;
+  oglCanAutoMipMap : Boolean;
   oglMaxTexSize    : Integer;
   oglMaxAnisotropy : Integer;
   oglMaxTexUnits   : Integer;
@@ -173,10 +174,13 @@ begin
   oglMaxAnisotropy := d3dCaps.MaxAnisotropy;
   oglMaxTexUnits   := d3dCaps.MaxSimultaneousTextures;
   {$IFDEF USE_DIRECT3D8}
+  oglCanAutoMipMap := FALSE;
   log_Add( 'D3D8_MAX_TEXTURE_SIZE: ' + u_IntToStr( oglMaxTexSize ) );
   log_Add( 'D3D8_MAX_TEXTURE_ANISOTROPY: ' + u_IntToStr( oglMaxAnisotropy ) );
   {$ENDIF}
   {$IFDEF USE_DIRECT3D9}
+  oglCanAutoMipMap := d3dCaps.Caps2 and D3DCAPS2_CANAUTOGENMIPMAP > 0;
+  log_Add( 'D3D9_AUTOGENMIPMAP: ' + u_BoolToStr( oglCanAutoMipMap ) );
   log_Add( 'D3D9_MAX_TEXTURE_SIZE: ' + u_IntToStr( oglMaxTexSize ) );
   log_Add( 'D3D9_MAX_TEXTURE_ANISOTROPY: ' + u_IntToStr( oglMaxAnisotropy ) );
   {$ENDIF}
