@@ -134,8 +134,6 @@ begin
 end;
 
 function file_Exists( const Name : String ) : Boolean;
-  var
-    attr : LongWord;
 begin
   Result := GetFileAttributes( PChar( filePath + Name ) ) <> $FFFFFFFF;
 end;
