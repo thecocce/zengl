@@ -475,7 +475,7 @@ begin
                   glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST );
                   glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
                 end else
-                  if Flags and TEX_FILTER_TRILINEAR > 0 Then
+                  if ( Flags and TEX_FILTER_TRILINEAR > 0 ) or ( ( not oglCanAnisotropy ) and ( Flags and TEX_FILTER_ANISOTROPY > 0 ) ) Then
                     begin
                       Texture.Flags := Texture.Flags or TEX_FILTER_TRILINEAR;
                       glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
