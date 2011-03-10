@@ -28,8 +28,8 @@ uses
   zgl_types;
 
 const
-  cs_ZenGL    = 'ZenGL 0.2';
-  cs_Date     = '2011.02.27';
+  cs_ZenGL    = 'ZenGL 0.3';
+  cs_Date     = '2011.03.10';
   cv_major    = 0;
   cv_minor    = 2;
   cv_revision = 0;
@@ -526,12 +526,12 @@ begin
 
   if What and APP_USE_UTF8 > 0 Then
     begin
-      if SizeOf( Char ) = 1 Then
-        font_GetCID := font_GetUTF8ID
       {$IFNDEF FPC}
-      else
-        font_GetCID := font_GetUTF16ID;
+      if SizeOf( Char ) = 2 Then
+        font_GetCID := font_GetUTF16ID
       {$ENDIF}
+      else
+        font_GetCID := font_GetUTF8ID;
     end;
 
   {$IFDEF USE_SOUND}
