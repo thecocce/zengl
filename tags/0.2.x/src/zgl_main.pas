@@ -594,8 +594,8 @@ begin
       {$IFNDEF FPC}
       if SizeOf( Char ) = 2 Then
         font_GetCID := font_GetUTF16ID
-      {$ENDIF}
       else
+      {$ENDIF}
         font_GetCID := font_GetUTF8ID;
     end;
 
