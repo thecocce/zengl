@@ -174,6 +174,8 @@ end;
 procedure scr_Destroy;
 begin
   scr_Reset();
+
+  scrInitialized := FALSE;
 end;
 
 procedure scr_Reset;

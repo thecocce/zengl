@@ -153,6 +153,7 @@ begin
       u_Error( 'Cannot unregister window class' );
       wndINST := 0;
     end;
+  wndHandle := 0;
 end;
 
 procedure wnd_Update;
