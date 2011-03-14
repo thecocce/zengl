@@ -37,7 +37,7 @@ uses
 
 const
   cs_ZenGL    = 'ZenGL 0.2.1';
-  cs_Date     = '2011.03.13';
+  cs_Date     = '2011.03.14';
   cv_major    = 0;
   cv_minor    = 2;
   cv_revision = 0;
@@ -431,7 +431,9 @@ begin
     DIRECTORY_APPLICATION: Result := Ptr( PChar( appWorkDir ) );
     DIRECTORY_HOME: Result := Ptr( PChar( appHomeDir ) );
 
-    LOG_FILENAME: Result := Ptr( @logfile );
+    LOG_FILENAME:
+      if not appWork Then
+        Result := Ptr( @logfile );
 
     DESKTOP_WIDTH:
     {$IFDEF LINUX}
@@ -539,9 +541,6 @@ begin
   CFStringGetFileSystemRepresentation( appCFString, @appPath[ 0 ], 8192 );
   appWorkDir  := appPath + '/';
   appHomeDir  := FpGetEnv( 'HOME' ) + '/Library/Preferences/';
-
-  if logFile = 'log.txt' Then
-    logFile := PChar( appWorkDir + '../log.txt' );
 {$ENDIF}
   appGotSysDirs := TRUE;
 end;

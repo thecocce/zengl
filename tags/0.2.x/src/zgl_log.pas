@@ -36,7 +36,7 @@ function  log_Timing : AnsiString;
 var
   log      : zglTFile = FILE_ERROR;
   logStart : LongWord;
-  logFile  : PChar = 'log.txt';
+  logFile  : PChar;
 
 implementation
 uses
@@ -54,6 +54,21 @@ begin
   appLog   := TRUE;
   logStart := Round( timer_GetTicks() );
 
+  {$IFDEF LINUX}
+  if not Assigned( logFile ) Then
+    logFile := u_GetPChar( 'log.txt' );
+  {$ENDIF}
+  {$IFDEF WINDESKTOP}
+  if not Assigned( logFile ) Then
+    logFile := u_GetPChar( 'log.txt' );
+  {$ENDIF}
+  {$IFDEF DARWIN}
+  if not Assigned( logFile ) Then
+    logFile := u_GetPChar( appWorkDir + '../log.txt' )
+  else
+    logFile := u_GetPChar( logFile );
+  {$ENDIF}
+
   file_Open( log, logFile, FOM_CREATE );
   // crazy code :)
   es := '';
@@ -67,6 +82,10 @@ end;
 
 procedure log_Close;
 begin
+  appLog := FALSE;
+  FreeMem( logFile );
+  logFile := nil;
+
   if log <> FILE_ERROR Then
     file_Close( log );
 end;
