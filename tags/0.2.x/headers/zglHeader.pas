@@ -2,8 +2,8 @@
 {-----------= ZenGL =-----------}
 {-------------------------------}
 {                               }
-{ version:  0.2                 }
-{ date:     2011.02.27          }
+{ version:  0.2.1               }
+{ date:     2011.03.13          }
 { license:  GNU LGPL version 3  }
 { homepage: http://zengl.org    }
 {                               }
@@ -1024,7 +1024,7 @@ var
   text_DrawInRect     : procedure( Font : zglPFont; const Rect : zglTRect; const Text : String; Flags : LongWord = 0 );
   text_DrawInRectEx   : procedure( Font : zglPFont; const Rect : zglTRect; Scale, Step : Single; const Text : String; Alpha : Byte = 0; Color : LongWord = $FFFFFF; Flags : LongWord = 0 );
   text_GetWidth       : function( Font : zglPFont; const Text : String; Step : Single = 0.0 ) : Single;
-  text_GetHeight      : function( Font : zglPFont; const Rect : zglTRect; const Text : String; Scale : Single = 1.0; Step : Single = 0.0 ) : Single;
+  text_GetHeight      : function( Font : zglPFont; Width : Single; const Text : String; Scale : Single = 1.0; Step : Single = 0.0 ) : Single;
   textFx_SetLength    : procedure( Length : Integer; LastCoord : zglPPoint2D = nil; LastCharDesc : zglPCharDesc = nil );
 
 // Sound
@@ -1117,22 +1117,22 @@ type
   end;
 
 var
-  snd_Init              : function : Boolean;
-  snd_Free              : procedure;
-  snd_Add               : function( SourceCount : Integer ) : zglPSound;
-  snd_Del               : procedure( var Sound : zglPSound );
-  snd_LoadFromFile      : function( const FileName : String; SourceCount : Integer = 8 ) : zglPSound;
-  snd_LoadFromMemory    : function( const Memory : zglTMemory; const Extension : String; SourceCount : Integer = 8 ) : zglPSound;
-  snd_Play              : function( Sound : zglPSound; Loop : Boolean = FALSE; X : Single = 0; Y : Single = 0; Z : Single = 0 ) : Integer;
-  snd_Stop              : procedure( Sound : zglPSound; ID : Integer );
-  snd_SetPos            : procedure( Sound : zglPSound; ID : Integer; X, Y, Z : Single );
-  snd_SetVolume         : procedure( Sound : zglPSound; ID : Integer; Volume : Single );
-  snd_SetSpeed          : procedure( Sound : zglPSound; ID : Integer; Speed : Single );
-  snd_Get               : function( Sound : zglPSound; ID, What : Integer ) : Integer;
-  snd_PlayFile          : function( const FileName : String; Loop : Boolean = FALSE ) : Integer;
-  snd_PauseFile         : procedure( ID : Integer );
-  snd_StopFile          : procedure( ID : Integer );
-  snd_ResumeFile        : procedure( ID : Integer );
+  snd_Init           : function : Boolean;
+  snd_Free           : procedure;
+  snd_Add            : function( SourceCount : Integer ) : zglPSound;
+  snd_Del            : procedure( var Sound : zglPSound );
+  snd_LoadFromFile   : function( const FileName : String; SourceCount : Integer = 8 ) : zglPSound;
+  snd_LoadFromMemory : function( const Memory : zglTMemory; const Extension : String; SourceCount : Integer = 8 ) : zglPSound;
+  snd_Play           : function( Sound : zglPSound; Loop : Boolean = FALSE; X : Single = 0; Y : Single = 0; Z : Single = 0 ) : Integer;
+  snd_Stop           : procedure( Sound : zglPSound; ID : Integer );
+  snd_SetPos         : procedure( Sound : zglPSound; ID : Integer; X, Y, Z : Single );
+  snd_SetVolume      : procedure( Sound : zglPSound; ID : Integer; Volume : Single );
+  snd_SetSpeed       : procedure( Sound : zglPSound; ID : Integer; Speed : Single );
+  snd_Get            : function( Sound : zglPSound; ID, What : Integer ) : Integer;
+  snd_PlayFile       : function( const FileName : String; Loop : Boolean = FALSE ) : Integer;
+  snd_PauseFile      : procedure( ID : Integer );
+  snd_StopFile       : procedure( ID : Integer );
+  snd_ResumeFile     : procedure( ID : Integer );
 
 // MATH
 const
