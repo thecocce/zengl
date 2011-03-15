@@ -58,7 +58,7 @@ begin
   if not Assigned( logFile ) Then
     logFile := u_GetPChar( 'log.txt' )
   {$ENDIF}
-  {$IFDEF WINDESKTOP}
+  {$IFDEF WINDOWS}
   if not Assigned( logFile ) Then
     logFile := u_GetPChar( 'log.txt' )
   {$ENDIF}
