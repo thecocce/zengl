@@ -29,7 +29,7 @@ uses
 
 const
   cs_ZenGL    = 'ZenGL 0.3';
-  cs_Date     = '2011.03.13';
+  cs_Date     = '2011.03.14';
   cv_major    = 0;
   cv_minor    = 2;
   cv_revision = 0;
@@ -50,12 +50,6 @@ const
   SND_FORMAT_FILE_LOADER = $000021;
   SND_FORMAT_MEM_LOADER  = $000022;
   SND_FORMAT_DECODER     = $000023;
-  WIDGET_TYPE_ID         = $000030;
-  WIDGET_FILL_DESC       = $000031;
-  WIDGET_ONDRAW          = $000032;
-  WIDGET_ONPROC          = $000033;
-  WIDGET_ONFREEDESC      = $000034;
-  WIDGET_ONFREEDATA      = $000035;
 
   // zgl_Get
   ZENGL_VERSION           = 1;
@@ -168,7 +162,6 @@ begin
   oglFSAA    := FSAA;
   oglStencil := StencilBits;
   if not scr_Create() Then exit;
-
   appInitialized := TRUE;
   if wndHeight >= zgl_Get( DESKTOP_HEIGHT ) Then
     wndFullScreen := TRUE;
@@ -193,7 +186,6 @@ begin
 
   oglFSAA    := FSAA;
   oglStencil := StencilBits;
-
   if not scr_Create() Then exit;
   appInitedToHandle := TRUE;
   wndHandle := Handle;
@@ -410,7 +402,9 @@ begin
     DIRECTORY_APPLICATION: Result := Ptr( PChar( appWorkDir ) );
     DIRECTORY_HOME: Result := Ptr( PChar( appHomeDir ) );
 
-    LOG_FILENAME: Result := Ptr( @logfile );
+    LOG_FILENAME:
+      if not appWork Then
+        Result := Ptr( @logfile );
 
     DESKTOP_WIDTH:
       Result := scrDesktop.dmPelsWidth;

@@ -56,18 +56,18 @@ begin
 
   {$IFDEF LINUX}
   if not Assigned( logFile ) Then
-    logFile := u_GetPChar( 'log.txt' );
+    logFile := u_GetPChar( 'log.txt' )
   {$ENDIF}
   {$IFDEF WINDESKTOP}
   if not Assigned( logFile ) Then
-    logFile := u_GetPChar( 'log.txt' );
+    logFile := u_GetPChar( 'log.txt' )
   {$ENDIF}
   {$IFDEF DARWIN}
   if not Assigned( logFile ) Then
     logFile := u_GetPChar( appWorkDir + '../log.txt' )
+  {$ENDIF}
   else
     logFile := u_GetPChar( logFile );
-  {$ENDIF}
 
   file_Open( log, logFile, FOM_CREATE );
   // crazy code :)

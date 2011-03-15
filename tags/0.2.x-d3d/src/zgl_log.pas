@@ -55,7 +55,9 @@ begin
   logStart := Round( timer_GetTicks() );
 
   if not Assigned( logFile ) Then
-    logFile := u_GetPChar( 'log.txt' );
+    logFile := u_GetPChar( 'log.txt' )
+  else
+    logFile := u_GetPChar( logFile );
 
   file_Open( log, logFile, FOM_CREATE );
   // crazy code :)
