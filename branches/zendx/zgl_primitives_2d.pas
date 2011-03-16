@@ -104,8 +104,8 @@ end;
 
 procedure pr2d_Rect( X, Y, W, H : Single; Color : LongWord; Alpha : Byte = 255; FX : LongWord = 0 );
 begin
- if FX and PR2D_FILL > 0 Then
-   begin
+  if FX and PR2D_FILL > 0 Then
+    begin
       if ( not b2dStarted ) or batch2d_Check( GL_TRIANGLES, FX_BLEND or FX, nil ) Then
         begin
           glEnable( GL_BLEND );
@@ -149,6 +149,11 @@ begin
         end;
    end else
     begin
+      X := X + 0.5;
+      Y := Y + 0.5;
+      W := W - 1;
+      H := H - 1;
+
       if ( not b2dStarted ) or batch2d_Check( GL_LINES, FX_BLEND or FX, nil ) Then
         begin
           glEnable( GL_BLEND );
@@ -158,36 +163,36 @@ begin
       if FX and FX2D_VCA > 0 Then
         begin
           glColor4ubv( @fx2dVCA1[ 0 ] );
-          glVertex2f( X + 0.5,     Y + 0.5 );
+          glVertex2f( X,     Y );
 
           glColor4ubv( @fx2dVCA2[ 0 ] );
-          glVertex2f( X + W - 0.5, Y + 0.5 );
+          glVertex2f( X + W, Y );
 
-          glVertex2f( X + W - 0.5, Y + 0.5 );
+          glVertex2f( X + W, Y );
           glColor4ubv( @fx2dVCA3[ 0 ] );
-          glVertex2f( X + W - 0.5, Y + H - 0.5 );
+          glVertex2f( X + W, Y + H );
 
-          glVertex2f( X + W - 0.5, Y + H - 0.5 );
+          glVertex2f( X + W, Y + H );
           glColor4ubv( @fx2dVCA4[ 0 ] );
-          glVertex2f( X + 0.5,     Y + H - 0.5 );
+          glVertex2f( X,     Y + H );
 
-          glVertex2f( X + 0.5,     Y + H - 0.5 );
+          glVertex2f( X,     Y + H );
           glColor4ubv( @fx2dVCA1[ 0 ] );
-          glVertex2f( X + 0.5,     Y + 0.5 );
+          glVertex2f( X,     Y );
         end else
           begin
             glColor4ub( ( Color and $FF0000 ) shr 16, ( Color and $FF00 ) shr 8, Color and $FF, Alpha );
-            glVertex2f( X + 0.5,     Y + 0.5 );
-            glVertex2f( X + W - 0.5, Y + 0.5 );
+            glVertex2f( X,     Y );
+            glVertex2f( X + W, Y );
 
-            glVertex2f( X + W - 0.5, Y + 0.5 );
-            glVertex2f( X + W - 0.5, Y + H - 0.5 );
+            glVertex2f( X + W, Y );
+            glVertex2f( X + W, Y + H );
 
-            glVertex2f( X + W - 0.5, Y + H - 0.5 );
-            glVertex2f( X + 0.5,     Y + H - 0.5 );
+            glVertex2f( X + W, Y + H );
+            glVertex2f( X,     Y + H );
 
-            glVertex2f( X + 0.5,     Y + H - 0.5 );
-            glVertex2f( X + 0.5,     Y + 0.5 );
+            glVertex2f( X,     Y + H );
+            glVertex2f( X,     Y );
           end;
 
       if not b2dStarted Then
