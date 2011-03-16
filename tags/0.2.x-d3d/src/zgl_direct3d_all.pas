@@ -354,13 +354,12 @@ var
   lMipFilter : LongWord;
   lWrap      : LongWord;
   // Buffers
-  newTriangle  : Boolean;
-  newTriangleC : Integer;
-  bColor       : TD3DColor;
-  bTVertices   : array of TXYZCTVertex; // Textured
-  bTVCount     : Integer;
-  bPVertices   : array of TXYZCVertex;  // Primitives
-  bPVCount     : Integer;
+  newTriangle : Integer;
+  bColor      : TD3DColor;
+  bTVertices  : array of TXYZCTVertex; // Textured
+  bTVCount    : Integer;
+  bPVertices  : array of TXYZCVertex;  // Primitives
+  bPVCount    : Integer;
   // Scissor
   ScissorEnabled : Boolean;
   ScissorX : Integer;
@@ -439,9 +438,8 @@ procedure glBegin(mode: GLenum);
 begin
   bTVCount := 0;
   bPVCount := 0;
-  RenderQuad := FALSE;
-  newTriangle := FALSE;
-  newTriangleC := 0;
+  RenderQuad  := FALSE;
+  newTriangle := 0;
 
   case Mode of
     GL_POINTS: RenderMode := D3DPT_POINTLIST;
@@ -933,26 +931,29 @@ procedure glVertex2f(x, y: GLfloat);
 begin
   if RenderTextured Then
     begin
-      bTVertices[ bTVCount - 1 ].z := 0;
-      bTVertices[ bTVCount - 1 ].c := bColor;
-      bTVertices[ bTVCount - 1 ].x := x;
-      bTVertices[ bTVCount - 1 ].y := y;
+      bTVertices[ bTVCount ].z := 0;
+      bTVertices[ bTVCount ].c := bColor;
+      bTVertices[ bTVCount ].x := x;
+      bTVertices[ bTVCount ].y := y;
+      INC( bTVCount );
       if RenderQuad Then
         begin
-          if newTriangle Then
+          INC( newTriangle );
+          if newTriangle = 3 Then
             begin
+              if bTVCount = length( bTVertices ) Then SetLength(  bTVertices, bTVCount + 1024 );
+              bTVertices[ bTVCount  ] :=  bTVertices[ bTVCount - 1 ];
+
               INC( bTVCount );
-              if bTVCount + 1 > length( bTVertices ) Then SetLength(  bTVertices, bTVCount + 1 );
-              bTVertices[ bTVCount - 1 ] :=  bTVertices[ bTVCount - 2 ];
-              newTriangle := FALSE;
-            end;
-          if newTriangleC = 4 Then
-            begin
-              newTriangleC := 0;
-              INC( bTVCount );
-              if bTVCount + 1 > length( bTVertices ) Then SetLength( bTVertices, bTVCount + 1 );
-              bTVertices[ bTVCount - 1 ] := bTVertices[ bTVCount - 6 ];
-            end;
+            end else
+              if newTriangle = 4 Then
+                begin
+                  if bTVCount > length( bTVertices ) Then SetLength( bTVertices, bTVCount + 1024 );
+                  bTVertices[ bTVCount ] := bTVertices[ bTVCount - 5 ];
+
+                  INC( bTVCount );
+                  newTriangle := 0;
+                end;
         end;
     end else
       begin
@@ -964,21 +965,21 @@ begin
         INC( bPVCount );
         if RenderQuad Then
           begin
-            INC( newTriangleC );
-            if newTriangleC = 3 Then newTriangle := TRUE;
-            if newTriangle Then
+            INC( newTriangle );
+            if newTriangle = 3 Then
               begin
+                if bPVCount = length( bPVertices ) Then SetLength(  bPVertices, bPVCount + 1024 );
+                bPVertices[ bPVCount ] :=  bPVertices[ bPVCount - 1 ];
+
                 INC( bPVCount );
-                if bPVCount + 1 > length( bPVertices ) Then SetLength(  bPVertices, bPVCount + 1 );
-                bPVertices[ bPVCount - 1 ] :=  bPVertices[ bPVCount - 2 ];
-                newTriangle := FALSE;
-              end;
-            if newTriangleC = 4 Then
-              begin
-                newTriangleC := 0;
-                INC( bPVCount );
-                if bPVCount + 1 > length( bPVertices ) Then SetLength( bPVertices, bPVCount + 1 );
-                bPVertices[ bPVCount - 1 ] := bPVertices[ bPVCount - 6 ];
+              end else
+                if newTriangle = 4 Then
+                  begin
+                    if bPVCount = length( bPVertices ) Then SetLength( bPVertices, bPVCount + 1024 );
+                    bPVertices[ bPVCount ] := bPVertices[ bPVCount - 5 ];
+
+                    INC( bPVCount );
+                    newTriangle := 0;
               end;
           end;
       end;
@@ -988,26 +989,29 @@ procedure glVertex2fv(v: PGLfloat);
 begin
   if RenderTextured Then
     begin
-      bTVertices[ bTVCount - 1 ].z := 0;
-      bTVertices[ bTVCount - 1 ].c := bColor;
-      bTVertices[ bTVCount - 1 ].x := zglPPoint2D( v ).X;
-      bTVertices[ bTVCount - 1 ].y := zglPPoint2D( v ).Y;
+      bTVertices[ bTVCount ].z := 0;
+      bTVertices[ bTVCount ].c := bColor;
+      bTVertices[ bTVCount ].x := zglPPoint2D( v ).X;
+      bTVertices[ bTVCount ].y := zglPPoint2D( v ).Y;
+      INC( bTVCount );
       if RenderQuad Then
         begin
-          if newTriangle Then
+          INC( newTriangle );
+          if newTriangle = 3 Then
             begin
+              if bTVCount = length( bTVertices ) Then SetLength(  bTVertices, bTVCount + 1024 );
+              bTVertices[ bTVCount  ] :=  bTVertices[ bTVCount - 1 ];
+
               INC( bTVCount );
-              if bTVCount + 1 > length( bTVertices ) Then SetLength(  bTVertices, bTVCount + 1 );
-              bTVertices[ bTVCount - 1 ] :=  bTVertices[ bTVCount - 2 ];
-              newTriangle := FALSE;
-            end;
-          if newTriangleC = 4 Then
-            begin
-              newTriangleC := 0;
-              INC( bTVCount );
-              if bTVCount + 1 > length( bTVertices ) Then SetLength( bTVertices, bTVCount + 1 );
-              bTVertices[ bTVCount - 1 ] := bTVertices[ bTVCount - 6 ];
-            end;
+            end else
+              if newTriangle = 4 Then
+                begin
+                  if bTVCount > length( bTVertices ) Then SetLength( bTVertices, bTVCount + 1024 );
+                  bTVertices[ bTVCount ] := bTVertices[ bTVCount - 5 ];
+
+                  INC( bTVCount );
+                  newTriangle := 0;
+                end;
         end;
     end else
       begin
@@ -1019,22 +1023,22 @@ begin
         INC( bPVCount );
         if RenderQuad Then
           begin
-            INC( newTriangleC );
-            if newTriangleC = 3 Then newTriangle := TRUE;
-            if newTriangle Then
+            INC( newTriangle );
+            if newTriangle = 3 Then
               begin
+                if bPVCount = length( bPVertices ) Then SetLength(  bPVertices, bPVCount + 1024 );
+                bPVertices[ bPVCount ] :=  bPVertices[ bPVCount - 1 ];
+
                 INC( bPVCount );
-                if bPVCount + 1 > length( bPVertices ) Then SetLength(  bPVertices, bPVCount + 1 );
-                bPVertices[ bPVCount - 1 ] :=  bPVertices[ bPVCount - 2 ];
-                newTriangle := FALSE;
-              end;
-            if newTriangleC = 4 Then
-              begin
-                newTriangleC := 0;
-                INC( bPVCount );
-                if bPVCount + 1 > length( bPVertices ) Then SetLength( bPVertices, bPVCount + 1 );
-                bPVertices[ bPVCount - 1 ] := bPVertices[ bPVCount - 6 ];
-              end;
+              end else
+                if newTriangle = 4 Then
+                  begin
+                    if bPVCount = length( bPVertices ) Then SetLength( bPVertices, bPVCount + 1024 );
+                    bPVertices[ bPVCount ] := bPVertices[ bPVCount - 5 ];
+
+                    INC( bPVCount );
+                    newTriangle := 0;
+                  end;
           end;
       end;
 end;
@@ -1043,26 +1047,29 @@ procedure glVertex3f(x, y, z: GLfloat);
 begin
   if RenderTextured Then
     begin
-      bTVertices[ bTVCount - 1 ].z := z;
-      bTVertices[ bTVCount - 1 ].c := bColor;
-      bTVertices[ bTVCount - 1 ].x := x;
-      bTVertices[ bTVCount - 1 ].y := y;
+      bTVertices[ bTVCount ].z := z;
+      bTVertices[ bTVCount ].c := bColor;
+      bTVertices[ bTVCount ].x := x;
+      bTVertices[ bTVCount ].y := y;
+      INC( bTVCount );
       if RenderQuad Then
         begin
-          if newTriangle Then
+          INC( newTriangle );
+          if newTriangle = 3 Then
             begin
+              if bTVCount = length( bTVertices ) Then SetLength(  bTVertices, bTVCount + 1024 );
+              bTVertices[ bTVCount  ] :=  bTVertices[ bTVCount - 1 ];
+
               INC( bTVCount );
-              if bTVCount + 1 > length( bTVertices ) Then SetLength(  bTVertices, bTVCount + 1 );
-              bTVertices[ bTVCount - 1 ] :=  bTVertices[ bTVCount - 2 ];
-              newTriangle := FALSE;
-            end;
-          if newTriangleC = 4 Then
-            begin
-              newTriangleC := 0;
-              INC( bTVCount );
-              if bTVCount + 1 > length( bTVertices ) Then SetLength( bTVertices, bTVCount + 1 );
-              bTVertices[ bTVCount - 1 ] := bTVertices[ bTVCount - 6 ];
-            end;
+            end else
+              if newTriangle = 4 Then
+                begin
+                  if bTVCount > length( bTVertices ) Then SetLength( bTVertices, bTVCount + 1024 );
+                  bTVertices[ bTVCount ] := bTVertices[ bTVCount - 5 ];
+
+                  INC( bTVCount );
+                  newTriangle := 0;
+                end;
         end;
     end else
       begin
@@ -1074,22 +1081,22 @@ begin
         INC( bPVCount );
         if RenderQuad Then
           begin
-            INC( newTriangleC );
-            if newTriangleC = 3 Then newTriangle := TRUE;
-            if newTriangle Then
+            INC( newTriangle );
+            if newTriangle = 3 Then
               begin
+                if bPVCount = length( bPVertices ) Then SetLength(  bPVertices, bPVCount + 1024 );
+                bPVertices[ bPVCount ] :=  bPVertices[ bPVCount - 1 ];
+
                 INC( bPVCount );
-                if bPVCount + 1 > length( bPVertices ) Then SetLength(  bPVertices, bPVCount + 1 );
-                bPVertices[ bPVCount - 1 ] :=  bPVertices[ bPVCount - 2 ];
-                newTriangle := FALSE;
-              end;
-            if newTriangleC = 4 Then
-              begin
-                newTriangleC := 0;
-                INC( bPVCount );
-                if bPVCount + 1 > length( bPVertices ) Then SetLength( bPVertices, bPVCount + 1 );
-                bPVertices[ bPVCount - 1 ] := bPVertices[ bPVCount - 6 ];
-              end;
+              end else
+                if newTriangle = 4 Then
+                  begin
+                    if bPVCount = length( bPVertices ) Then SetLength( bPVertices, bPVCount + 1024 );
+                    bPVertices[ bPVCount ] := bPVertices[ bPVCount - 5 ];
+
+                    INC( bPVCount );
+                    newTriangle := 0;
+                  end;
           end;
       end;
 end;
@@ -1497,26 +1504,16 @@ end;
 
 procedure glTexCoord2f(s, t: GLfloat);
 begin
-  if bTVCount + 1 > length( bTVertices ) Then SetLength( bTVertices, bTVCount + 1 );
+  if bTVCount = length( bTVertices ) Then SetLength( bTVertices, bTVCount + 1024 );
   bTVertices[ bTVCount ].u := s;
   bTVertices[ bTVCount ].v := t;
-  INC( bTVCount );
-  INC( newTriangleC );
-
-  if newTriangleC = 3 then
-    newTriangle := TRUE;
 end;
 
 procedure glTexCoord2fv(v: PGLfloat);
 begin
-  if bTVCount + 1 > length( bTVertices ) Then SetLength( bTVertices, bTVCount + 1 );
+  if bTVCount = length( bTVertices ) Then SetLength( bTVertices, bTVCount + 1024 );
   bTVertices[ bTVCount ].u := zglPPoint2D( v ).X;
   bTVertices[ bTVCount ].v := zglPPoint2D( v ).Y;
-  INC( bTVCount );
-  INC( newTriangleC );
-
-  if newTriangleC = 3 then
-    newTriangle := TRUE;
 end;
 
 initialization
