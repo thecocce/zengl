@@ -551,7 +551,6 @@ begin
     begin
       FormatCode     := 1;
       SampleRate     := Result.Frequency;
-      BitsPerSample  := 16;
       BytesPerSample := ( BitsPerSample div 8 ) * ChannelNumber;
       BytesPerSecond := SampleRate * BytesPerSample;
       cbSize         := SizeOf( buffDesc );
@@ -635,7 +634,6 @@ begin
     begin
       FormatCode     := 1;
       SampleRate     := Result.Frequency;
-      BitsPerSample  := 16;
       BytesPerSample := ( BitsPerSample div 8 ) * ChannelNumber;
       BytesPerSecond := SampleRate * BytesPerSample;
       cbSize         := SizeOf( buffDesc );

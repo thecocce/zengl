@@ -23,9 +23,8 @@ unit zgl_file;
 {$I zgl_config.cfg}
 
 interface
-
 uses
-  {$IFDEF LINUX_OR_DARWIN}
+  {$IFDEF UNIX}
   BaseUnix,
   {$ENDIF}
   {$IFDEF WINDOWS}
@@ -33,7 +32,7 @@ uses
   {$ENDIF}
   zgl_types;
 
-{$IFDEF LINUX_OR_DARWIN}
+{$IFDEF UNIX}
 type zglTFile = LongInt;
 {$ENDIF}
 {$IFDEF WINDOWS}
@@ -76,11 +75,11 @@ function _file_GetName( const FileName : String ) : PChar;
 function _file_GetExtension( const FileName : String ) : PChar;
 function _file_GetDirectory( const FileName : String ) : PChar;
 
-{$IFDEF DARWIN}
-function darwin_GetRes( const FileName : String ) : String;
-{$ENDIF}
+{$IF DEFINED(DARWIN) or DEFINED(WINCE)}
+function platform_GetRes( const FileName : String ) : String;
+{$IFEND}
 
-{$IFDEF LINUX_OR_DARWIN}
+{$IFDEF UNIX}
 const
   { read/write search permission for everyone }
   MODE_MKDIR = S_IWUSR or S_IRUSR or
@@ -112,7 +111,7 @@ end;
 
 function file_Open( var FileHandle : zglTFile; const FileName : String; Mode : Byte ) : Boolean;
 begin
-{$IFDEF LINUX_OR_DARWIN}
+{$IFDEF LINUX}
   case Mode of
     FOM_CREATE: FileHandle := FpOpen( filePath + FileName, O_Creat or O_Trunc or O_RdWr );
     FOM_OPENR:  FileHandle := FpOpen( filePath + FileName, O_RdOnly );
@@ -121,9 +120,16 @@ begin
 {$ENDIF}
 {$IFDEF WINDOWS}
   case Mode of
-    FOM_CREATE: FileHandle := CreateFile( PChar( filePath + FileName ), GENERIC_ALL, 0, nil, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0 );
+    FOM_CREATE: FileHandle := CreateFile( PChar( filePath + FileName ), GENERIC_READ or GENERIC_WRITE, 0, nil, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0 );
     FOM_OPENR:  FileHandle := CreateFile( PChar( filePath + FileName ), GENERIC_READ, FILE_SHARE_READ, nil, OPEN_EXISTING, 0, 0 );
     FOM_OPENRW: FileHandle := CreateFile( PChar( filePath + FileName ), GENERIC_READ or GENERIC_WRITE, FILE_SHARE_READ or FILE_SHARE_WRITE, nil, OPEN_EXISTING, 0, 0 );
+  end;
+{$ENDIF}
+{$IFDEF DARWIN}
+  case Mode of
+    FOM_CREATE: FileHandle := FpOpen( platform_GetRes( filePath + FileName ), O_Creat or O_Trunc or O_RdWr );
+    FOM_OPENR:  FileHandle := FpOpen( platform_GetRes( filePath + FileName ), O_RdOnly );
+    FOM_OPENRW: FileHandle := FpOpen( platform_GetRes( filePath + FileName ), O_RdWr );
   end;
 {$ENDIF}
   Result := FileHandle <> FILE_ERROR;
@@ -131,17 +137,20 @@ end;
 
 function file_MakeDir( const Directory : String ) : Boolean;
 begin
-{$IFDEF LINUX_OR_DARWIN}
-  Result := FpMkdir( Directory, MODE_MKDIR ) = FILE_ERROR;
+{$IFDEF LINUX}
+  Result := FpMkdir( filePath + Directory, MODE_MKDIR ) = FILE_ERROR;
 {$ENDIF}
 {$IFDEF WINDOWS}
-  Result := CreateDirectory( PChar( Directory ), nil );
+  Result := CreateDirectory( PChar( filePath + Directory ), nil );
+{$ENDIF}
+{$IFDEF DARWIN}
+  Result := FpMkdir( platform_GetRes( filePath + Directory ), MODE_MKDIR ) = FILE_ERROR;
 {$ENDIF}
 end;
 
 function file_Remove( const Name : String ) : Boolean;
   var
-  {$IFDEF LINUX_OR_DARWIN}
+  {$IFDEF UNIX}
     status : Stat;
   {$ENDIF}
   {$IFDEF WINDOWS}
@@ -158,13 +167,17 @@ begin
       exit;
     end;
 
-{$IFDEF LINUX_OR_DARWIN}
+{$IFDEF LINUX}
   FpStat( filePath + Name, status );
   dir := fpS_ISDIR( status.st_mode );
 {$ENDIF}
 {$IFDEF WINDOWS}
   attr := GetFileAttributes( PChar( filePath + Name ) );
   dir  := attr and FILE_ATTRIBUTE_DIRECTORY > 0;
+{$ENDIF}
+{$IFDEF DARWIN}
+  FpStat( platform_GetRes( filePath + Name ), status );
+  dir := fpS_ISDIR( status.st_mode );
 {$ENDIF}
 
   if dir Then
@@ -179,38 +192,44 @@ begin
       for i := 2 to list.Count - 1 do
         file_Remove( path + list.Items[ i ] );
 
-      {$IFDEF LINUX_OR_DARWIN}
+      {$IFDEF UNIX}
       Result := FpRmdir( filePath + Name ) = 0;
       {$ENDIF}
       {$IFDEF WINDOWS}
       Result := RemoveDirectory( PChar( filePath + Name ) );
       {$ENDIF}
     end else
-      {$IFDEF LINUX_OR_DARWIN}
+      {$IFDEF LINUX}
       Result := FpUnlink( filePath + Name ) = 0;
       {$ENDIF}
       {$IFDEF WINDOWS}
       Result := DeleteFile( PChar( filePath + Name ) );
       {$ENDIF}
+      {$IFDEF DARWIN}
+      Result := FpUnlink( platform_GetRes( filePath + Name ) ) = 0;
+      {$ENDIF}
 end;
 
 function file_Exists( const Name : String ) : Boolean;
-  {$IFDEF LINUX_OR_DARWIN}
+  {$IFDEF UNIX}
   var
     status : Stat;
   {$ENDIF}
 begin
-{$IFDEF LINUX_OR_DARWIN}
+{$IFDEF LINUX}
   Result := FpStat( filePath + Name, status ) = 0;
 {$ENDIF}
 {$IFDEF WINDOWS}
   Result := GetFileAttributes( PChar( filePath + Name ) ) <> $FFFFFFFF;
 {$ENDIF}
+{$IFDEF DARWIN}
+  Result := FpStat( platform_GetRes( filePath + Name ), status ) = 0;
+{$ENDIF}
 end;
 
 function file_Seek( FileHandle : zglTFile; Offset, Mode : Integer ) : LongWord;
 begin
-{$IFDEF LINUX_OR_DARWIN}
+{$IFDEF UNIX}
   case Mode of
     FSM_SET: Result := FpLseek( FileHandle, Offset, SEEK_SET );
     FSM_CUR: Result := FpLseek( FileHandle, Offset, SEEK_CUR );
@@ -228,7 +247,7 @@ end;
 
 function file_GetPos( FileHandle : zglTFile ) : LongWord;
 begin
-{$IFDEF LINUX_OR_DARWIN}
+{$IFDEF UNIX}
   Result := FpLseek( FileHandle, 0, SEEK_CUR );
 {$ENDIF}
 {$IFDEF WINDOWS}
@@ -238,7 +257,7 @@ end;
 
 function file_Read( FileHandle : zglTFile; var Buffer; Bytes : LongWord ) : LongWord;
 begin
-{$IFDEF LINUX_OR_DARWIN}
+{$IFDEF UNIX}
   Result := FpLseek( FileHandle, 0, SEEK_CUR );
   if Result + Bytes > file_GetSize( FileHandle ) Then
     Result := file_GetSize( FileHandle ) - Result
@@ -253,7 +272,7 @@ end;
 
 function file_Write( FileHandle : zglTFile; const Buffer; Bytes : LongWord ) : LongWord;
 begin
-{$IFDEF LINUX_OR_DARWIN}
+{$IFDEF UNIX}
   Result := FpLseek( FileHandle, 0, SEEK_CUR );
   if Result + Bytes > file_GetSize( FileHandle ) Then
     Result := file_GetSize( FileHandle ) - Result
@@ -267,12 +286,12 @@ begin
 end;
 
 function file_GetSize( FileHandle : zglTFile ) : LongWord;
-  {$IFDEF LINUX_OR_DARWIN}
+  {$IFDEF UNIX}
   var
     tmp : LongWord;
   {$ENDIF}
 begin
-{$IFDEF LINUX_OR_DARWIN}
+{$IFDEF UNIX}
   // Весьма безумная реализация 8)
   tmp    := FpLseek( FileHandle, 0, SEEK_CUR );
   Result := FpLseek( FileHandle, 0, SEEK_END );
@@ -285,7 +304,7 @@ end;
 
 procedure file_Flush( FileHandle : zglTFile );
 begin
-{$IFDEF LINUX_OR_DARWIN}
+{$IFDEF UNIX}
   //fflush( FileHandle );
 {$ENDIF}
 {$IFDEF WINDOWS}
@@ -295,31 +314,29 @@ end;
 
 procedure file_Close( var FileHandle : zglTFile );
 begin
-{$IFDEF LINUX_OR_DARWIN}
+{$IFDEF UNIX}
   FpClose( FileHandle );
-  FileHandle := 0;
 {$ENDIF}
 {$IFDEF WINDOWS}
   CloseHandle( FileHandle );
-  FileHandle := 0;
 {$ENDIF}
+  FileHandle := FILE_ERROR;
 end;
 
 procedure file_Find( const Directory : String; var List : zglTFileList; FindDir : Boolean );
-  {$IFDEF LINUX_OR_DARWIN}
   var
+  {$IFDEF UNIX}
     dir    : PDir;
     dirent : PDirent;
     _type  : Integer;
   {$ENDIF}
   {$IFDEF WINDOWS}
-  var
     First : THandle;
-    FList : {$IFDEF FPC} WIN32FINDDATAA {$ELSE} WIN32_FIND_DATA {$ENDIF};
+    FList : WIN32_FIND_DATA;
   {$ENDIF}
 begin
   List.Count := 0;
-{$IFDEF LINUX_OR_DARWIN}
+{$IFDEF LINUX}
   if FindDir Then
     _type := 4
   else
@@ -350,6 +367,24 @@ begin
     INC( List.Count );
   until not FindNextFile( First, FList );
   FindClose( First );
+{$ENDIF}
+{$IFDEF DARWIN}
+  if FindDir Then
+    _type := 4
+  else
+    _type := 8;
+
+  dir := FpOpenDir( platform_GetRes( filePath + Directory ) );
+  repeat
+    dirent := FpReadDir( dir^ );
+    if Assigned( dirent ) and ( dirent^.d_type = _type ) Then
+      begin
+        SetLength( List.Items, List.Count + 1 );
+        List.Items[ List.Count ] := dirent^.d_name;
+        INC( List.Count );
+      end;
+  until not Assigned( dirent );
+  FpCloseDir( dir^ );
 {$ENDIF}
 
   if List.Count > 2 Then
@@ -408,7 +443,7 @@ begin
 end;
 
 {$IFDEF DARWIN}
-function darwin_GetRes( const FileName : String ) : String;
+function platform_GetRes( const FileName : String ) : String;
   var
     len : Integer;
 begin

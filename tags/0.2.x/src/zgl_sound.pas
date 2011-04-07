@@ -25,7 +25,7 @@ unit zgl_sound;
 interface
 
 uses
-  {$IFDEF LINUX_OR_DARWIN}
+  {$IFDEF UNIX}
   {$LINKLIB pthread}
   cthreads,
   {$ENDIF}
@@ -504,11 +504,7 @@ begin
 
   if not sndInitialized Then exit;
 
-  {$IFDEF DARWIN}
-  if not file_Exists( darwin_GetRes( FileName ) ) Then
-  {$ELSE}
   if not file_Exists( FileName ) Then
-  {$ENDIF}
     begin
       log_Add( 'Cannot read "' + FileName + '"' );
       exit;
@@ -517,11 +513,7 @@ begin
 
   for i := managerSound.Count.Formats - 1 downto 0 do
     if u_StrUp( file_GetExtension( FileName ) ) = managerSound.Formats[ i ].Extension Then
-      {$IFDEF DARWIN}
-      managerSound.Formats[ i ].FileLoader( darwin_GetRes( FileName ), Result.Data, Result.Size, fmt, Result.Frequency );
-      {$ELSE}
       managerSound.Formats[ i ].FileLoader( FileName, Result.Data, Result.Size, fmt, Result.Frequency );
-      {$ENDIF}
 
   if not Assigned( Result.Data ) Then
     begin
@@ -574,7 +566,6 @@ begin
     begin
       FormatCode     := 1;
       SampleRate     := Result.Frequency;
-      BitsPerSample  := 16;
       BytesPerSample := ( BitsPerSample div 8 ) * ChannelNumber;
       BytesPerSecond := SampleRate * BytesPerSample;
       cbSize         := SizeOf( buffDesc );
@@ -658,7 +649,6 @@ begin
     begin
       FormatCode     := 1;
       SampleRate     := Result.Frequency;
-      BitsPerSample  := 16;
       BytesPerSample := ( BitsPerSample div 8 ) * ChannelNumber;
       BytesPerSecond := SampleRate * BytesPerSample;
       cbSize         := SizeOf( buffDesc );
@@ -1087,11 +1077,7 @@ begin
         FreeMem( sfStream[ Result ]._data );
     end;
 
-  {$IFDEF DARWIN}
-  if not file_Exists( darwin_GetRes( FileName ) ) Then
-  {$ELSE}
   if not file_Exists( FileName ) Then
-  {$ENDIF}
     begin
       log_Add( 'Cannot read "' + FileName + '"' );
       exit;
@@ -1108,11 +1094,7 @@ begin
     sfStream[ Result ].Loop := Loop;
 
   if ( not Assigned( sfStream[ Result ]._decoder ) ) or
-  {$IFDEF DARWIN}
-     ( not sfStream[ Result ]._decoder.Open( sfStream[ Result ], darwin_GetRes( FileName ) ) ) Then
-  {$ELSE}
      ( not sfStream[ Result ]._decoder.Open( sfStream[ Result ], FileName ) ) Then
-  {$ENDIF}
     begin
       sfStream[ Result ]._decoder := nil;
       log_Add( 'Cannot play: "' + FileName + '"' );
@@ -1264,7 +1246,7 @@ begin
 
           DEC( processed );
         end;
-      {$IFDEF LINUX_OR_DARWIN}
+      {$IFDEF UNIX}
       while sfStream[ id ]._paused do u_Sleep( 10 );
       {$ENDIF}
       {$ELSE}

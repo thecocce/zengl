@@ -107,7 +107,7 @@ begin
   file_Write( log, str[ 1 ], length( str ) );
 
   {$IFDEF USE_LOG_FLUSH}
-  log_Flush;
+  log_Flush();
   {$ENDIF}
 end;
 

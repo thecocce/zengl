@@ -241,11 +241,7 @@ begin
     zeroTexture := tex_CreateZero( 4, 4, $FFFFFFFF, TEX_DEFAULT_2D );
   Result := zeroTexture;
 
-  {$IFDEF DARWIN}
-  if not file_Exists( darwin_GetRes( FileName ) ) Then
-  {$ELSE}
   if not file_Exists( FileName ) Then
-  {$ENDIF}
     begin
       log_Add( 'Cannot read "' + FileName + '"' );
       exit;
@@ -253,11 +249,7 @@ begin
 
   for i := managerTexture.Count.Formats - 1 downto 0 do
     if u_StrUp( file_GetExtension( FileName ) ) = managerTexture.Formats[ i ].Extension Then
-      {$IFDEF DARWIN}
-      managerTexture.Formats[ i ].FileLoader( darwin_GetRes( FileName ), pData, w, h );
-      {$ELSE}
       managerTexture.Formats[ i ].FileLoader( FileName, pData, w, h );
-      {$ENDIF}
 
   if not Assigned( pData ) Then
     begin
