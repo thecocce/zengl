@@ -289,9 +289,9 @@ begin
       d3dDevice.GetDepthStencilSurface( d3dStencil );
       d3dTexArray[ Target.Surface.ID ].Texture.GetSurfaceLevel( 0, lSurface );
       if Target.Flags and RT_USE_DEPTH > 0 Then
-        d3dDevice.SetRenderTarget( lSurface, nil )
+        d3dDevice.SetRenderTarget( lSurface, Target.Handle.Depth )
       else
-        d3dDevice.SetRenderTarget( lSurface, Target.Handle.Depth );
+        d3dDevice.SetRenderTarget( lSurface, nil );
       {$ENDIF}
       {$IFDEF USE_DIRECT3D9}
       d3dDevice.GetDepthStencilSurface( d3dStencil );
@@ -299,7 +299,9 @@ begin
       d3dTexArray[ Target.Surface.ID ].Texture.GetSurfaceLevel( 0, lSurface );
       d3dDevice.SetRenderTarget( 0, lSurface );
       if Target.Flags and RT_USE_DEPTH > 0 Then
-        d3dDevice.SetDepthStencilSurface( Target.Handle.Depth );
+        d3dDevice.SetDepthStencilSurface( Target.Handle.Depth )
+      else
+        d3dDevice.SetDepthStencilSurface( nil );
       {$ENDIF}
 
       oglTarget  := TARGET_TEXTURE;
