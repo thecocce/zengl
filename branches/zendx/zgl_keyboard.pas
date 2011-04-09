@@ -178,6 +178,10 @@ var
   keysMax      : Integer;
   keysLast     : array[ 0..1 ] of Byte;
 
+  // callback
+  key_PPress   : procedure( KeyCode : Byte );
+  key_PRelease : procedure( KeyCode : Byte );
+
 implementation
 uses
   zgl_application,

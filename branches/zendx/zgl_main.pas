@@ -29,7 +29,7 @@ uses
 
 const
   cs_ZenGL    = 'ZenGL 0.3';
-  cs_Date     = '2011.04.08';
+  cs_Date     = '2011.04.09';
   cv_major    = 0;
   cv_minor    = 2;
   cv_revision = 0;
@@ -42,10 +42,19 @@ const
   SYS_UPDATE             = $000005;
   SYS_EXIT               = $000006;
   SYS_ACTIVATE           = $000007;
+
+  INPUT_MOUSE_MOVE       = $000040;
+  INPUT_MOUSE_PRESS      = $000041;
+  INPUT_MOUSE_RELEASE    = $000042;
+  INPUT_MOUSE_WHEEL      = $000042;
+  INPUT_KEY_PRESS        = $000044;
+  INPUT_KEY_RELEASE      = $000045;
+
   TEX_FORMAT_EXTENSION   = $000010;
   TEX_FORMAT_FILE_LOADER = $000011;
   TEX_FORMAT_MEM_LOADER  = $000012;
   TEX_CURRENT_EFFECT     = $000013;
+
   SND_FORMAT_EXTENSION   = $000020;
   SND_FORMAT_FILE_LOADER = $000021;
   SND_FORMAT_MEM_LOADER  = $000022;
@@ -136,6 +145,8 @@ uses
   zgl_direct3d_all,
   zgl_timers,
   zgl_log,
+  zgl_mouse,
+  zgl_keyboard,
   zgl_render_2d,
   zgl_textures,
   {$IFDEF USE_TEXTURE_ATLAS}
@@ -156,11 +167,12 @@ uses
 
 procedure zgl_Init( FSAA : Byte = 0; StencilBits : Byte = 0 );
 begin
+  oglFSAA    := FSAA;
+  oglStencil := StencilBits;
+
   zgl_GetSysDir();
   log_Init();
 
-  oglFSAA    := FSAA;
-  oglStencil := StencilBits;
   if not scr_Create() Then exit;
   appInitialized := TRUE;
   if wndHeight >= zgl_Get( DESKTOP_HEIGHT ) Then
@@ -338,6 +350,27 @@ begin
       begin
         app_PActivate := UserData;
         if not Assigned( UserData ) Then app_PActivate := zeroa;
+      end;
+    // Input events
+    INPUT_MOUSE_MOVE:
+      begin
+        mouse_PMove := UserData;
+      end;
+    INPUT_MOUSE_PRESS:
+      begin
+        mouse_PPress := UserData;
+      end;
+    INPUT_MOUSE_RELEASE:
+      begin
+        mouse_PRelease := UserData;
+      end;
+    INPUT_KEY_PRESS:
+      begin
+        key_PPress := UserData;
+      end;
+    INPUT_KEY_RELEASE:
+      begin
+        key_PRelease := UserData;
       end;
     // Textures
     TEX_FORMAT_EXTENSION:
