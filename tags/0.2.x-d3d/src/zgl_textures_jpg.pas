@@ -38,6 +38,7 @@ uses
 
 const
   JPG_EXTENSION  : array[ 0..3 ] of Char = ( 'J', 'P', 'G', #0 );
+  JPEG_EXTENSION : array[ 0..4 ] of Char = ( 'J', 'P', 'E', 'G', #0 );
 
 {$IFDEF USE_LIBJPEG}
   {$L jaricom}
@@ -293,8 +294,14 @@ begin
 end;
 
 initialization
+  // jpg
   zgl_Reg( TEX_FORMAT_EXTENSION,   @JPG_EXTENSION[ 0 ] );
   zgl_Reg( TEX_FORMAT_FILE_LOADER, @jpg_LoadFromFile );
   zgl_Reg( TEX_FORMAT_MEM_LOADER,  @jpg_LoadFromMemory );
+  // jpeg
+  zgl_Reg( TEX_FORMAT_EXTENSION,   @JPEG_EXTENSION[ 0 ] );
+  zgl_Reg( TEX_FORMAT_FILE_LOADER, @jpg_LoadFromFile );
+  zgl_Reg( TEX_FORMAT_MEM_LOADER,  @jpg_LoadFromMemory );
+
 
 end.
