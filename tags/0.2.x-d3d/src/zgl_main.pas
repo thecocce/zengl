@@ -29,7 +29,7 @@ uses
 
 const
   cs_ZenGL    = 'ZenGL 0.2.2';
-  cs_Date     = '2011.04.08';
+  cs_Date     = '2011.04.11';
   cv_major    = 0;
   cv_minor    = 2;
   cv_revision = 0;
@@ -174,8 +174,10 @@ begin
   Set2DMode();
   wnd_ShowCursor( appShowCursor );
 
+  d3d_BeginScene();
   app_PInit();
   app_PLoop();
+  d3d_EndScene();
   zgl_Destroy();
 end;
 
@@ -197,8 +199,10 @@ begin
   Set2DMode();
   wnd_ShowCursor( appShowCursor );
 
+  d3d_BeginScene();
   app_PInit();
   app_PLoop();
+  d3d_EndScene();
   zgl_Destroy();
 end;
 

@@ -97,12 +97,11 @@ procedure zeroa; begin end;
 
 procedure app_Draw;
 begin
-  if not d3d_BeginScene Then exit;
   SetCurrentMode();
   scr_Clear();
   app_PDraw();
   scr_Flush();
-  d3d_EndScene();
+
   if not appPause Then
     INC( appFPSCount );
 end;
@@ -117,6 +116,7 @@ end;
 
 procedure app_Init;
 begin
+  SetCurrentMode();
   scr_Clear();
   app_PLoad();
   scr_Flush();

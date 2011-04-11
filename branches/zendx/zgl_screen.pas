@@ -192,6 +192,8 @@ end;
 procedure scr_Flush;
 begin
   batch2d_Flush();
+  d3d_EndScene();
+  d3d_BeginScene();
 end;
 
 procedure scr_SetOptions( Width, Height, Refresh : Word; FullScreen, VSync : Boolean );
