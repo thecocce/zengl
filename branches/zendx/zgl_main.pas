@@ -29,7 +29,7 @@ uses
 
 const
   cs_ZenGL    = 'ZenGL 0.3';
-  cs_Date     = '2011.04.11';
+  cs_Date     = '2011.04.13';
   cv_major    = 0;
   cv_minor    = 2;
   cv_revision = 0;
@@ -49,6 +49,7 @@ const
   INPUT_MOUSE_WHEEL      = $000042;
   INPUT_KEY_PRESS        = $000044;
   INPUT_KEY_RELEASE      = $000045;
+  INPUT_KEY_CHAR         = $000046;
 
   TEX_FORMAT_EXTENSION   = $000010;
   TEX_FORMAT_FILE_LOADER = $000011;
@@ -375,6 +376,10 @@ begin
     INPUT_KEY_RELEASE:
       begin
         key_PRelease := UserData;
+      end;
+    INPUT_KEY_CHAR:
+      begin
+        key_PInputChar := UserData;
       end;
     // Textures
     TEX_FORMAT_EXTENSION:

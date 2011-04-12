@@ -226,6 +226,7 @@ exports
   fx2d_SetScale            name prefix + 'fx2d_SetScale',
 
   // Camera 2D
+  cam2d_Init               name prefix + 'cam2d_Init',
   cam2d_Set                name prefix + 'cam2d_Set',
   cam2d_Get                name prefix + 'cam2d_Get',
 
