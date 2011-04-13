@@ -103,12 +103,23 @@ begin
   // Позиция/Трансформация
   if Angle <> 0 Then
     begin
-      x1 := -W / 2;
-      y1 := -H / 2;
-      x2 := -x1;
-      y2 := -y1;
-      cX :=  X + x2;
-      cY :=  Y + y2;
+      if FX and FX2D_RPIVOT = 0 Then
+        begin
+          x1 := -W / 2;
+          y1 := -H / 2;
+          x2 := -x1;
+          y2 := -y1;
+          cX :=  X + x2;
+          cY :=  Y + y2;
+        end else
+          begin
+            x1 := -fx2dRPX;
+            y1 := -fx2dRPY;
+            x2 := W + x1;
+            y2 := H + y1;
+            cX := X + fx2dRPX;
+            cY := Y + fx2dRPY;
+          end;
 
       m_SinCos( Angle * deg2rad, s, c );
 
@@ -280,12 +291,23 @@ begin
   // Позиция/Трансформация
   if Angle <> 0 Then
     begin
-      x1 := -W / 2;
-      y1 := -H / 2;
-      x2 := -x1;
-      y2 := -y1;
-      cX :=  X + x2;
-      cY :=  Y + y2;
+      if FX and FX2D_RPIVOT = 0 Then
+        begin
+          x1 := -W / 2;
+          y1 := -H / 2;
+          x2 := -x1;
+          y2 := -y1;
+          cX :=  X + x2;
+          cY :=  Y + y2;
+        end else
+          begin
+            x1 := -fx2dRPX;
+            y1 := -fx2dRPY;
+            x2 := W + x1;
+            y2 := H + y1;
+            cX := X + fx2dRPX;
+            cY := Y + fx2dRPY;
+          end;
 
       m_SinCos( Angle * deg2rad, s, c );
 
@@ -464,12 +486,23 @@ begin
   // Позиция/Трансформация
   if Angle <> 0 Then
     begin
-      x1 := -W / 2;
-      y1 := -H / 2;
-      x2 := -x1;
-      y2 := -y1;
-      cX :=  X + x2;
-      cY :=  Y + y2;
+      if FX and FX2D_RPIVOT = 0 Then
+        begin
+          x1 := -W / 2;
+          y1 := -H / 2;
+          x2 := -x1;
+          y2 := -y1;
+          cX :=  X + x2;
+          cY :=  Y + y2;
+        end else
+          begin
+            x1 := -fx2dRPX;
+            y1 := -fx2dRPY;
+            x2 := W + x1;
+            y2 := H + y1;
+            cX := X + fx2dRPX;
+            cY := Y + fx2dRPY;
+          end;
 
       m_SinCos( Angle * deg2rad, s, c );
 
@@ -649,12 +682,23 @@ begin
   // Позиция/Трансформация
   if Angle <> 0 Then
     begin
-      x1 := -W / 2;
-      y1 := -H / 2;
-      x2 := -x1;
-      y2 := -y1;
-      cX :=  X + x2;
-      cY :=  Y + y2;
+      if FX and FX2D_RPIVOT = 0 Then
+        begin
+          x1 := -W / 2;
+          y1 := -H / 2;
+          x2 := -x1;
+          y2 := -y1;
+          cX :=  X + x2;
+          cY :=  Y + y2;
+        end else
+          begin
+            x1 := -fx2dRPX;
+            y1 := -fx2dRPY;
+            x2 := W + x1;
+            y2 := H + y1;
+            cX := X + fx2dRPX;
+            cY := Y + fx2dRPY;
+          end;
 
       m_SinCos( Angle * deg2rad, s, c );
 
