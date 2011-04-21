@@ -176,6 +176,8 @@ begin
         mouseY := cursorpos.Y - wndY - wndBrdSizeY - wndCpnSize;
       end;
 
+  mouseX := Round( ( mouseX - scrAddCX ) / scrResCX );
+  mouseY := Round( ( mouseY - scrAddCY ) / scrResCY );
   if ( mouseLX <> mouseX ) or ( mouseLY <> mouseY ) Then
     begin
       mouseLX := mouseX;

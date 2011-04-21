@@ -47,9 +47,9 @@ const
   INPUT_MOUSE_PRESS      = $000041;
   INPUT_MOUSE_RELEASE    = $000042;
   INPUT_MOUSE_WHEEL      = $000042;
-  INPUT_KEY_PRESS        = $000044;
-  INPUT_KEY_RELEASE      = $000045;
-  INPUT_KEY_CHAR         = $000046;
+  INPUT_KEY_PRESS        = $000050;
+  INPUT_KEY_RELEASE      = $000051;
+  INPUT_KEY_CHAR         = $000052;
 
   TEX_FORMAT_EXTENSION   = $000010;
   TEX_FORMAT_FILE_LOADER = $000011;
@@ -181,11 +181,10 @@ begin
 
   if not wnd_Create( wndWidth, wndHeight ) Then exit;
   if not d3d_Create() Then exit;
+
+  wnd_ShowCursor( appShowCursor );
   wnd_SetCaption( wndCaption );
   appWork := TRUE;
-
-  Set2DMode();
-  wnd_ShowCursor( appShowCursor );
 
   d3d_BeginScene();
   app_PInit();
@@ -206,11 +205,10 @@ begin
   wndHandle := Handle;
   //wndDC := GetDC( wnd_Handle );
   if not d3d_Create() Then exit;
+
+  wnd_ShowCursor( appShowCursor );
   wnd_SetCaption( wndCaption );
   appWork := TRUE;
-
-  Set2DMode();
-  wnd_ShowCursor( appShowCursor );
 
   d3d_BeginScene();
   app_PInit();
