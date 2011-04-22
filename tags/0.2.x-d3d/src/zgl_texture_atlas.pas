@@ -346,6 +346,8 @@ begin
   if ( Flags and TEX_CONVERT_TO_POT > 0 ) Then
     tex.Flags := tex.Flags xor TEX_CONVERT_TO_POT;
   if tex.Flags and TEX_CALCULATE_ALPHA > 0 Then
+    tex_CalcAlpha( pData, TransparentColor, w, h )
+  else
     tex_CalcTransparent( pData, TransparentColor, w, h );
   tex_CalcFlags( tex, pData );
 
