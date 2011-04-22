@@ -105,6 +105,7 @@ procedure tex_CalcPOT( var pData : Pointer; var Width, Height : Word; var U, V :
 procedure tex_CalcGrayScale( var pData : Pointer; Width, Height : Word );
 procedure tex_CalcInvert( var pData : Pointer; Width, Height : Word );
 procedure tex_CalcTransparent( var pData : Pointer; TransparentColor : LongWord; Width, Height : Word );
+procedure tex_CalcAlpha( var pData : Pointer; TransparentColor : LongWord; Width, Height : Word );
 
 procedure tex_SetData( Texture : zglPTexture; pData : Pointer; X, Y, Width, Height : Word; Stride : Integer = 0 );
 procedure tex_GetData( Texture : zglPTexture; var pData : Pointer );
@@ -113,7 +114,6 @@ procedure zeroce( var pData : Pointer; Width, Height : Word );
 
 var
   managerTexture       : zglTTextureManager;
-  zeroTexture          : zglPTexture;
   tex_CalcCustomEffect : procedure( var pData : Pointer; Width, Height : Word ) = zeroce;
 
 implementation
@@ -127,6 +127,9 @@ uses
   zgl_file,
   zgl_log,
   zgl_utils;
+
+var
+  zeroTexture : zglPTexture;
 
 procedure zeroce; begin end;
 
@@ -266,6 +269,8 @@ begin
   Result.FramesY := 1;
   Result.Flags   := Flags;
   if Result.Flags and TEX_CALCULATE_ALPHA > 0 Then
+    tex_CalcAlpha( pData, TransparentColor, w, h )
+  else
     tex_CalcTransparent( pData, TransparentColor, w, h );
   tex_Create( Result^, pData );
 
@@ -306,6 +311,8 @@ begin
   Result.FramesY := 1;
   Result.Flags   := Flags;
   if Result.Flags and TEX_CALCULATE_ALPHA > 0 Then
+    tex_CalcAlpha( pData, TransparentColor, w, h )
+  else
     tex_CalcTransparent( pData, TransparentColor, w, h );
   tex_Create( Result^, pData );
 
@@ -590,6 +597,21 @@ procedure tex_CalcTransparent( var pData : Pointer; TransparentColor : LongWord;
   var
     i       : Integer;
     r, g, b : Byte;
+begin
+  if TransparentColor = $FF000000 Then exit;
+
+  r := ( TransparentColor and $FF0000 ) shr 16;
+  g := ( TransparentColor and $FF00   ) shr 8;
+  b := ( TransparentColor and $FF     );
+  for i := 0 to Width * Height - 1 do
+    if ( PByte( Ptr( pData ) + i * 4 )^ = r ) and ( PByte( Ptr( pData ) + i * 4 + 1 )^ = g ) and ( PByte( Ptr( pData ) + i * 4 + 2 )^ = b ) Then
+      PByte( Ptr( pData ) + i * 4 + 3 )^ := 0;
+end;
+
+procedure tex_CalcAlpha( var pData : Pointer; TransparentColor : LongWord; Width, Height : Word );
+  var
+    i       : Integer;
+    r, g, b : Byte;
     procedure Fill; {$IFDEF USE_INLINE} inline; {$ENDIF}
     begin
       PLongWord( Ptr( pData ) + i * 4 )^ := 0;
@@ -598,9 +620,9 @@ procedure tex_CalcTransparent( var pData : Pointer; TransparentColor : LongWord;
       if i + Width <= Width * Height - 1 Then
         if PByte( Ptr( pData ) + ( i + Width ) * 4 + 3 )^ > 0 Then
           begin
-            PByte( Ptr( pData ) + 0 + i * 4 )^ := PByte( Ptr( pData ) + ( i + Width ) * 4 + 0 )^;
-            PByte( Ptr( pData ) + 1 + i * 4 )^ := PByte( Ptr( pData ) + ( i + Width ) * 4 + 1 )^;
-            PByte( Ptr( pData ) + 2 + i * 4 )^ := PByte( Ptr( pData ) + ( i + Width ) * 4 + 2 )^;
+            PByte( Ptr( pData ) + i * 4 )^     := PByte( Ptr( pData ) + ( i + Width ) * 4 )^;
+            PByte( Ptr( pData ) + i * 4 + 1 )^ := PByte( Ptr( pData ) + ( i + Width ) * 4 + 1 )^;
+            PByte( Ptr( pData ) + i * 4 + 2 )^ := PByte( Ptr( pData ) + ( i + Width ) * 4 + 2 )^;
             exit;
           end;
 
@@ -608,9 +630,9 @@ procedure tex_CalcTransparent( var pData : Pointer; TransparentColor : LongWord;
       if ( i + 1 <= Width * Height - 1 ) and ( i + Width <= Width * Height - 1 ) Then
         if PByte( Ptr( pData ) + ( i + Width + 1 ) * 4 + 3 )^ > 0 Then
           begin
-            PByte( Ptr( pData ) + 0 + i * 4 )^ := PByte( Ptr( pData ) + ( i + Width + 1 ) * 4 + 0 )^;
-            PByte( Ptr( pData ) + 1 + i * 4 )^ := PByte( Ptr( pData ) + ( i + Width + 1 ) * 4 + 1 )^;
-            PByte( Ptr( pData ) + 2 + i * 4 )^ := PByte( Ptr( pData ) + ( i + Width + 1 ) * 4 + 2 )^;
+            PByte( Ptr( pData ) + i * 4 )^     := PByte( Ptr( pData ) + ( i + Width + 1 ) * 4 )^;
+            PByte( Ptr( pData ) + i * 4 + 1 )^ := PByte( Ptr( pData ) + ( i + Width + 1 ) * 4 + 1 )^;
+            PByte( Ptr( pData ) + i * 4 + 2 )^ := PByte( Ptr( pData ) + ( i + Width + 1 ) * 4 + 2 )^;
             exit;
           end;
 
@@ -618,9 +640,9 @@ procedure tex_CalcTransparent( var pData : Pointer; TransparentColor : LongWord;
       if i + 1 <= Width * Height - 1 Then
         if PByte( Ptr( pData ) + ( i + 1 ) * 4 + 3 )^ > 0 Then
           begin
-            PByte( Ptr( pData ) + 0 + i * 4 )^ := PByte( Ptr( pData ) + ( i + 1 ) * 4 + 0 )^;
-            PByte( Ptr( pData ) + 1 + i * 4 )^ := PByte( Ptr( pData ) + ( i + 1 ) * 4 + 1 )^;
-            PByte( Ptr( pData ) + 2 + i * 4 )^ := PByte( Ptr( pData ) + ( i + 1 ) * 4 + 2 )^;
+            PByte( Ptr( pData ) + i * 4 )^     := PByte( Ptr( pData ) + ( i + 1 ) * 4 )^;
+            PByte( Ptr( pData ) + i * 4 + 1 )^ := PByte( Ptr( pData ) + ( i + 1 ) * 4 + 1 )^;
+            PByte( Ptr( pData ) + i * 4 + 2 )^ := PByte( Ptr( pData ) + ( i + 1 ) * 4 + 2 )^;
             exit;
           end;
 
@@ -628,9 +650,9 @@ procedure tex_CalcTransparent( var pData : Pointer; TransparentColor : LongWord;
       if ( i + 1 <= Width * Height - 1 ) and ( i - Width > 0 ) Then
         if PByte( Ptr( pData ) + ( i - Width + 1 ) * 4 + 3 )^ > 0 Then
           begin
-            PByte( Ptr( pData ) + 0 + i * 4 )^ := PByte( Ptr( pData ) + ( i - Width + 1 ) * 4 + 0 )^;
-            PByte( Ptr( pData ) + 1 + i * 4 )^ := PByte( Ptr( pData ) + ( i - Width + 1 ) * 4 + 1 )^;
-            PByte( Ptr( pData ) + 2 + i * 4 )^ := PByte( Ptr( pData ) + ( i - Width + 1 ) * 4 + 2 )^;
+            PByte( Ptr( pData ) + i * 4 )^     := PByte( Ptr( pData ) + ( i - Width + 1 ) * 4 )^;
+            PByte( Ptr( pData ) + i * 4 + 1 )^ := PByte( Ptr( pData ) + ( i - Width + 1 ) * 4 + 1 )^;
+            PByte( Ptr( pData ) + i * 4 + 2 )^ := PByte( Ptr( pData ) + ( i - Width + 1 ) * 4 + 2 )^;
             exit;
           end;
 
@@ -638,9 +660,9 @@ procedure tex_CalcTransparent( var pData : Pointer; TransparentColor : LongWord;
       if i - Width > 0 Then
         if PByte( Ptr( pData ) + ( i - Width ) * 4 + 3 )^ > 0 Then
           begin
-            PByte( Ptr( pData ) + 0 + i * 4 )^ := PByte( Ptr( pData ) + ( i - Width ) * 4 + 0 )^;
-            PByte( Ptr( pData ) + 1 + i * 4 )^ := PByte( Ptr( pData ) + ( i - Width ) * 4 + 1 )^;
-            PByte( Ptr( pData ) + 2 + i * 4 )^ := PByte( Ptr( pData ) + ( i - Width ) * 4 + 2 )^;
+            PByte( Ptr( pData ) + i * 4 )^     := PByte( Ptr( pData ) + ( i - Width ) * 4 )^;
+            PByte( Ptr( pData ) + i * 4 + 1 )^ := PByte( Ptr( pData ) + ( i - Width ) * 4 + 1 )^;
+            PByte( Ptr( pData ) + i * 4 + 2 )^ := PByte( Ptr( pData ) + ( i - Width ) * 4 + 2 )^;
             exit;
           end;
 
@@ -648,9 +670,9 @@ procedure tex_CalcTransparent( var pData : Pointer; TransparentColor : LongWord;
       if ( i - 1 > 0 ) and ( i - Width > 0 ) Then
         if PByte( Ptr( pData ) + ( i - Width - 1 ) * 4 + 3 )^ > 0 Then
           begin
-            PByte( Ptr( pData ) + 0 + i * 4 )^ := PByte( Ptr( pData ) + ( i - Width - 1 ) * 4 + 0 )^;
-            PByte( Ptr( pData ) + 1 + i * 4 )^ := PByte( Ptr( pData ) + ( i - Width - 1 ) * 4 + 1 )^;
-            PByte( Ptr( pData ) + 2 + i * 4 )^ := PByte( Ptr( pData ) + ( i - Width - 1 ) * 4 + 2 )^;
+            PByte( Ptr( pData ) + i * 4 )^     := PByte( Ptr( pData ) + ( i - Width - 1 ) * 4 )^;
+            PByte( Ptr( pData ) + i * 4 + 1 )^ := PByte( Ptr( pData ) + ( i - Width - 1 ) * 4 + 1 )^;
+            PByte( Ptr( pData ) + i * 4 + 2 )^ := PByte( Ptr( pData ) + ( i - Width - 1 ) * 4 + 2 )^;
             exit;
           end;
 
@@ -658,9 +680,9 @@ procedure tex_CalcTransparent( var pData : Pointer; TransparentColor : LongWord;
       if i - 1 > 0 Then
         if PByte( Ptr( pData ) + ( i - 1 ) * 4 + 3 )^ > 0 Then
           begin
-            PByte( Ptr( pData ) + 0 + i * 4 )^ := PByte( Ptr( pData ) + ( i - 1 ) * 4 + 0 )^;
-            PByte( Ptr( pData ) + 1 + i * 4 )^ := PByte( Ptr( pData ) + ( i - 1 ) * 4 + 1 )^;
-            PByte( Ptr( pData ) + 2 + i * 4 )^ := PByte( Ptr( pData ) + ( i - 1 ) * 4 + 2 )^;
+            PByte( Ptr( pData ) + i * 4 )^     := PByte( Ptr( pData ) + ( i - 1 ) * 4 )^;
+            PByte( Ptr( pData ) + i * 4 + 1 )^ := PByte( Ptr( pData ) + ( i - 1 ) * 4 + 1 )^;
+            PByte( Ptr( pData ) + i * 4 + 2 )^ := PByte( Ptr( pData ) + ( i - 1 ) * 4 + 2 )^;
             exit;
           end;
 
@@ -668,9 +690,9 @@ procedure tex_CalcTransparent( var pData : Pointer; TransparentColor : LongWord;
       if ( i - 1 > 0 ) and ( i + Width <= Width * Height - 1 ) Then
         if PByte( Ptr( pData ) + ( i + Width - 1 ) * 4 + 3 )^ > 0 Then
           begin
-            PByte( Ptr( pData ) + 0 + i * 4 )^ := PByte( Ptr( pData ) + ( i + Width - 1 ) * 4 + 0 )^;
-            PByte( Ptr( pData ) + 1 + i * 4 )^ := PByte( Ptr( pData ) + ( i + Width - 1 ) * 4 + 1 )^;
-            PByte( Ptr( pData ) + 2 + i * 4 )^ := PByte( Ptr( pData ) + ( i + Width - 1 ) * 4 + 2 )^;
+            PByte( Ptr( pData ) + i * 4 )^     := PByte( Ptr( pData ) + ( i + Width - 1 ) * 4 )^;
+            PByte( Ptr( pData ) + i * 4 + 1 )^ := PByte( Ptr( pData ) + ( i + Width - 1 ) * 4 + 1 )^;
+            PByte( Ptr( pData ) + i * 4 + 2 )^ := PByte( Ptr( pData ) + ( i + Width - 1 ) * 4 + 2 )^;
             exit;
           end;
     end;
@@ -678,14 +700,14 @@ begin
   if TransparentColor = $FF000000 Then
     begin
       for i := 0 to Width * Height - 1 do
-        if ( PByte( Ptr( pData ) + 3 + i * 4 )^ = 0 ) Then Fill;
+        if ( PByte( Ptr( pData ) + i * 4 + 3 )^ = 0 ) Then Fill;
     end else
       begin
         r := ( TransparentColor and $FF0000 ) shr 16;
         g := ( TransparentColor and $FF00   ) shr 8;
         b := ( TransparentColor and $FF     );
         for i := 0 to Width * Height - 1 do
-          if ( PByte( Ptr( pData ) + 0 + i * 4 )^ = r ) and ( PByte( Ptr( pData ) + 1 + i * 4 )^ = g ) and ( PByte( Ptr( pData ) + 2 + i * 4 )^ = b ) Then Fill;
+          if ( PByte( Ptr( pData ) + i * 4 )^ = r ) and ( PByte( Ptr( pData ) + i * 4 + 1 )^ = g ) and ( PByte( Ptr( pData ) + i * 4 + 2 )^ = b ) Then Fill;
       end;
 end;
 

@@ -115,6 +115,7 @@ var
   oglClipH  : Integer;
   oglClipR  : Integer;
 
+  oglCanAnisotropy : Boolean;
   oglCanCompress   : Boolean;
   oglCanAutoMipMap : Boolean;
   oglMaxTexSize    : Integer;
@@ -171,17 +172,20 @@ begin
 
   d3d.GetDeviceCaps( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, d3dCaps );
   oglMaxTexSize    := d3dCaps.MaxTextureWidth;
+  oglCanAnisotropy := d3dCaps.RasterCaps and D3DPRASTERCAPS_ANISOTROPY > 0;
   oglMaxAnisotropy := d3dCaps.MaxAnisotropy;
   oglMaxTexUnits   := d3dCaps.MaxSimultaneousTextures;
   {$IFDEF USE_DIRECT3D8}
   oglCanAutoMipMap := FALSE;
   log_Add( 'D3D8_MAX_TEXTURE_SIZE: ' + u_IntToStr( oglMaxTexSize ) );
+  log_Add( 'D3D8_TEXTURE_FILTER_ANISOTROPIC: ' + u_BoolToStr( oglCanAnisotropy ) );
   log_Add( 'D3D8_MAX_TEXTURE_ANISOTROPY: ' + u_IntToStr( oglMaxAnisotropy ) );
   {$ENDIF}
   {$IFDEF USE_DIRECT3D9}
   oglCanAutoMipMap := d3dCaps.Caps2 and D3DCAPS2_CANAUTOGENMIPMAP > 0;
   log_Add( 'D3D9_AUTOGENMIPMAP: ' + u_BoolToStr( oglCanAutoMipMap ) );
   log_Add( 'D3D9_MAX_TEXTURE_SIZE: ' + u_IntToStr( oglMaxTexSize ) );
+  log_Add( 'D3D9_TEXTURE_FILTER_ANISOTROPIC: ' + u_BoolToStr( oglCanAnisotropy ) );
   log_Add( 'D3D9_MAX_TEXTURE_ANISOTROPY: ' + u_IntToStr( oglMaxAnisotropy ) );
   {$ENDIF}
 
