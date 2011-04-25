@@ -232,8 +232,15 @@ begin
 end;
 
 function file_GetExtension( const FileName : String ) : String;
+  var
+    tmp : String;
 begin
-  GetStr( FileName, Result, '.', FALSE );
+  GetStr( FileName, tmp, '/', FALSE );
+  if tmp = FileName Then
+    GetStr( FileName, tmp, '\', FALSE );
+  GetStr( tmp, Result, '.', FALSE );
+  if tmp = Result Then
+    Result := '';
 end;
 
 function file_GetDirectory( const FileName : String ) : String;
