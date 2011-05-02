@@ -192,11 +192,14 @@ begin
       for i := 2 to list.Count - 1 do
         file_Remove( path + list.Items[ i ] );
 
-      {$IFDEF UNIX}
+      {$IFDEF LINUX}
       Result := FpRmdir( filePath + Name ) = 0;
       {$ENDIF}
       {$IFDEF WINDOWS}
       Result := RemoveDirectory( PChar( filePath + Name ) );
+      {$ENDIF}
+      {$IFDEF DARWIN}
+      Result := FpRmdir( platform_GetRes( filePath + Name ) ) = 0;
       {$ENDIF}
     end else
       {$IFDEF LINUX}
@@ -336,13 +339,17 @@ procedure file_Find( const Directory : String; var List : zglTFileList; FindDir 
   {$ENDIF}
 begin
   List.Count := 0;
-{$IFDEF LINUX}
+{$IFDEF UNIX}
   if FindDir Then
     _type := 4
   else
     _type := 8;
 
+  {$IFDEF LINUX}
   dir := FpOpenDir( filePath + Directory );
+  {$ELSE}
+  dir := FpOpenDir( platform_GetRes( filePath + Directory ) );
+  {$ENDIF}
   repeat
     dirent := FpReadDir( dir^ );
     if Assigned( dirent ) and ( dirent^.d_type = _type ) Then
@@ -367,24 +374,6 @@ begin
     INC( List.Count );
   until not FindNextFile( First, FList );
   FindClose( First );
-{$ENDIF}
-{$IFDEF DARWIN}
-  if FindDir Then
-    _type := 4
-  else
-    _type := 8;
-
-  dir := FpOpenDir( platform_GetRes( filePath + Directory ) );
-  repeat
-    dirent := FpReadDir( dir^ );
-    if Assigned( dirent ) and ( dirent^.d_type = _type ) Then
-      begin
-        SetLength( List.Items, List.Count + 1 );
-        List.Items[ List.Count ] := dirent^.d_name;
-        INC( List.Count );
-      end;
-  until not Assigned( dirent );
-  FpCloseDir( dir^ );
 {$ENDIF}
 
   if List.Count > 2 Then
