@@ -30,15 +30,16 @@ uses
   zgl_direct3d,
   zgl_direct3d_all;
 
-procedure zero;
-procedure zerou( dt : Double );
-procedure zeroa( activate : Boolean );
-
 procedure app_Init;
 procedure app_MainLoop;
 procedure app_ProcessOS;
 function  app_ProcessMessages( hWnd : HWND; Msg : UINT; wParam : WPARAM; lParam : LPARAM ) : LRESULT; stdcall;
 procedure app_CalcFPS;
+
+procedure app_ZeroProc;
+procedure app_ZeroUpdate( dt : Double );
+procedure app_ZeroActivate( activate : Boolean );
+function  app_ZeroCloseQuery : Boolean;
 
 var
   appInitialized    : Boolean;
@@ -54,13 +55,14 @@ var
   appHomeDir        : String;
 
   // call-back
-  app_PInit     : procedure = app_Init;
-  app_PLoop     : procedure = app_MainLoop;
-  app_PLoad     : procedure = zero;
-  app_PDraw     : procedure = zero;
-  app_PExit     : procedure = zero;
-  app_PUpdate   : procedure( dt : Double ) = zerou;
-  app_PActivate : procedure( activate : Boolean ) = zeroa;
+  app_PInit       : procedure;
+  app_PLoop       : procedure;
+  app_PLoad       : procedure;
+  app_PDraw       : procedure;
+  app_PExit       : procedure;
+  app_PUpdate     : procedure( dt : Double );
+  app_PActivate   : procedure( activate : Boolean );
+  app_PCloseQuery : function : Boolean;
 
   appTimer      : LongWord;
   appShowCursor : Boolean;
@@ -91,9 +93,10 @@ uses
   {$ENDIF}
   zgl_utils;
 
-procedure zero;  begin end;
-procedure zerou; begin end;
-procedure zeroa; begin end;
+procedure app_ZeroProc; begin end;
+procedure app_ZeroUpdate( dt : Double ); begin end;
+procedure app_ZeroActivate( activate : Boolean ); begin end;
+function  app_ZeroCloseQuery : Boolean; begin Result := TRUE; end;
 
 procedure app_Draw;
 begin
@@ -210,7 +213,7 @@ begin
     end;
   case Msg of
     WM_CLOSE, WM_DESTROY, WM_QUIT:
-      appWork := FALSE;
+      appWork := not app_PCloseQuery();
 
     WM_PAINT:
       begin
@@ -391,7 +394,7 @@ begin
           key_PPress( key );
 
         if ( Msg = WM_SYSKEYDOWN ) and ( key = K_F4 ) Then
-          appWork := FALSE;
+          appWork := not app_PCloseQuery();
       end;
     WM_KEYUP, WM_SYSKEYUP:
       begin
@@ -454,6 +457,15 @@ begin
 end;
 
 initialization
+  app_PInit       := app_Init;
+  app_PLoop       := app_MainLoop;
+  app_PLoad       := app_ZeroProc;
+  app_PDraw       := app_ZeroProc;
+  app_PExit       := app_ZeroProc;
+  app_PUpdate     := app_ZeroUpdate;
+  app_PActivate   := app_ZeroActivate;
+  app_PCloseQuery := app_ZeroCloseQuery;
+
   appFlags := WND_USE_AUTOCENTER or APP_USE_LOG or COLOR_BUFFER_CLEAR or CLIP_INVISIBLE;
 
 end.
