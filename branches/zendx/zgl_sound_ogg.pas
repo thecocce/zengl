@@ -254,9 +254,11 @@ var
   oggMemory  : zglTMemory;
   oggDecoder : zglTSoundDecoder;
 
+{$IFNDEF USE_OGG_STATIC}
   oggLibrary        : HMODULE;
   vorbisLibrary     : HMODULE;
   vorbisfileLibrary : HMODULE;
+{$ENDIF}
 
 implementation
 
