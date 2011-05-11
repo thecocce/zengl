@@ -29,7 +29,7 @@ uses
 
 const
   cs_ZenGL    = 'ZenGL 0.2.2';
-  cs_Date     = '2011.05.04';
+  cs_Date     = '2011.05.11';
   cv_major    = 0;
   cv_minor    = 2;
   cv_revision = 0;
@@ -275,16 +275,6 @@ begin
   {$ENDIF}
 
   {$IFDEF USE_SOUND}
-  if managerSound.Count.Items <> 0 Then
-    log_Add( 'Sounds to free: ' + u_IntToStr( managerSound.Count.Items ) );
-  while managerSound.Count.Items > 0 do
-    begin
-      p := managerSound.First.next;
-      snd_Del( zglPSound( p ) );
-    end;
-
-  for i := 1 to SND_MAX do
-    snd_StopFile( i );
   snd_Free();
   {$ENDIF}
 
