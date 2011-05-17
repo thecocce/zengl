@@ -199,11 +199,12 @@ end;
 
 function app_ProcessMessages( hWnd : HWND; Msg : UINT; wParam : WPARAM; lParam : LPARAM ) : LRESULT; stdcall;
   var
-    i   : Integer;
-    len : Integer;
-    c   : array[ 0..5 ] of AnsiChar;
-    str : AnsiString;
-    key : LongWord;
+    focus : Boolean;
+    i     : Integer;
+    len   : Integer;
+    c     : array[ 0..5 ] of AnsiChar;
+    str   : AnsiString;
+    key   : LongWord;
 begin
   Result := 0;
   if ( not appWork ) and ( Msg <> WM_ACTIVATE ) Then
@@ -235,8 +236,8 @@ begin
       end;
     WM_ACTIVATE:
       begin
-        appFocus := ( LOWORD( wParam ) <> WA_INACTIVE );
-        if appFocus Then
+        focus := ( LOWORD( wParam ) <> WA_INACTIVE );
+        if ( focus ) and ( not appFocus ) Then
           begin
             appPause := FALSE;
             if appWork Then app_PActivate( TRUE );
@@ -245,10 +246,20 @@ begin
             FillChar( mouseDown[ 0 ], 3, 0 );
             mouse_ClearState();
           end else
-            begin
-              if appAutoPause Then appPause := TRUE;
-              if appWork Then app_PActivate( FALSE );
-            end;
+            if ( not focus ) and ( appFocus ) Then
+              begin
+                if appAutoPause Then appPause := TRUE;
+                if appWork Then app_PActivate( FALSE );
+              end;
+        appFocus := focus;
+       end;
+    WM_SHOWWINDOW:
+      begin
+        if ( wParam = 0 ) and ( appFocus ) Then
+          SendMessage( wndHandle, WM_ACTIVATE, WA_INACTIVE, 0 )
+        else
+          if ( wParam = 1 ) and ( not appFocus ) Then
+            SendMessage( wndHandle, WM_ACTIVATE, WA_ACTIVE, 0 );
       end;
     WM_NCHITTEST:
       begin
