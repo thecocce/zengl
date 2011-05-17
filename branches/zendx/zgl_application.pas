@@ -65,6 +65,7 @@ var
   app_PCloseQuery : function : Boolean;
 
   appTimer      : LongWord;
+  appMinimized  : Boolean;
   appShowCursor : Boolean;
 
   appdt : Double;
@@ -199,15 +200,14 @@ end;
 
 function app_ProcessMessages( hWnd : HWND; Msg : UINT; wParam : WPARAM; lParam : LPARAM ) : LRESULT; stdcall;
   var
-    focus : Boolean;
-    i     : Integer;
-    len   : Integer;
-    c     : array[ 0..5 ] of AnsiChar;
-    str   : AnsiString;
-    key   : LongWord;
+    i   : Integer;
+    len : Integer;
+    c   : array[ 0..5 ] of AnsiChar;
+    str : AnsiString;
+    key : LongWord;
 begin
   Result := 0;
-  if ( not appWork ) and ( Msg <> WM_ACTIVATE ) Then
+  if ( not appWork ) and ( Msg <> WM_ACTIVATEAPP ) Then
     begin
       Result := DefWindowProcW( hWnd, Msg, wParam, lParam );
       exit;
@@ -234,10 +234,10 @@ begin
         if ( not wndFullScreen ) and ( scr_Create() ) Then
           wnd_Update();
       end;
-    WM_ACTIVATE:
+    WM_ACTIVATEAPP:
       begin
-        focus := ( LOWORD( wParam ) <> WA_INACTIVE );
-        if ( focus ) and ( not appFocus ) Then
+        if appMinimized Then exit;
+        if ( wParam > 0 ) and ( not appFocus ) Then
           begin
             appPause := FALSE;
             if appWork Then app_PActivate( TRUE );
@@ -246,13 +246,26 @@ begin
             FillChar( mouseDown[ 0 ], 3, 0 );
             mouse_ClearState();
           end else
-            if ( not focus ) and ( appFocus ) Then
+            if ( wParam = 0 ) and ( appFocus ) Then
               begin
                 if appAutoPause Then appPause := TRUE;
                 if appWork Then app_PActivate( FALSE );
               end;
-        appFocus := focus;
-       end;
+        appFocus := wParam > 0;
+      end;
+    WM_SIZE:
+      begin
+        if wParam = SIZE_MINIMIZED Then
+          begin
+            SendMessage( wndHandle, WM_ACTIVATEAPP, 0, 0 );
+            appMinimized := TRUE;
+          end;
+        if ( wParam = SIZE_MAXIMIZED ) or ( wParam = SIZE_RESTORED ) Then
+          begin
+            appMinimized := FALSE;
+            SendMessage( wndHandle, WM_ACTIVATEAPP, 1, 0 );
+          end;
+      end;
     WM_SHOWWINDOW:
       begin
         if ( wParam = 0 ) and ( appFocus ) Then
