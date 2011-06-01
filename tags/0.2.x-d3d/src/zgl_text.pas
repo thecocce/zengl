@@ -129,7 +129,7 @@ begin
       if Text[ i ] = #10 Then
         begin
           X := sx;
-          Y := Y + Font.MaxHeight;
+          Y := Y + Font.MaxHeight * textScale;
         end;
       c := font_GetCID( Text, i, @i );
 

@@ -240,6 +240,7 @@ type
 
 procedure ogg_Init;
 function  ogg_DecoderOpen( var Stream : zglTSoundStream; const FileName : String ) : Boolean;
+function  ogg_DecoderOpenMem( var Stream : zglTSoundStream; const Memory : zglTMemory ) : Boolean;
 function  ogg_DecoderRead( var Stream : zglTSoundStream; Buffer : Pointer; Bytes : LongWord; var _End : Boolean ) : LongWord;
 procedure ogg_DecoderLoop( var Stream : zglTSoundStream );
 procedure ogg_DecoderClose( var Stream : zglTSoundStream );
@@ -344,7 +345,7 @@ begin
   file_Open( Stream._file, FileName, FOM_OPENR );
   zgl_GetMem( Stream._data, SizeOf( zglTOggStream ) );
 
-  with zglTOggStream( Stream._Data^ ) do
+  with zglTOggStream( Stream._data^ ) do
     begin
       vc.read  := @ogg_Read;
       vc.seek  := @ogg_Seek;
@@ -362,6 +363,32 @@ begin
           Result := TRUE;
         end;
         ov_pcm_seek( vf, 0 );
+    end;
+end;
+
+function ogg_DecoderOpenMem( var Stream : zglTSoundStream; const Memory : zglTMemory ) : Boolean;
+begin
+  Result := FALSE;
+  if not oggLoad Then ogg_Init;
+  if not oggInit Then exit;
+
+  zgl_GetMem( Stream._data, SizeOf( zglTOggStream ) );
+
+  with zglTOggStream( Stream._data^ ) do
+    begin
+      FillChar( vc, SizeOf( vc ), 0 );
+      if ov_open_callbacks( nil, vf, Pointer( Ptr( Memory.Memory ) + Memory.Position ), Memory.Size - Memory.Position, vc ) >= 0 Then
+        begin
+          vi                := ov_info( vf, -1 );
+          Stream.Bits       := 16;
+          Stream.Frequency  := vi.rate;
+          Stream.Channels   := vi.channels;
+          Stream.Length     := ov_pcm_total( vf, -1 ) / vi.rate * 1000;
+          Stream.BufferSize := 64 * 1024;
+          zgl_GetMem( Pointer( Stream.Buffer ), Stream.BufferSize );
+          Result := TRUE;
+        end;
+      ov_pcm_seek( vf, 0 );
     end;
 end;
 
@@ -424,7 +451,7 @@ begin
   if not oggInit Then exit;
 
   FillChar( _vc, SizeOf( _vc ), 0 );
-  if ov_open_callbacks( nil, _vf, oggMemory.Memory, oggMemory.Size, _vc ) >= 0 Then
+  if ov_open_callbacks( nil, _vf, Pointer( Ptr( oggMemory.Memory ) + oggMemory.Position ), oggMemory.Size - oggMemory.Position, _vc ) >= 0 Then
     begin
       _vi       := ov_info( _vf, -1 );
       Frequency := _vi.rate;
@@ -442,7 +469,7 @@ begin
       _vi := nil;
       ov_clear( _vf );
 
-      if ov_open_callbacks( nil, _vf, oggMemory.Memory, oggMemory.Size, _vc ) >= 0 Then
+      if ov_open_callbacks( nil, _vf, Pointer( Ptr( oggMemory.Memory ) + oggMemory.Position ), oggMemory.Size - oggMemory.Position, _vc ) >= 0 Then
         begin
           GetMem( Data, Size );
           decoderRead( _vf, Data, Size, _end );
@@ -468,11 +495,12 @@ begin
 end;
 
 initialization
-  oggDecoder.Ext   := OGG_EXTENSION;
-  oggDecoder.Open  := ogg_DecoderOpen;
-  oggDecoder.Read  := ogg_DecoderRead;
-  oggDecoder.Loop  := ogg_DecoderLoop;
-  oggDecoder.Close := ogg_DecoderClose;
+  oggDecoder.Ext      := OGG_EXTENSION;
+  oggDecoder.Open     := ogg_DecoderOpen;
+  oggDecoder.OpenMem  := ogg_DecoderOpenMem;
+  oggDecoder.Read     := ogg_DecoderRead;
+  oggDecoder.Loop     := ogg_DecoderLoop;
+  oggDecoder.Close    := ogg_DecoderClose;
   zgl_Reg( SND_FORMAT_EXTENSION,   @OGG_EXTENSION[ 0 ] );
   zgl_Reg( SND_FORMAT_FILE_LOADER, @ogg_LoadFromFile );
   zgl_Reg( SND_FORMAT_MEM_LOADER,  @ogg_LoadFromMemory );
