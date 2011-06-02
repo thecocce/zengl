@@ -188,9 +188,9 @@ begin
   Set2DMode();
   wnd_ShowCursor( appShowCursor );
 
-  {$IFDEF LINUX}
+  {$IF DEFINED(LINUX) or DEFINED(DARWIN)}
   scr_SetOptions( wndWidth, wndHeight, scrRefresh, wndFullScreen, scrVSync );
-  {$ENDIF}
+  {$IFEND}
 
   app_PInit();
   app_PLoop();
