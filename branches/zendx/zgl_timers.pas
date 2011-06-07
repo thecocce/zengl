@@ -54,16 +54,18 @@ procedure timer_Reset;
 var
   managerTimer  : zglTTimerManager;
   canKillTimers : Boolean = TRUE;
-  timersToKill  : Word = 0;
-  aTimersToKill : array[ 0..1023 ] of zglPTimer;
-  t_frequency : int64;
-  t_freq      : Single;
-  t_start   : Double;
 
 implementation
 uses
   zgl_application,
   zgl_main;
+
+var
+  timersToKill   : Word = 0;
+  aTimersToKill  : array[ 0..1023 ] of zglPTimer;
+  timerFrequency : Int64;
+  timerFreq      : Single;
+  timerStart     : Double;
 
 function timer_Add( OnTimer : Pointer; Interval : LongWord ) : zglPTimer;
 begin
@@ -146,7 +148,7 @@ function timer_GetTicks : Double;
 begin
   m := SetThreadAffinityMask( GetCurrentThread(), 1 );
   QueryPerformanceCounter( t );
-  Result := 1000 * T * t_freq - t_start;
+  Result := 1000 * t * timerFreq - timerStart;
   SetThreadAffinityMask( GetCurrentThread(), m );
 end;
 
@@ -165,8 +167,8 @@ end;
 
 initialization
   SetThreadAffinityMask( GetCurrentThread(), 1 );
-  QueryPerformanceFrequency( t_frequency );
-  t_freq  := 1 / t_frequency;
-  t_start := timer_GetTicks();
+  QueryPerformanceFrequency( timerFrequency );
+  timerFreq := 1 / timerFrequency;
+  timerStart := timer_GetTicks();
 
 end.
